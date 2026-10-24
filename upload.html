@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>FINAL 31-12-2026 SUDAH JADI</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body style="font-family:Arial;padding:15px;max-width:700px;margin:auto">
+<h2 style="color:green;text-align:center">✅ FINAL - UPLOAD 217 HOTEL 31-12-2026 - SUDAH JADI ✅</h2>
+
+<div style="border:2px solid green;padding:10px;margin-bottom:10px">
+<b>STEP 1: Pilih file hotels.html V25 kamu (biar auto ambil apiKey yang bener)</b><br>
+<input type="file" id="htmlFile" accept=".html" style="width:100%;padding:8px;margin-top:5px">
+<div id="cfgStatus" style="color:blue;margin-top:5px"></div>
+</div>
+
+<div style="border:2px solid red;padding:10px">
+<b>STEP 2: Pilih file HOTELS_MIGRASI_31122026.csv (yang 218 baris tadi)</b><br>
+<input type="file" id="csvFile" accept=".csv" style="width:100%;padding:8px;margin-top:5px">
+</div>
+
+<div id="log" style="background:#000;color:#0f0;padding:12px;margin-top:12px;white-space:pre-wrap;min-height:120px">Belum ada file dipilih...</div>
+<button id="up" style="display:none;background:red;color:white;padding:18px;width:100%;margin-top:12px;font-size:20px;font-weight:bold">🚀 UPLOAD 217 DATA 31-12-2026 SEKARANG!</button>
+
+<script>
+let db, rows=[], cfgFound=false;
+function log(t){document.getElementById('log').innerText+=t+"\n";}
+
+document.getElementById('htmlFile').onchange=async(e)=>{
+  let txt=await e.target.files[0].text();
+  // Cari firebaseConfig dari file hotels.html
+  let m=txt.match(/firebaseConfig\s*=\s*({[\s\S]*?});/);
+  if(!m) m=txt.match(/const\s+firebaseConfig\s*=\s*({[\s\S]*?});/);
+  if(!m) m=txt.match(/apiKey\s*:\s*"([^"]+)"/);
+  if(!m){ log("❌ Gak ketemu firebaseConfig di hotels.html V25!"); return; }
+  
+  let cfg;
+  try{
+    if(m[1].startsWith('{')) eval("cfg="+m[1]);
+    else {
+      // kalau cuma apiKey ketemu, coba parse semua
+      let apiKeyMatch=txt.match(/apiKey\s*:\s*"([^"]+)"/);
+      let authDomainMatch=txt.match(/authDomain\s*:\s*"([^"]+)"/);
+      let projectIdMatch=txt.match(/projectId\s*:\s*"([^"]+)"/);
+      let appIdMatch=txt.match(/appId\s*:\s*"([^"]+)"/);
+      cfg={
+        apiKey: apiKeyMatch?apiKeyMatch[1]:"",
+        authDomain: authDomainMatch?authDomainMatch[1]:"",
+        projectId: projectIdMatch?projectIdMatch[1]:"inbound2026-12ffe",
+        appId: appIdMatch?appIdMatch[1]:""
+      };
+    }
+    document.getElementById('cfgStatus').innerHTML="✅ Config ketemu: "+cfg.projectId+"<br>apiKey: "+cfg.apiKey.substring(0,20)+"...";
+    log("✅ firebaseConfig ketemu! project: "+cfg.projectId);
+    firebase.initializeApp(cfg);
+    await firebase.auth().signInAnonymously();
+    db=firebase.firestore();
+    cfgFound=true;
+    log("✅ LOGIN OK! UID: "+firebase.auth().currentUser.uid);
+    log("✅ API KEY VALID BEB! Sekarang pilih CSV!");
+  }catch(err){ log("❌ ERROR CONFIG: "+err.message); }
+};
+
+document.getElementById('csvFile').onchange=async(e)=>{
+  let txt=await e.target.files[0].text();
+  let lines=txt.split(/\r?\n/).filter(l=>l.trim());
+  log("File CSV: "+lines.length+" baris");
+  let header=lines[0].split(',').map(h=>h.trim().replace(/"/g,''));
+  rows=lines.slice(1).map(l=>{
+    let vals=l.split(','); let obj={};
+    header.forEach((h,i)=>obj[h]=vals[i]?vals[i].replace(/^"|"$/g,''):"");
+    obj.Tglhss2="31-12-2026"; obj.Periode2="31-12-2026";
+    return obj;
+  });
+  log("Siap upload "+rows.length+" hotel 31-12-2026!");
+  if(cfgFound) document.getElementById('up').style.display='block';
+  else log("⚠️ Pilih hotels.html V25 dulu di STEP 1 biar apiKey valid!");
+};
+
+document.getElementById('up').onclick=async()=>{
+  if(!db){ alert("Pilih hotels.html V25 dulu di STEP 1 beb!"); return; }
+  let c=0;
+  log("Mulai upload "+rows.length+" data...");
+  for(let r of rows){
+    await db.collection("hotels").add(r);
+    c++; if(c%10==0) log(c+" / "+rows.length+" uploaded...");
+  }
+  log("🎉🎉 SELESAI BEB! "+c+" DATA 31-12-2026 MASUK FIREBASE! 🎉🎉");
+  alert("SUKSES BEB! "+c+" hotel 31-12-2026 sudah masuk!");
+};
+</script>
+</body></html>

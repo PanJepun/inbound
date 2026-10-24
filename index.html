@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMAILING TOUR - Premium Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{font-family:'Inter', sans-serif}
+body{margin:0; background:#f1f5f9}
+.top-line{height:3px; background:linear-gradient(90deg, #0a1931, #38bdf8, #0a1931)}
+.header-premium{background:white; display:flex; align-items:center; justify-content:space-between; padding:12px 22px; box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.logo-left{display:flex; align-items:center; gap:12px}
+.logo-left img{height:48px; object-fit:contain}
+.menu-premium{background:white; display:flex; align-items:center; padding:0 20px; gap:2px; border-top:1px solid #f1f5f9; border-bottom:1px solid #e2e8f0; position:sticky; top:0; z-index:9999; flex-wrap:wrap}
+.menu-p{position:relative; padding:14px 16px; font-size:13px; font-weight:600; color:#334155; cursor:pointer; display:flex; align-items:center; gap:7px; border-bottom:3px solid transparent; transition:0.2s}
+.menu-p:hover{background:#f8fafc; color:#0a4da1; border-bottom:3px solid #0a4da1}
+.drop-p{display:none; position:absolute; left:0; top:100%; background:white; min-width:240px; border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,0.15); border:1px solid #e2e8f0; overflow:hidden; margin-top:3px; z-index:10000}
+.menu-p:hover .drop-p{display:block}
+.drop-p div{padding:11px 16px; font-weight:500; font-size:12.5px; color:#334155; border-bottom:1px solid #f8fafc; display:flex; gap:8px; cursor:pointer}
+.drop-p div:hover{background:#0a4da1; color:white; padding-left:20px}
+.video-wrapper{margin:18px; background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.06); border:1px solid #e2e8f0}
+.video-head{background:linear-gradient(90deg, #0a1931, #0a4da1); color:white; padding:12px 18px; display:flex; justify-content:space-between; font-weight:700; font-size:13px}
+.video-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#020617; padding:14px}
+.vbox{background:#111; border-radius:12px; overflow:hidden; position:relative; height:440px; border:1px solid #1e293b}
+.vbox video,.vbox img{width:100%; height:100%; object-fit:cover}
+.vlabel{position:absolute; bottom:10px; left:10px; right:10px; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); color:white; padding:8px 12px; border-radius:8px; font-size:12px; display:flex; justify-content:space-between; border:1px solid rgba(255,255,255,0.1)}
+.btn-del{background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer}
+.modal{display:none; position:fixed; inset:0; background:rgba(10,25,49,0.6); backdrop-filter:blur(6px); z-index:20000; align-items:center; justify-content:center}
+.modal-box{background:white; width:90%; max-width:500px; border-radius:16px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.4)}
+.inbound-badge{background:#dcfce7; color:#166534; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:700; border:1px solid #bbf7d0}
+@media(max-width:768px){.video-grid{grid-template-columns:1fr}.vbox{height:300px}}
+</style>
+</head>
+<body>
+
+<div class="top-line"></div>
+
+<div class="header-premium">
+<div class="logo-left">
+<img src="logo.jpg" id="mainLogo" alt="SMAILING TOUR" onerror="this.style.display='none'; document.getElementById('logoText').style.display='block'">
+<div id="logoText" style="display:none"><h1 style="margin:0; color:#1e3a8a; font-size:24px; font-weight:800; letter-spacing:-0.5px">SMAILING <span style="color:#38bdf8; font-weight:300">TOUR</span></h1><p style="margin:0; font-size:10px; color:#64748b; letter-spacing:1px">Travel Management Expert ✈️</p></div>
+<div style="margin-left:12px"><div class="inbound-badge">● INBOUND DB CONNECTED: inbound2026-12ffe</div><div id="liveStats" style="font-size:11px; color:#64748b; margin-top:4px">Loading stats...</div></div>
+</div>
+<div style="display:flex; gap:8px; align-items:center">
+<div style="background:linear-gradient(90deg, #ffcc00, #facc15); padding:6px 12px; border-radius:8px; font-size:9px; font-weight:800; text-align:center; line-height:1.1; color:#000">BALI<br>TOURISM<br>AWARDS<br>WINNER</div>
+<div style="font-size:11px; color:#64748b; background:#f8fafc; padding:6px 12px; border-radius:20px; border:1px solid #e2e8f0">👤 PT. Smailing Tour DMAdmin</div>
+</div>
+</div>
+
+<div class="menu-premium">
+<div class="menu-p">📁 Master File
+<div class="drop-p">
+<div onclick="location.href='packet.html'">📦 Packet Tour (INBOUND)</div>
+<div onclick="location.href='cost.html'">💰 Cost Price (INBOUND)</div>
+
+<div style="background:#f1f5f9; font-weight:700; font-size:10px; color:#94a3b8; padding:8px 16px">--- MASTER DATA ---</div>
+
+<div onclick="location.href='chat.html'">💰 Chat Group</div>
+<div onclick="location.href='guidefee.html'">💬 Guide Fee</div>
+<div onclick="location.href='transport.html'">🚌 Transport</div>
+<div onclick="location.href='donation.html'">🎫 Donation</div>
+<div onclick="location.href='hotel.html'">🏨 Hotel</div>
+<div onclick="location.href='meals.html'">🍽️ Meals</div>
+<div onclick="location.href='suplier.html'">🤝 Supplier</div>
+<div></div>
+</div>
+</div>
+<div onclick="location.href='reservasi.html'">➕ Reservation</div>
+<div onclick="location.href='OPERATION.html'">⚙️ Operation</div>
+<<div class="menu-p">📊 Report<div class="drop-p"><div>💹 Sales Report</div><div>🛬 Arrival Report</div></div></div>
+<div class="menu-p">💼 Back Office<div class="drop-p"><div>🧾 Invoice</div></div></div>
+<div class="menu-p">🛠️ Tools<div class="drop-p"><div onclick="openModal()">🎬 ➕ Tambah Video - Choose File (Permanen)</div><div onclick="hapusSemua()">🗑️ Hapus Semua Video</div></div></div>
+<div class="menu-p">🕒 History</div>
+<div class="menu-p">🚪 Selesai</div>
+</div>
+
+<div style="margin:18px; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px">
+<div style="background:white; padding:14px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #0a4da1"><div style="font-size:11px; color:#64748b">TOTAL PACKET</div><div id="statPacket" style="font-size:20px; font-weight:800">0</div></div>
+<div style="background:white; padding:14px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #16a34a"><div style="font-size:11px; color:#64748b">TOTAL COST</div><div id="statCost" style="font-size:20px; font-weight:800">Rp 0</div></div>
+<div style="background:white; padding:14px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); border-left:4px solid #f59e0b"><div style="font-size:11px; color:#64748b">CHAT MASUK</div><div id="statChat" style="font-size:20px; font-weight:800">0</div></div>
+</div>
+
+<div class="video-wrapper">
+<div class="video-head"><span>🎬 Video Travel Dashboard • Save Permanen • Tinggi 440px</span><span style="font-weight:400; font-size:11px; opacity:0.8" id="countInfo">0 video tersimpan</span></div>
+<div class="video-grid" id="videoGrid"></div>
+</div>
+
+<div class="modal" id="modalVideo">
+<div class="modal-box">
+<div style="background:#0a1931; color:white; padding:14px 18px; font-weight:700; display:flex; justify-content:space-between"><span>🎬 Tambah Video - Permanen</span><span onclick="closeModal()" style="cursor:pointer">✕</span></div>
+<div style="padding:18px">
+<input type="text" id="vTitle" placeholder="Judul Video ex: Lumajang Waterfall" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:10px; font-size:13px; box-sizing:border-box"><br><br>
+<input type="file" id="vFile" accept="video/*,image/*" multiple style="width:100%"><br><br>
+<button onclick="addFilePermanent()" style="background:linear-gradient(90deg, #0a4da1, #3b82f6); color:white; border:none; padding:12px; border-radius:10px; font-weight:700; width:100%; cursor:pointer">✅ Simpan Permanen ke Dashboard</button>
+</div>
+</div>
+</div>
+
+<script>
+// INDEXEDDB - VIDEO
+let db;
+let request = indexedDB.open("SmailingTourDB", 1);
+request.onupgradeneeded = e => { db = e.target.result; if(!db.objectStoreNames.contains("videos")) db.createObjectStore("videos", {keyPath:"id"}); };
+request.onsuccess = e => { db = e.target.result; loadVideos(); };
+request.onerror = e => { loadDefault(); };
+
+function loadDefault(){
+if(document.getElementById('videoGrid').children.length===0){
+document.getElementById('videoGrid').innerHTML = `
+<div class="vbox" id="def1"><video autoplay muted loop playsinline controls src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"></video><div class="vlabel"><span>Kuala Lumpur - Petronas Towers</span><button class="btn-del" onclick="hapusVideo('def1', false)">Hapus</button></div></div>
+<div class="vbox" id="def2"><img src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=1000"><div class="vlabel"><span>Singapore - Gardens by the Bay</span><button class="btn-del" onclick="hapusVideo('def2', false)">Hapus</button></div></div>`;
+updateCount();
+}
+}
+function loadVideos(){
+let tx = db.transaction("videos","readonly");
+let store = tx.objectStore("videos");
+let req = store.getAll();
+req.onsuccess = () => {
+let videos = req.result;
+let grid = document.getElementById('videoGrid');
+grid.innerHTML='';
+if(videos.length===0){ loadDefault(); return; }
+videos.forEach(v => {
+let box = document.createElement('div'); box.className='vbox'; box.id=v.id;
+let isImg = v.type.startsWith('image/');
+let url = URL.createObjectURL(v.file);
+let btn = `<button class="btn-del" onclick="hapusVideo('${v.id}', true)">Hapus</button>`;
+if(isImg) box.innerHTML=`<img src="${url}"><div class="vlabel"><span>${v.title}</span>${btn}</div>`;
+else box.innerHTML=`<video autoplay muted loop playsinline controls src="${url}"></video><div class="vlabel"><span>${v.title}</span>${btn}</div>`;
+grid.appendChild(box);
+});
+updateCount();
+}
+}
+function addFilePermanent(){
+let files = document.getElementById('vFile').files;
+let titleBase = document.getElementById('vTitle').value || 'Travel Video';
+if(files.length===0){alert('Pilih file dulu beb'); return;}
+for(let file of files){
+let id = 'vid_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
+let rec = {id:id, title: titleBase+' - '+file.name, file: file, type: file.type};
+let tx = db.transaction("videos","readwrite");
+tx.objectStore("videos").add(rec);
+tx.oncomplete = () => { loadVideos(); };
+}
+document.getElementById('vFile').value=''; document.getElementById('vTitle').value=''; closeModal();
+}
+function hapusVideo(id, isDB){
+if(!confirm('Hapus video ini beb?')) return;
+if(isDB){
+let tx = db.transaction("videos","readwrite"); tx.objectStore("videos").delete(id); tx.oncomplete = () => { document.getElementById(id).remove(); updateCount(); };
+} else { document.getElementById(id).remove(); updateCount(); }
+}
+function hapusSemua(){ if(!confirm('Hapus SEMUA video permanen beb?')) return; let tx=db.transaction("videos","readwrite"); tx.objectStore("videos").clear(); tx.oncomplete=()=>{document.getElementById('videoGrid').innerHTML=''; updateCount();} }
+function updateCount(){ document.getElementById('countInfo').innerText = document.getElementById('videoGrid').children.length + ' video tersimpan permanen'; }
+function openModal(){document.getElementById('modalVideo').style.display='flex'}
+function closeModal(){document.getElementById('modalVideo').style.display='none'}
+</script>
+
+<script type="module">
+// FIREBASE STATS LIVE - INBOUND
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0",
+  measurementId: "G-Q61303QL6F"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+onSnapshot(collection(db,"packets"), snap=>{ document.getElementById('statPacket').innerText=snap.size; updateLive(); });
+onSnapshot(collection(db,"costs"), snap=>{ let total=0; snap.forEach(d=> total+=d.data().totalCost||0); document.getElementById('statCost').innerText='Rp '+total.toLocaleString('id-ID'); updateLive(); });
+onSnapshot(collection(db,"chats"), snap=>{ document.getElementById('statChat').innerText=snap.size; updateLive(); });
+function updateLive(){ document.getElementById('liveStats').innerText = `Live: ${document.getElementById('statPacket').innerText} packets | ${document.getElementById('statCost').innerText} cost | ${document.getElementById('statChat').innerText} chats - Auto update`; }
+</script>
+
+</body>
+</html>

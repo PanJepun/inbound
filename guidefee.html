@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TABEL GUIDE FEE - SERVICE LEBAR + SEARCH BAHASA AREA</title>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0; user-select:none}
+.top-win{background:linear-gradient(180deg, #e0eeff, #a9c6ef); border-bottom:2px solid #5a7fb5; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:14px; color:#0a1931}
+.top-win span:first-child{color:#1a3dcc; text-decoration:underline}
+.search-bar{background:#d0e0ff; padding:6px 10px; display:flex; gap:12px; align-items:center; border-bottom:1px solid #888; font-size:11px; font-weight:700}
+.search-bar input{height:24px; padding:3px 8px; border:1px solid #666; font-size:11px; width:160px; background:white}
+.search-bar input.search-service{width:220px}
+.form-area{background:#e8e8f0; padding:10px; display:grid; grid-template-columns: 440px 1fr; gap:12px; border-bottom:2px solid #999}
+.form-left{padding:4px}
+.form-right{padding:6px; background:#f0f0ff; border:1px solid #aaa; border-radius:3px}
+.row{display:flex; align-items:center; margin-bottom:8px; gap:4px}
+.row label{font-size:11px; font-weight:700; width:115px; flex:none; text-align:right; margin-right:6px}
+.row input,.row textarea{font-size:11px; padding:3px 6px; border:1px solid #666; background:white}
+.row input{height:24px}
+.row input:disabled,.row textarea:disabled{background:#e5e5e5; color:#555; cursor:not-allowed}
+.row input.code{width:120px}
+.row input.service{width:300px; font-weight:bold; background:#fff; border:2px solid #666}
+.row textarea.remarks{width:300px; height:48px; resize:none}
+.searchable-wrap{position:relative; display:flex; align-items:center; gap:4px}
+.searchable-wrap input{width:170px; height:24px; font-weight:bold; border:1px solid #666; padding:3px 6px; font-size:11px; background:white}
+.searchable-wrap input.area-input{width:170px; background:#ffffcc; font-weight:bold}
+.searchable-wrap input:disabled{background:#e5e5e5}
+.searchable-list{position:absolute; top:25px; left:0; right:30px; background:white; border:1px solid #666; max-height:150px; overflow-y:auto; z-index:100; display:none; box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+.searchable-list.active{display:block}
+.searchable-list div{padding:4px 6px; font-size:11px; cursor:pointer; border-bottom:1px solid #eee}
+.searchable-list div:hover{background:#b3d9ff}
+.searchable-list div.selected{background:#00ff7f; font-weight:bold}
+.btn-plus,.btn-minus{width:26px; height:24px; font-weight:900; font-size:14px; border:1px solid #555; cursor:pointer; border-radius:2px; line-height:1}
+.btn-plus{background:linear-gradient(180deg, #a8e6a8, #5fbf5f)}
+.btn-minus{background:linear-gradient(180deg, #ffb8b8, #ff6a6a)}
+.btn-plus:disabled,.btn-minus:disabled{opacity:0.4}
+.nominal-box{border:1px solid #666; background:#fffde0; padding:8px; border-radius:3px; margin-top:8px}
+.nominal-title{font-size:12px; font-weight:900; background:yellow; display:inline-block; padding:2px 8px; margin-bottom:8px; border:1px solid #999}
+.nominal-grid{display:grid; grid-template-columns: repeat(5, 1fr); gap:8px}
+.nominal-grid label{font-size:10px; font-weight:700; text-align:center; display:block; margin-bottom:3px}
+.nominal-grid input{width:100%; text-align:right; font-size:11px; padding:3px 4px; border:1px solid #666; height:24px; font-weight:700}
+.nominal-grid input:disabled{background:#e5e5e5}
+.toolbar{background:#e9e9e9; padding:5px 10px; display:flex; gap:4px; align-items:center; border-top:1px solid #999; border-bottom:1px solid #999}
+.toolbar button{padding:4px 12px; min-width:54px; font-size:11px; font-weight:700; border:1px solid #777; cursor:pointer; border-radius:2px; background:linear-gradient(180deg, #fff, #d0d0d0)}
+.toolbar button.add{background:#a8e6a8}
+.toolbar button.edit{background:#fff7a8}
+.toolbar button.exit{background:#b8b8ff}
+.toolbar button:disabled{opacity:0.5}
+.toolbar button.update-mode{background:linear-gradient(180deg, #fff7cc, #ff9900)!important}
+.table-wrap{background:white; overflow:auto; height:calc(100vh - 290px); border-top:2px solid #00cc99}
+table{width:100%; border-collapse:collapse; font-size:11px}
+th{background:#e8e8e8; border:1px solid #999; padding:4px 3px; font-size:10px; position:sticky; top:0; text-align:center; white-space:nowrap}
+td{border:1px solid #999; padding:3px 5px; white-space:nowrap; cursor:pointer}
+td.service-col{max-width:350px; min-width:200px; white-space:normal; word-break:break-word; font-weight:bold}
+tr.yellow td{background:#ffff99}
+tr.white td{background:white}
+tr.selected td{background:#00ff7f!important; font-weight:700}
+tr:hover td{background:#b3ffda}
+</style>
+</head>
+<body>
+<div class="top-win"><span>TABEL GUIDE FEE SMAILING TOUR - SERVICE LEBAR + SEARCH</span><span id="clock">11:32:55</span><span id="fbStatus" style="font-size:11px; color:green; font-weight:bold">● Firebase: inbound2026-12ffe</span></div>
+
+<div class="search-bar">
+<span>🔍 Filter Tabel:</span>
+<span>Service:</span><input id="searchService" class="search-service" placeholder="ketik service..." oninput="applyFilter()">
+<span>Bahasa:</span><input id="searchLang" placeholder="ENGLISH, SPAIN..." oninput="applyFilter()">
+<span>Area:</span><input id="searchArea" placeholder="BANGLI, TABANAN..." oninput="applyFilter()">
+<button onclick="clearFilter()" style="padding:2px 8px; font-size:10px; border:1px solid #666; cursor:pointer">Clear</button>
+<span style="margin-left:auto; font-size:10px" id="filterInfo">Menampilkan semua</span>
+</div>
+
+<div class="form-area">
+<div class="form-left">
+<div class="row"><label>Guide Fee Code :</label><input id="gfCode" class="code" disabled></div>
+<div class="row">
+<label>Group / Wilayah :</label>
+<div class="searchable-wrap">
+<input id="groupWilayah" disabled placeholder="KETIK ATAU PILIH..." autocomplete="off" oninput="filterList('groupWilayah')" onfocus="showList('groupWilayah')">
+<div class="searchable-list" id="list-groupWilayah"></div>
+</div>
+<button class="btn-plus" id="btnPlusGroup" onclick="addGroup()" disabled>+</button>
+<button class="btn-minus" id="btnMinusGroup" onclick="deleteGroup()" disabled>-</button>
+</div>
+<div class="row"><label>Service :</label><input id="service" class="service" disabled placeholder="KETIK NAMA SERVICE - SUDAH LEBAR"></div>
+<div class="row"><label>Remarks :</label><textarea id="remarks" class="remarks" disabled></textarea></div>
+</div>
+
+<div class="form-right">
+<div class="row">
+<label>Languange :</label>
+<div class="searchable-wrap">
+<input id="language" disabled placeholder="KETIK SPAIN, ENGLISH..." autocomplete="off" oninput="filterList('language')" onfocus="showList('language')">
+<div class="searchable-list" id="list-language"></div>
+</div>
+<button class="btn-plus" id="btnPlusLang" onclick="addLanguage()" disabled>+</button>
+<button class="btn-minus" id="btnMinusLang" onclick="deleteLanguage()" disabled>-</button>
+</div>
+<div class="row">
+<label>Area / Group :</label>
+<div class="searchable-wrap">
+<input id="areaGroup" class="area-input" disabled placeholder="KETIK BANGLI..." autocomplete="off" oninput="filterList('areaGroup')" onfocus="showList('areaGroup')">
+<div class="searchable-list" id="list-areaGroup"></div>
+</div>
+<button class="btn-plus" id="btnPlusArea" onclick="addArea()" disabled>+</button>
+<button class="btn-minus" id="btnMinusArea" onclick="deleteArea()" disabled>-</button>
+</div>
+<div class="nominal-box">
+<div class="nominal-title">Nominal Guide Fee</div>
+<div class="nominal-grid">
+<div><label>1-6 Pax</label><input id="pax1" type="text" disabled></div>
+<div><label>7-11 Pax</label><input id="pax2" type="text" disabled></div>
+<div><label>11-19 Pax</label><input id="pax3" type="text" disabled></div>
+<div><label>20-30 Pax</label><input id="pax4" type="text" disabled></div>
+<div><label>>30 Pax</label><input id="pax5" type="text" disabled></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="toolbar">
+<button id="btnAdd" class="add" onclick="doAdd()">Add</button>
+<button id="btnSave" onclick="doSave()" disabled>Save</button>
+<button id="btnEdit" class="edit" onclick="doEdit()">Edit</button>
+<button onclick="doDelete()">Delete</button>
+<button id="btnCancel" onclick="doCancel()">Cancel</button>
+<button onclick="doPrint()">Print</button>
+<button class="exit" onclick="location.href='index.html'">Exit</button>
+</div>
+
+<div class="table-wrap">
+<table id="guideTable">
+<thead>
+<tr>
+<th>GF Code</th><th>Area / Group</th><th style="min-width:250px">Service (LEBAR)</th><th>1-6 Pax</th><th>7-11 Pax</th><th>12-19 Pax</th><th>20-30 Pax</th><th>> 30 Pax</th><th>Remarks</th><th>Lang</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0",
+  measurementId: "G-Q61303QL6F"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "guide_fee");
+const colGroup = collection(db, "guide_group_options");
+const colLang = collection(db, "guide_language_options");
+const colArea = collection(db, "guide_area_options");
+let guides = [];
+let filteredGuides = [];
+let groupOptions = ["BANGLI","TABANAN","BADUNG","GIANYAR","KLUNGKUNG","KARANGASEM","BULELENG","JEMBRANA","DENPASAR","NUSA DUA","KUTA","SEMINYAK","CANGGU","UBUD","ULUWATU"];
+let areaOptions = ["BANGLI","TABANAN","BADUNG","GIANYAR","KLUNGKUNG","KARANGASEM","BULELENG","JEMBRANA","DENPASAR","NUSA DUA, KUTA, SEMINYAK, CANGGU","UBUD, ULUWATU","A1","A2","A5","Q","RRE","NUSA DUA","KUTA"];
+let languageOptions = ["ENGLISH","INDONESIA","JAPANESE","KOREAN","CHINESE","GERMAN","FRENCH","SPANISH","SPAIN","ITALIAN","DUTCH","RUSSIAN","THAI"];
+let selectedIndex = -1;
+let selectedFirebaseId = null;
+function setFormEnabled(enabled){
+  ['gfCode','service','remarks','areaGroup','groupWilayah','language','pax1','pax2','pax3','pax4','pax5'].forEach(id=>{ document.getElementById(id).disabled=!enabled; });
+  ['btnPlusGroup','btnMinusGroup','btnPlusLang','btnMinusLang','btnPlusArea','btnMinusArea'].forEach(id=>{ document.getElementById(id).disabled=!enabled; });
+  document.getElementById('btnSave').disabled=!enabled;
+  document.getElementById('btnCancel').disabled=!enabled;
+}
+function formatRupiah(num){
+  if(num===null || num===undefined || num==='') return '0.00';
+  const n = parseFloat(String(num).replace(/,/g,''))||0;
+  return n.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function buildList(type, filterText){
+  const map = {'groupWilayah': groupOptions,'areaGroup': areaOptions,'language': languageOptions};
+  let opts = map[type]||[];
+  if(filterText){
+    const f = filterText.toUpperCase();
+    opts = opts.filter(o=> o.includes(f));
+  }
+  const listDiv = document.getElementById('list-'+type);
+  listDiv.innerHTML='';
+  opts.slice(0,50).forEach(opt=>{
+    const div=document.createElement('div');
+    div.textContent=opt;
+    div.onclick=()=>{
+      document.getElementById(type).value=opt;
+      listDiv.classList.remove('active');
+    };
+    listDiv.appendChild(div);
+  });
+  if(opts.length>0) listDiv.classList.add('active');
+  else listDiv.classList.remove('active');
+}
+window.filterList = (type)=>{
+  const val=document.getElementById(type).value;
+  buildList(type, val);
+};
+window.showList = (type)=>{
+  buildList(type, '');
+};
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.searchable-wrap')){
+    document.querySelectorAll('.searchable-list').forEach(l=> l.classList.remove('active'));
+  }
+});
+window.applyFilter = ()=>{
+  const sService=document.getElementById('searchService').value.toUpperCase();
+  const sLang=document.getElementById('searchLang').value.toUpperCase();
+  const sArea=document.getElementById('searchArea').value.toUpperCase();
+  filteredGuides = guides.filter(g=>{
+    const matchService =!sService || g.service.includes(sService);
+    const matchLang =!sLang || (g.language||'').includes(sLang);
+    const matchArea =!sArea || g.areaGroup.includes(sArea);
+    return matchService && matchLang && matchArea;
+  });
+  document.getElementById('filterInfo').innerText=`Menampilkan ${filteredGuides.length} dari ${guides.length}`;
+  render();
+};
+window.clearFilter = ()=>{
+  document.getElementById('searchService').value='';
+  document.getElementById('searchLang').value='';
+  document.getElementById('searchArea').value='';
+  applyFilter();
+};
+window.addGroup = async ()=>{
+  const newVal = prompt('Tambah Group/Wilayah baru:');
+  if(!newVal) return;
+  const up = newVal.trim().toUpperCase();
+  if(!up) return;
+  if(groupOptions.includes(up)){ alert('Sudah ada beb!'); document.getElementById('groupWilayah').value=up; return; }
+  groupOptions.push(up); groupOptions.sort();
+  document.getElementById('groupWilayah').value=up;
+  try{ await setDoc(doc(db,"guide_group_options", up), {name:up, createdAt:new Date()}); }catch(e){}
+};
+window.deleteGroup = async ()=>{
+  const val=document.getElementById('groupWilayah').value; if(!val) return;
+  if(!confirm(`Hapus "${val}" dari dropdown?`)) return;
+  groupOptions = groupOptions.filter(v=>v!==val);
+  document.getElementById('groupWilayah').value=groupOptions[0]||'';
+  try{ await deleteDoc(doc(db,"guide_group_options", val)); }catch(e){}
+};
+window.addArea = async ()=>{
+  const newVal = prompt('Tambah Area/Group baru:');
+  if(!newVal) return;
+  const up = newVal.trim().toUpperCase();
+  if(!up) return;
+  if(areaOptions.includes(up)){ alert('Sudah ada beb!'); document.getElementById('areaGroup').value=up; return; }
+  areaOptions.push(up); areaOptions.sort();
+  document.getElementById('areaGroup').value=up;
+  try{ await setDoc(doc(db,"guide_area_options", up), {name:up, createdAt:new Date()}); }catch(e){}
+};
+window.deleteArea = async ()=>{
+  const val=document.getElementById('areaGroup').value; if(!val) return;
+  if(!confirm(`Hapus Area/Group "${val}"?`)) return;
+  areaOptions = areaOptions.filter(v=>v!==val);
+  document.getElementById('areaGroup').value=areaOptions[0]||'';
+  try{ await deleteDoc(doc(db,"guide_area_options", val)); }catch(e){}
+};
+window.addLanguage = async ()=>{
+  const newVal = prompt('Tambah Languange baru:');
+  if(!newVal) return;
+  const up = newVal.trim().toUpperCase();
+  if(!up) return;
+  if(languageOptions.includes(up)){ alert('Sudah ada beb!'); document.getElementById('language').value=up; return; }
+  languageOptions.push(up); languageOptions.sort();
+  document.getElementById('language').value=up;
+  try{ await setDoc(doc(db,"guide_language_options", up), {name:up, createdAt:new Date()}); }catch(e){}
+};
+window.deleteLanguage = async ()=>{
+  const val=document.getElementById('language').value; if(!val) return;
+  if(!confirm(`Hapus Languange "${val}"?`)) return;
+  languageOptions = languageOptions.filter(v=>v!==val);
+  document.getElementById('language').value=languageOptions[0]||'';
+  try{ await deleteDoc(doc(db,"guide_language_options", val)); }catch(e){}
+};
+function render(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  const list = (document.getElementById('searchService').value || document.getElementById('searchLang').value || document.getElementById('searchArea').value)? filteredGuides : guides;
+  list.forEach((g)=>{
+    const originalIdx = guides.findIndex(x=> x.firebaseId===g.firebaseId);
+    const tr=document.createElement('tr');
+    tr.dataset.index=originalIdx;
+    tr.className = originalIdx===selectedIndex? 'selected' : (originalIdx%2===0? 'yellow' : 'white');
+    tr.innerHTML=`<td>${g.gfCode}</td><td>${g.areaGroup}</td><td class="service-col">${g.service}</td><td style="text-align:right">${formatRupiah(g.pax1)}</td><td style="text-align:right">${formatRupiah(g.pax2)}</td><td style="text-align:right">${formatRupiah(g.pax3)}</td><td style="text-align:right">${formatRupiah(g.pax4)}</td><td style="text-align:right">${formatRupiah(g.pax5)}</td><td>${g.remarks||''}</td><td>${g.language||''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById('tbody').addEventListener('click', (e)=>{
+  const tr=e.target.closest('tr');
+  if(!tr || tr.dataset.index===undefined) return;
+  const idx=parseInt(tr.dataset.index);
+  if(isNaN(idx) || idx>=guides.length) return;
+  selectedIndex=idx;
+  const s=guides[idx];
+  selectedFirebaseId=s.firebaseId;
+  if(s.groupWilayah &&!groupOptions.includes(s.groupWilayah)){ groupOptions.push(s.groupWilayah); groupOptions.sort(); }
+  if(s.areaGroup &&!areaOptions.includes(s.areaGroup)){ areaOptions.push(s.areaGroup); areaOptions.sort(); }
+  if(s.language &&!languageOptions.includes(s.language)){ languageOptions.push(s.language); languageOptions.sort(); }
+  document.getElementById('gfCode').value=s.gfCode;
+  document.getElementById('groupWilayah').value=s.groupWilayah;
+  document.getElementById('areaGroup').value=s.areaGroup;
+  document.getElementById('language').value=s.language;
+  document.getElementById('service').value=s.service;
+  document.getElementById('remarks').value=s.remarks||'';
+  document.getElementById('pax1').value=formatRupiah(s.pax1);
+  document.getElementById('pax2').value=formatRupiah(s.pax2);
+  document.getElementById('pax3').value=formatRupiah(s.pax3);
+  document.getElementById('pax4').value=formatRupiah(s.pax4);
+  document.getElementById('pax5').value=formatRupiah(s.pax5);
+  setFormEnabled(false);
+  const b=document.getElementById('btnAdd'); b.innerText='Update'; b.classList.add('update-mode');
+  render();
+});
+window.doAdd=()=>{
+  const b=document.getElementById('btnAdd');
+  if(b.innerText==='Update'){ doSave(); return; }
+  selectedIndex=-1; selectedFirebaseId=null;
+  const next = guides.length+1;
+  document.getElementById('gfCode').value='GF-'+String(next).padStart(3,'0');
+  document.getElementById('service').value=''; document.getElementById('remarks').value='';
+  ['pax1','pax2','pax3','pax4','pax5'].forEach(id=> document.getElementById(id).value='');
+  document.getElementById('groupWilayah').value=groupOptions[0]||'';
+  document.getElementById('areaGroup').value=areaOptions[0]||'';
+  document.getElementById('language').value=languageOptions[0]||'';
+  setFormEnabled(true);
+};
+window.doEdit=()=>{
+  if(selectedIndex===-1 &&!document.getElementById('gfCode').value){ alert('Klik data di tabel dulu beb!'); return; }
+  setFormEnabled(true);
+};
+window.doSave=async()=>{
+  const gfCode=document.getElementById('gfCode').value;
+  if(!gfCode){ alert('GF Code kosong beb!'); return; }
+  const payload={
+    gfCode: gfCode,
+    areaGroup: document.getElementById('areaGroup').value.toUpperCase(),
+    groupWilayah: document.getElementById('groupWilayah').value.toUpperCase(),
+    service: document.getElementById('service').value.toUpperCase(),
+    language: document.getElementById('language').value.toUpperCase(),
+    remarks: document.getElementById('remarks').value,
+    pax1: document.getElementById('pax1').value.replace(/,/g,''),
+    pax2: document.getElementById('pax2').value.replace(/,/g,''),
+    pax3: document.getElementById('pax3').value.replace(/,/g,''),
+    pax4: document.getElementById('pax4').value.replace(/,/g,''),
+    pax5: document.getElementById('pax5').value.replace(/,/g,''),
+    updatedAt: new Date()
+  };
+  try{
+    if(selectedFirebaseId){
+      await updateDoc(doc(db,"guide_fee",selectedFirebaseId), payload);
+    }else{
+      payload.createdAt=new Date();
+      await addDoc(colRef, payload);
+    }
+    setFormEnabled(false);
+    document.getElementById('btnAdd').innerText='Add'; document.getElementById('btnAdd').classList.remove('update-mode');
+  }catch(e){ alert(e.message); }
+};
+window.doDelete=async()=>{
+  if(selectedIndex===-1 ||!selectedFirebaseId){ alert('Klik data di tabel dulu beb!'); return; }
+  if(confirm('Hapus '+document.getElementById('gfCode').value+'?')){
+    await deleteDoc(doc(db,"guide_fee",selectedFirebaseId));
+    doCancel();
+  }
+};
+window.doCancel=()=>{
+  selectedIndex=-1; selectedFirebaseId=null;
+  ['gfCode','service','remarks','pax1','pax2','pax3','pax4','pax5'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('btnAdd').innerText='Add'; document.getElementById('btnAdd').classList.remove('update-mode');
+  setFormEnabled(false); render();
+};
+window.doPrint=()=>{ window.print(); };
+setInterval(()=>{ document.getElementById('clock').innerText=new Date().toTimeString().split(' ')[0]; },1000);
+onSnapshot(colGroup, snap=>{
+  if(snap.size>0){
+    const arr=[]; snap.forEach(d=> arr.push(d.data().name));
+    if(arr.length>0) groupOptions=arr.sort();
+  }
+});
+onSnapshot(colArea, snap=>{
+  if(snap.size>0){
+    const arr=[]; snap.forEach(d=> arr.push(d.data().name));
+    if(arr.length>0) areaOptions=arr.sort();
+  }
+});
+onSnapshot(colLang, snap=>{
+  if(snap.size>0){
+    const arr=[]; snap.forEach(d=> arr.push(d.data().name));
+    if(arr.length>0) languageOptions=arr.sort();
+  }
+});
+onSnapshot(colRef, snap=>{
+  const oldTc=selectedIndex>=0? guides[selectedIndex]?.gfCode : null;
+  guides=[];
+  snap.forEach(d=>{
+    const data=d.data();
+    guides.push({
+      firebaseId:d.id,
+      gfCode:data.gfCode||'',
+      areaGroup:data.areaGroup||'',
+      groupWilayah:data.groupWilayah||'',
+      service:data.service||'',
+      language:data.language||'',
+      remarks:data.remarks||'',
+      pax1:data.pax1||'0',
+      pax2:data.pax2||'0',
+      pax3:data.pax3||'0',
+      pax4:data.pax4||'0',
+      pax5:data.pax5||'0'
+    });
+  });
+  guides.sort((a,b)=> a.gfCode.localeCompare(b.gfCode));
+  if(oldTc){
+    const idx=guides.findIndex(c=>c.gfCode===oldTc);
+    if(idx>=0) selectedIndex=idx;
+  }
+  applyFilter();
+});
+setFormEnabled(false);
+</script>
+</body>
+</html>

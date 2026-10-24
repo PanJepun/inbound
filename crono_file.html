@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHRONO FILE RAPI + OPTIONAL + OTHERS ITINERARY</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#777;padding:0;display:flex;flex-direction:column;align-items:center;font-family:Arial, sans-serif}
+.controls{width:100%;max-width:1700px;background:#fff;padding:10px 12px;margin:6px 0;border:2px solid #000;display:flex;justify-content:space-between;font-weight:900;font-size:11px}
+.controls button{padding:8px 14px;border:2px solid #000;cursor:pointer;font-weight:900}
+.btn-active{outline:3px solid #f00}
+.wrapper{width:100%;max-width:1700px;overflow-x:auto;background:#fff;border:2px solid #000;margin-bottom:10px;padding-right:15px}
+.paper{width:100%;min-width:1200px;background:#fff;padding:14px 18px 14px 10px;color:#000;font-size:11px}
+.top{display:flex;justify-content:space-between;border-bottom:2.5px solid #000;padding-bottom:8px;margin-bottom:10px}
+.logo{font-weight:900;font-size:22px;color:#2a7ab5;line-height:14px} .logo span{font-size:8px;color:#000;font-weight:400;display:block;margin-top:3px}
+.title{font-family:"Times New Roman",serif;font-size:36px;font-style:italic}
+.head{display:flex;justify-content:space-between;margin-bottom:10px;font-size:12px}
+.head .left{width:35%;min-width:250px}
+.head .right{width:42%;min-width:320px}
+.arrivalBox{font-family:"Courier New", monospace;font-size:12px;font-weight:700;line-height:16px;margin-top:6px}
+.arrRow{display:flex;align-items:center}
+.arrRow .label{width:95px;text-align:left}
+.arrRow .colon{width:10px;text-align:center}
+.arrRow .dateVal{width:110px;text-align:left}
+.arrRow .flightLabel{width:55px;text-align:left;margin-left:10px}
+.arrRow .flightVal{width:110px;text-align:left}
+.clientNames{white-space:pre-line;line-height:14px;font-weight:400;margin-top:4px;display:block}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{border:1.5px solid #000;background:#e9e9e9;padding:5px 3px;font-size:9.5px;font-weight:900;text-align:center;white-space:normal;word-break:break-word}
+td{border:1px solid #000;padding:4px 3px;font-size:10px;line-height:11px;word-break:break-word}
+.rightNum{white-space:nowrap !important;text-align:right;font-weight:600;padding-right:8px !important;font-size:10px}
+.centerNum{white-space:nowrap !important;text-align:center}
+.dateCell{white-space:nowrap !important;width:70px}
+.paxCell{width:35px}
+.hotelCol{width:180px;min-width:160px;max-width:190px;white-space:normal !important}
+.hotelCell{width:180px;max-width:190px;white-space:normal !important;font-size:10px;line-height:11px;word-wrap:break-word}
+.serviceCol{width:240px;min-width:200px;max-width:260px;white-space:normal !important}
+.serviceCell{width:240px;max-width:260px;white-space:normal !important;font-size:10px;line-height:11px;word-wrap:break-word}
+th:last-child, td:last-child{padding-right:10px !important}
+.subHotel{display:flex;justify-content:space-between;font-weight:900;font-size:11px;padding:6px 10px 6px 4px;border-top:2px solid #000;border-bottom:1px solid #000;background:#e8e8e8}
+.footerFinal{border-top:2.5px solid #000;margin-top:14px;padding-top:10px;display:flex;justify-content:space-between;font-weight:900;font-size:12px}
+.green{color:#006600} .double{border-top:3px double #000;border-bottom:3px double #000;padding:0 8px 0 6px;margin-left:6px}
+.record{text-align:center;margin-top:30px;font-size:10px}
+@media print{.controls{display:none !important} body{background:#fff !important} .wrapper{border:none !important;padding-right:0 !important} .paper{padding-right:8px !important;min-width:0 !important} @page{size:A4 landscape;margin:5mm 6mm}}
+</style>
+</head>
+<body>
+<div class="controls">
+<div style="display:flex;gap:6px;align-items:center">
+<button id="btnNett" style="background:#ccffcc" onclick="setMode('nett')">NETT</button>
+<button id="btnSales" class="btn-active" style="background:#ffff99" onclick="setMode('sales')">SALES</button>
+<button onclick="window.print()" style="background:#222;color:#fff;padding:8px 18px;border:2px solid #000;cursor:pointer;font-weight:900;margin-left:8px">🖨️ PRINT / PDF</button>
+<span style="margin-left:12px">Guest ID: <span id="gIdCtrl" style="background:yellow;padding:2px 6px">-</span> | <span id="optCount" style="background:#aaffaa;padding:2px 6px">0 OPTIONAL</span> | <span id="othersCount" style="background:#ffcc99;padding:2px 6px">0 OTHERS</span></span>
+</div>
+<div>Margin: <span id="showMargin" style="color:#f00">10%</span></div>
+</div>
+<div class="wrapper">
+<div class="paper">
+<div class="top"><div class="logo">SMAILING TOUR<span>Travel Management Expert</span></div><div class="title" id="mainTitle">CHRONO FILE</div></div>
+<div class="head">
+<div class="left"><b>Clients Name :</b><span class="clientNames" id="cName">-</span><br><br>Guest ID : <span id="gIdShow" style="background:yellow;padding:2px 6px">-</span></div>
+<div class="right">
+<div style="font-family:Courier New, monospace;font-weight:700">TOTAL PAX : <span id="tPax">2</span></div>
+<div class="arrivalBox">
+<div class="arrRow"><span class="label">Arrival</span><span class="colon">:</span><span class="dateVal" id="arr">-</span><span class="flightLabel">Flight</span><span class="colon">:</span><span class="flightVal" id="flIn">-</span></div>
+<div class="arrRow"><span class="label">Deaparture</span><span class="colon">:</span><span class="dateVal" id="dep">-</span><span class="flightLabel">Flight</span><span class="colon">:</span><span class="flightVal" id="flOut">-</span></div>
+</div>
+</div>
+</div>
+<table>
+<tr><th style="width:65px">Date In</th><th style="width:65px">Date Out</th><th class="hotelCol">Hotel Name</th><th style="width:50px">T.Room/<br>Nite(s)</th><th style="width:80px">Price /<br>Room+Abf</th><th style="width:50px">HB</th><th style="width:50px">FB</th><th style="width:50px">S.SUPL</th><th style="width:60px">X-Bed</th><th style="width:95px">SALES/PAX</th></tr>
+<tr style="background:#f5f5f5"><td colspan="10" style="font-weight:900;border-top:2px solid #000">Hotels Detail :</td></tr>
+<tbody id="tbodyHotel"></tbody>
+</table>
+<div class="subHotel"><span style="color:#0033cc">Price / Room ( 2pax )</span><span>Sub Total Hotel : Rp . <span id="subHotel">0.00</span></span></div>
+<table style="margin-top:16px">
+<tr><th style="width:65px">Date</th><th style="width:35px">Pax</th><th class="serviceCol">Service / Agents</th><th style="width:85px">Total Price</th><th style="width:70px">Nett / Pax</th><th style="width:90px">Sales/Pax</th></tr>
+<tr style="background:#f5f5f5"><td colspan="6" style="font-weight:900;border-top:2px solid #000">ITENARARY ( Transport + OPTIONAL + OTHERS ) :</td></tr>
+<tbody id="tbodyIte"></tbody>
+</table>
+<div class="subHotel" style="margin-top:0;background:#ffff99"><span>Detail Itinerary Dibawah Hotel ( termasuk OPTIONAL + OTHERS )</span><span>Sub Total Transport : Rp . <span id="subIte">0.00</span></span></div>
+<div class="footerFinal">
+<div>AGENCY : <span id="agency">-</span><br>NATIONALITY : <span id="nation">-</span></div>
+<div style="text-align:right;min-width:280px">
+<div class="green" style="font-size:14px">TOTAL <span id="lblGrand">SALES</span> : Rp . <span id="grandTotal" class="double">0.00</span></div>
+</div>
+</div>
+<div class="record">Record: EOF/8 &nbsp;&nbsp;&nbsp; Exclusive | + OPTIONAL + OTHERS from Guide</div>
+</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe" };
+const db = getFirestore(initializeApp(firebaseConfig));
+let activePNR = new URLSearchParams(window.location.search).get('guestId')||'SMLDMC-20OKT26-00001'; activePNR=activePNR.toUpperCase().trim();
+let mode = new URLSearchParams(window.location.search).get('mode')||'sales';
+let hotelMarginPct=10, tourMarginPct=10;
+let cacheHotels=[], cacheIte=[];
+function parseDate(s){ if(!s) return new Date(0); s=String(s).trim(); const p=s.split(/[-/]/); if(p.length===3){ if(p[0].length===4) return new Date(+p[0],+p[1]-1,+p[2]); return new Date(+p[2],+p[1]-1,+p[0]); } return new Date(s); }
+function calcNites(ci,co){ const d1=parseDate(ci); const d2=parseDate(co); if(isNaN(d1)||isNaN(d2)) return 1; return Math.round((d2-d1)/86400000)||1; }
+function fmt(n){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function parseNum(v){ if(v==null) return 0; return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }
+function formatDateFromAny(val){ if(!val) return ''; try{ let d; if(val && typeof val.toDate==='function'){ d=val.toDate(); } else if(val && typeof val.seconds==='number'){ d=new Date(val.seconds*1000); } else if(val instanceof Date){ d=val; } else if(typeof val==='string'){ let s=val.trim().replaceAll('/','-'); if(s.match(/^\d{2}-\d{2}-\d{4}$/)) return s; if(s.match(/^\d{4}-\d{2}-\d{2}/)){ const p=s.split('-'); return `${p[2].substring(0,2)}-${p[1]}-${p[0]}`; } if(s==='-'||s==='') return ''; d=new Date(s); } if(!d || isNaN(d.getTime())) return String(val).replaceAll('/','-'); const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0'); const yyyy=d.getFullYear(); return `${dd}-${mm}-${yyyy}`; }catch(e){ return String(val).replaceAll('/','-'); } }
+function getGuestId(obj){ for(let k in obj){ const lk=k.toLowerCase(); if(lk.includes('guest') && lk.includes('id') && obj[k]) return String(obj[k]).toUpperCase().trim(); } return (obj.guestId||obj.GuestID||obj.guestID||'').toString().toUpperCase().trim(); }
+function getField(obj, includes){ const keys=Object.keys(obj); for(let k of keys){ const lk=k.toLowerCase().replace(/\s+/g,''); let ok=true; for(let inc of includes){ if(!lk.includes(inc)) { ok=false; break; } } if(ok) return obj[k]; } return ''; }
+window.setMode=function(m){ mode=m; const url=new URL(window.location); url.searchParams.set('mode',m); window.history.replaceState({},'',url); render(); }
+function render(){
+  document.getElementById('mainTitle').innerText='CHRONO FILE'+(mode==='nett'?' - NETT':'');
+  document.getElementById('lblGrand').innerText= mode==='nett'?'NETT':'SALES';
+  document.getElementById('btnNett').classList.toggle('btn-active',mode==='nett');
+  document.getElementById('btnSales').classList.toggle('btn-active',mode==='sales');
+  document.getElementById('showMargin').innerText=hotelMarginPct+'% / '+tourMarginPct+'%';
+  const tbodyH=document.getElementById('tbodyHotel'); tbodyH.innerHTML=''; let subHotel=0;
+  cacheHotels.sort((a,b)=> parseDate(a.checkIn)-parseDate(b.checkIn));
+  cacheHotels.forEach(h=>{
+    const rate=parseNum(h.rate); const abf=parseNum(h.abf); const hb=parseNum(h.hb); const fb=parseNum(h.fb); const ssupl=parseNum(h.sglsup||h.supl); const xbed=parseNum(h.xbed);
+    const troom=parseInt(h.troom||1)||1; const nites=calcNites(h.checkIn,h.checkOut);
+    const priceRoomAbf=(rate+abf)*nites; const nett=priceRoomAbf+hb+fb+ssupl+xbed; const sales=nett*(1+hotelMarginPct/100);
+    const val = mode==='sales'?sales:nett; subHotel+=val*troom;
+    tbodyH.innerHTML+=`<tr><td class="dateCell">${formatDateFromAny(h.checkIn)}</td><td class="dateCell">${formatDateFromAny(h.checkOut)}</td><td class="hotelCell">${(h.hotelName||'').toString().toUpperCase()}</td><td class="centerNum">${troom}/${nites}</td><td class="rightNum">${fmt(priceRoomAbf)}</td><td class="rightNum">${fmt(hb)}</td><td class="rightNum">${fmt(fb)}</td><td class="rightNum">${fmt(ssupl)}</td><td class="rightNum">${fmt(xbed)}</td><td class="rightNum" style="background:#ccffcc;font-weight:900">${fmt(val)}</td></tr>`;
+  });
+  document.getElementById('subHotel').innerText=fmt(subHotel);
+  const tbodyI=document.getElementById('tbodyIte'); tbodyI.innerHTML=''; let subIte=0;
+  cacheIte.sort((a,b)=> parseDate(a.date)-parseDate(b.date));
+  cacheIte.forEach(r=>{
+    const salesPerPax=r.nett*(1+(r.marginPct||tourMarginPct)/100); 
+    const val = mode==='sales'?salesPerPax:r.nett; 
+    subIte+=val*r.pax;
+    const detail = r.transportCompany ? `<br><span style="font-size:8px;color:#666">→ ${r.transportCompany}</span>` : '';
+    let badge = '';
+    if(r.source==='OPTIONAL') badge = `<span style="background:#ffff00;border:1px solid #000;padding:1px 4px;font-size:7px;margin-left:4px">OPTIONAL</span>`;
+    if(r.source==='OTHERS') badge = `<span style="background:#ffcc99;border:1px solid #000;padding:1px 4px;font-size:7px;margin-left:4px">OTHERS</span>`;
+    tbodyI.innerHTML+=`<tr style="${r.source==='OPTIONAL'?'background:#ffffcc': r.source==='OTHERS'?'background:#ffe0cc':''}"><td class="dateCell">${formatDateFromAny(r.date)}</td><td class="paxCell centerNum">${r.pax}</td><td class="serviceCell"><b>${r.service.toUpperCase()}</b>${badge}${detail}</td><td class="rightNum">${fmt(val*r.pax)}</td><td class="rightNum">${fmt(r.nett)}</td><td class="rightNum" style="background:${r.source==='OPTIONAL'?'#aaffaa': r.source==='OTHERS'?'#ffcc99':'#ffeb99'};font-weight:900">${fmt(val)}</td></tr>`;
+  });
+  document.getElementById('subIte').innerText=fmt(subIte);
+  document.getElementById('grandTotal').innerText=fmt(subHotel+subIte);
+  document.getElementById('optCount').innerText = cacheIte.filter(x=>x.source==='OPTIONAL').length + ' OPTIONAL';
+  const othersEl = document.getElementById('othersCount');
+  if(othersEl) othersEl.innerText = cacheIte.filter(x=>x.source==='OTHERS').length + ' OTHERS';
+  const allDates=[]; cacheHotels.forEach(h=>{ if(h.checkIn) allDates.push(h.checkIn); if(h.checkOut) allDates.push(h.checkOut); }); cacheIte.forEach(r=>{ if(r.date) allDates.push(r.date); });
+  if(allDates.length>0){ allDates.sort((a,b)=> parseDate(a)-parseDate(b)); const arrEl=document.getElementById('arr'); const depEl=document.getElementById('dep'); if(!arrEl.innerText || arrEl.innerText==='-' ) arrEl.innerText=formatDateFromAny(allDates[0]); if(!depEl.innerText || depEl.innerText==='-') depEl.innerText=formatDateFromAny(allDates[allDates.length-1]); }
+}
+async function load(){
+ document.getElementById('gIdShow').innerText=activePNR; document.getElementById('gIdCtrl').innerText=activePNR;
+ const collections=["marketing","master","bookings"];
+ for(let colName of collections){ try{ const snap=await getDocs(collection(db,colName)); snap.forEach(s=>{ const d=s.data(); const g=getGuestId(d); if(!g || (g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g))) return; let totalPax=parseInt(parseNum(d.totalPax||d.pax||2))||2; let arrRaw = d.arrivalDate||d.arrival||null; let depRaw = d.departureDate||d.departure||null; for(let k in d){ const lk=k.toLowerCase(); if(lk.includes('arrival') && !arrRaw) arrRaw=d[k]; if((lk.includes('departure')||lk.includes('depature')) && !depRaw) depRaw=d[k]; } let flIn = d.flightIn||d.flightNo1||''; let flOut = d.flightOut||d.flightNo2||''; for(let k in d){ const lk=k.toLowerCase(); if(lk.includes('flight')){ if(lk.includes('in')||lk==='flightno1') flIn=d[k]||flIn; else if(lk.includes('out')||lk==='flightno2') flOut=d[k]||flOut; } } for(let k in d){ const lk=k.toLowerCase(); if(lk.includes('hotel') && lk.includes('margin')) hotelMarginPct=parseFloat(parseNum(d[k]))||hotelMarginPct; if(lk.includes('tour') && lk.includes('margin')) tourMarginPct=parseFloat(parseNum(d[k]))||tourMarginPct; if(lk==='margin'||lk==='profitmargin'){ const v=parseFloat(parseNum(d[k])); if(v>0){ hotelMarginPct=v; tourMarginPct=v; } } } if(d.hotelMargin) hotelMarginPct=parseFloat(d.hotelMargin)||hotelMarginPct; if(d.tourMargin) tourMarginPct=parseFloat(d.tourMargin)||tourMarginPct; if(d.profitMargin){ hotelMarginPct=parseFloat(d.profitMargin)||hotelMarginPct; tourMarginPct=parseFloat(d.profitMargin)||tourMarginPct; } document.getElementById('cName').innerHTML=String(d.guestName||d.clientName||'-').toUpperCase().replace(/\n/g,'<br>'); document.getElementById('tPax').innerText=totalPax; if(formatDateFromAny(arrRaw)) document.getElementById('arr').innerText=formatDateFromAny(arrRaw); if(formatDateFromAny(depRaw)) document.getElementById('dep').innerText=formatDateFromAny(depRaw); document.getElementById('flIn').innerText=flIn||'CX 231'; document.getElementById('flOut').innerText=flOut||'GA 888'; document.getElementById('agency').innerText=String(d.agent||d.agency||'-').toUpperCase(); document.getElementById('nation').innerText=String(d.nationality||d.national||'-').toUpperCase(); }); }catch(e){} }
+ const snapH = await getDocs(collection(db,"hotel_transactions")); snapH.forEach(s=>{ const d=s.data(); const g=getGuestId(d)||(d.guestId||'').toString().toUpperCase().trim(); if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return; cacheHotels.push(d); });
+ const cols=["transp","transport","transport_transactions","tour_transactions"]; 
+ for(let colName of cols){ try{ const snap=await getDocs(collection(db,colName)); let found=0; snap.forEach(s=>{ const d=s.data(); const g = getGuestId(d) || String(d.GuestID||d.guestID||'').toString().toUpperCase().trim(); let match = g && (g===activePNR || g.includes(activePNR) || activePNR.includes(g)); if(!match){ for(let k in d){ if(k.toLowerCase().includes('guest') && String(d[k]).toUpperCase().trim()===activePNR){ match=true; break; } } } if(!match) return; const dateVal = getField(d,['date','tour']) || getField(d,['date']) || d.dateOfTours || d.date || ''; const nameTrans = getField(d,['name','transport']) || getField(d,['transport']) || d.nameOfTransport || ''; const nameServ = getField(d,['name','service']) || getField(d,['service']) || d.nameOfService || ''; const price = parseNum(getField(d,['price','tour']) || getField(d,['price']) || d.priceTours || 0); const margin = parseNum(getField(d,['margin']) || 0); const totalSales = parseNum(getField(d,['total','sales']) || 0); const nettSales = parseNum(getField(d,['nett','sales']) || getField(d,['net','sales']) || 0); const pax = parseInt(parseNum(getField(d,['pax']) || d.pax || 2))||2; const guestNote = getField(d,['guest']) || d.guest || ''; if(totalSales===0 && nettSales===0 && price===750000) return; let serviceName = String(nameServ||'').trim() || String(nameTrans||'').trim() || 'SERVICE'; if(guestNote) serviceName = serviceName + ' ('+guestNote+')'; const nettPerPax = price>0 ? price : (nettSales>0 ? nettSales/pax : 0); if(nettPerPax===0 && serviceName.toUpperCase()==='SERVICE') return; cacheIte.push({ date:dateVal, pax:pax, service:serviceName, transportCompany: String(nameTrans||'').toUpperCase().trim(), nett:nettPerPax, marginPct:margin||tourMarginPct, source:'TRANSPORT' }); found++; }); if(found>0) break; }catch(e){} }
+ try{
+   const snapOpt = await getDocs(collection(db,"optional"));
+   snapOpt.forEach(s=>{
+     const d=s.data();
+     const g = String(d.GuestID||d.GuestId||'').toUpperCase().trim();
+     if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return;
+     if(String(d.NameOfGuest||'').toUpperCase().includes('MARIA HERNANDEZ')) return;
+     if(!d.NameOfTour) return;
+     cacheIte.push({
+       date: d.Date||'',
+       pax: parseInt(parseNum(d.TPax||2))||2,
+       service: String(d.NameOfTour||'').toUpperCase(),
+       transportCompany: String(d.Supplier||'SMAILING DMC').toUpperCase(),
+       nett: parseNum(d.NetPrice||0),
+       marginPct: parseNum(d.Margin||10),
+       source: 'OPTIONAL'
+     });
+   });
+ }catch(e){}
+
+ // === TAMBAHAN OTHERS KE ITENARARY BEB! FORM TETAP, CUMA DATA DITAMBAH! ===
+ try{
+   const snapOthers = await getDocs(collection(db,"others"));
+   snapOthers.forEach(s=>{
+     const d=s.data();
+     const g = String(d.GuestID||d.guestId||d.GuestId||'').toUpperCase().trim();
+     if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return;
+     const nameService = d.NameOfService || d.serviceName || d.NameOfTour || '';
+     if(!nameService) return;
+     const adult = parseInt(parseNum(d.Adult||0))||0;
+     const child = parseInt(parseNum(d.Child||0))||0;
+     const pax = (adult + child) || parseInt(parseNum(d.Pax||d.pax||2))||2;
+     const price = parseNum(d.Price||d.price||d.TotalPrice||0);
+     const margin = parseNum(d.Margin||d.margin||10);
+     // Jika Price adalah total? Kita anggap Price = per pax nett
+     cacheIte.push({
+       date: d.Date||d.date||'',
+       pax: pax,
+       service: String(nameService).toUpperCase(),
+       transportCompany: String(d.Supplier||'SMAILING DMC').toUpperCase(),
+       nett: price,
+       marginPct: margin,
+       source: 'OTHERS'
+     });
+   });
+ }catch(e){ console.log('Others load error', e); }
+
+ render();
+}
+load();
+</script>
+</body>
+</html>

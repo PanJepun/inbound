@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MENU MARKETING - V19 MASTER FIX - ADD EDIT JALAN</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#c6e8c6;font-family:Tahoma,Arial;font-size:11px;overflow:hidden}
+.win{border:2px solid #000;background:#c6e8c6;width:100vw;height:100vh;display:flex;flex-direction:column}
+.titleBar{background:#d4d0c8;border-bottom:2px solid #000;padding:2px 6px;font-weight:700;font-size:11px;color:#006600;display:flex;justify-content:space-between}
+.formArea{background:#c6e8c6;padding:6px 8px;border-bottom:2px solid #000;position:relative}
+table.f{border-collapse:collapse;width:82%} table.f td{padding:2px 4px;font-weight:700;white-space:nowrap;height:22px;font-size:11px;vertical-align:middle}
+.in{height:20px;border:1.5px solid #000;background:#fff;font-weight:700;padding:0 6px;font-size:11px;border-radius:2px}
+.inDate{width:90px;text-align:center;background:#fff}
+.inGuest{width:230px;background:#ffffcc;border:2px solid #0000cc;font-weight:900;font-size:10px}
+.inSmall{width:65px;text-align:center;background:#fff}
+.inAgent{width:105px;background:#fff}
+.inRate{width:75px;text-align:center;background:#ffffcc}
+.inUSD{width:85px;text-align:right;background:#ffffcc}
+.inIDR{width:115px;text-align:right;background:#ffffcc}
+.inPacket{width:85px;background:#ffffcc}
+.inMargin{width:55px;text-align:center;background:#ffffcc}
+textarea.guest{width:200px;height:36px;border:1.5px solid #000;font-weight:700;padding:2px 5px;resize:none;background:#fff;font-size:10px}
+.btnPlus{width:20px;height:20px;border:1.5px solid #000;background:#00ff66;font-weight:900;font-size:12px;cursor:pointer;border-radius:3px;margin-left:2px}
+.btnMin{width:20px;height:20px;border:1.5px solid #000;background:#ff9999;font-weight:900;font-size:12px;cursor:pointer;border-radius:3px;margin-left:1px}
+.rightOps{position:absolute;right:6px;top:2px;width:175px;display:flex;flex-direction:column;gap:3px;align-items:flex-end}
+.timeRed{color:#ff0000;font-size:22px;font-weight:900;font-family:Arial Black;line-height:22px}
+.btnOp{width:125px;height:21px;border:2px solid #000;background:#d4d0c8;font-weight:900;font-size:11px;cursor:pointer;text-align:center;border-radius:3px}
+.btnOp.profit{background:#c6e8ff;color:#0000ff;text-decoration:underline;font-size:10px}
+.itinBar{background:#ffff00;border-bottom:3px solid #000;border-top:2px solid #000;padding:4px 10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.itin-radio{display:flex;align-items:center;gap:4px;font-weight:900;font-size:11px;cursor:pointer;padding:4px 10px;border:2px solid #000;background:#ffcc00;border-radius:4px}
+.itin-radio input{width:14px;height:14px}
+.actionBar{background:#c6e8c6;border-bottom:3px solid #000;padding:5px 8px;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.actionBar button{height:24px;padding:0 14px;font-size:11px;font-weight:900;border:1.5px solid #000;background:#d4d0c8;cursor:pointer;border-radius:3px;box-shadow:inset 1px 1px 0 #fff}
+.actionBar button#btnSave{background:#a8ffb0;border:2px solid #000}
+.actionBar button.del{background:#ffb0b0;border:2px solid #000;color:#ff0000}
+.actionBar button.refresh{background:#00ff66;border:2px solid #000}
+.btn-quotation{background:#a8a8ff!important;border:2px solid #000!important}
+.salesPriceBox{margin-left:auto;display:flex;align-items:center;gap:6px;font-weight:900;font-size:13px;color:#0000cc}
+.salesPriceBox input{width:135px;height:24px;text-align:right;font-weight:900;background:#d4d0c8;border:2px solid #000;font-size:12px}
+.grid{flex:1;background:#b0ffb0;overflow:auto;border-top:2px solid #000}
+table.list{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+table.list th{background:#d8e8d0;border:1px solid #000;padding:6px 4px;text-align:center;font-weight:900;position:sticky;top:0;font-size:10px}
+table.list td{border:1px solid #666;padding:5px 5px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;background:#b0ffb0}
+tr.sel td{background:#00ff66!important;font-weight:900!important;border:2px solid #0000cc!important;color:#000}
+</style>
+</head>
+<body>
+<div class="win">
+<div class="titleBar"><span>≡ MENU MARKETING - V18 SEJAJAR 1 KOLOM - NO COG</span><span id="jamTop" style="color:#000;font-weight:900">--:--:--</span></div>
+
+<div class="formArea">
+<div class="rightOps">
+<div class="timeRed" id="jamBig">18:33:28</div>
+<button class="btnOp">Operation</button>
+<button class="btnOp profit">PROFIT N LOSS</button>
+<button class="btnOp" style="background:#c6e8ff;color:#0000ff">INVOICE</button>
+<button class="btnOp" style="background:#c6e8ff;color:#0000ff">COG</button>
+</div>
+
+<table class="f">
+<tr><td>Reservation Date :</td><td><input class="in inDate" id="resDate" type="text" value="22-06-2023"></td><td>Arrival Date</td><td><input class="in inDate" id="arrDate" type="text" value="05-07-2023"></td><td>Flight No. :</td><td><input class="in" id="flight1" style="width:70px"></td><td>Status :</td><td><select class="in" id="status" style="width:62px;background:#00ff66;border:2px solid #000;font-weight:900"><option>Ok</option><option>Cancel</option></select></td></tr>
+<tr><td>Guest ID :</td><td><input class="in inGuest" id="guestId" value="SMLDMC-22JUN2023-00012" readonly></td><td>Departure Date</td><td><input class="in inDate" id="depDate" type="text" value="09-07-2023"></td><td>Flight No. :</td><td><input class="in" id="flight2" style="width:70px"></td><td>T. Margin</td><td><input class="in inMargin" id="tMargin" value="10.00"></td></tr>
+<tr><td>Travel Consultant :</td><td><input class="in" id="travelCons" value="HILARIUS" style="width:130px;background:#ffffcc"></td><td>Total Adult</td><td><input class="in inSmall" id="totalAdl" value="2"></td><td>AGENT :</td><td style="display:flex;align-items:center"><input class="in inAgent" id="agent" list="agentList" value="AURORA"><datalist id="agentList"></datalist><button class="btnPlus" onclick="addAgent()">+</button><button class="btnMin" onclick="delAgent()">-</button></td><td>Name of Packet</td><td><input class="in inPacket" id="packetName" value="Package"></td></tr>
+<tr><td>Name of Guest :</td><td><textarea id="guestName" class="guest">Adolfo Florentino</textarea></td><td>Total Child</td><td><input class="in inSmall" id="totalChd" value="0"></td><td>Nationality :</td><td style="display:flex;align-items:center"><input class="in inAgent" id="nationality" list="natList" value="SPAIN"><datalist id="natList"></datalist><button class="btnPlus" onclick="addNat()">+</button><button class="btnMin" onclick="delNat()">-</button></td><td>Tour Price USD</td><td><input class="in inUSD" id="tourUSD" value="4,062.00" oninput="calcIDR()"></td></tr>
+<tr><td></td><td></td><td>Rate :</td><td><input class="in inRate" id="rate" value="14,300.00" oninput="calcIDR()"></td><td>Agents Lock :</td><td><input class="in" id="agentsLock" style="width:110px"></td><td>Tour Price IDR</td><td><input class="in inIDR" id="tourIDR" value="58,086,600.00" readonly></td></tr>
+</table>
+</div>
+
+<div class="itinBar">
+<label class="itin-radio" onclick="openItin('hotels')"><input type="radio" name="itin" checked> Hotels</label>
+<label class="itin-radio" onclick="openItin('transport')"><input type="radio" name="itin"> Transport</label>
+<label class="itin-radio" onclick="openItin('tours')"><input type="radio" name="itin"> Tours</label>
+<label class="itin-radio" onclick="openItin('meals')"><input type="radio" name="itin"> Meals</label>
+<label class="itin-radio" onclick="openItin('guide')"><input type="radio" name="itin"> Guide Fee</label>
+<label class="itin-radio" onclick="openItin('others')"><input type="radio" name="itin"> Others</label>
+<label class="itin-radio" onclick="openItin('optional')"><input type="radio" name="itin"> Optional</label>
+</div>
+
+<div class="actionBar">
+<button onclick="modeAdd()">Add</button><button id="btnSave" onclick="modeSave()">Save</button><button onclick="modeEdit()">Edit</button><button class="del" onclick="modeDelete()">Delete</button><button onclick="modeCancel()">Cancel</button><button onclick="modeCancel()">Exit</button><button class="refresh" onclick="location.reload()">Refresh</button>
+<button class="btn-quotation" onclick="openItin('hotels')">QUOTATION</button><button class="btn-crono">Crono File</button>
+<div class="salesPriceBox"><span>Sales Price / ID :</span><input id="salesPriceId" value="1,830,400.00" readonly></div>
+</div>
+
+<div class="grid" id="masterGrid">
+<table class="list">
+<thead><tr><th>Date</th><th>Guest ID:</th><th>Name of Guest</th><th>Agents</th><th>Date Of Arr.</th><th>Flight No.</th><th>Date Of Dep.</th><th>Flight</th><th>Adl</th><th>Chd</th><th>Status</th><th>Nationality</th></tr></thead>
+<tbody id="tbodyMaster"><tr><td colspan="12" style="text-align:center;padding:10px">Loading data...</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe", storageBucket: "inbound2026-12ffe.firebasestorage.app", messagingSenderId: "368642042481", appId: "1:368642042481:web:0da95081f2039b357089d0" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+function getTodayISO(){ const d=new Date(); return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`; }
+function toISODate(ddmmyyyy){ if(!ddmmyyyy) return ''; if(ddmmyyyy.includes('-') && ddmmyyyy.length===10){ const [d,m,y]=ddmmyyyy.split('-'); return `${y}-${m}-${d}`; } return ddmmyyyy; }
+function formatDatePartForId(){
+  const now=new Date(); const dd=String(now.getDate()).padStart(2,'0');
+  const months=["jan","feb","mar","apr","mei","jun","jul","agu","sep","okt","nov","des"];
+  return `${dd}${months[now.getMonth()]}${String(now.getFullYear()).slice(-2)}`;
+}
+
+let currentDocId = null;
+let isEdit = false;
+let selectedRow = null;
+
+let agentListData = JSON.parse(localStorage.getItem('agents')||'["AURORA","BALI BEST","EXPEDIA","TOUR MUNDIAL"]');
+let natListData = JSON.parse(localStorage.getItem('nats')||'["SPAIN","USA","AUSTRALIA","GERMANY","RUSIA"]');
+
+function refreshDatalist(){
+  const dlA=document.getElementById('agentList'); dlA.innerHTML=''; agentListData.forEach(a=>{ const o=document.createElement('option'); o.value=a; dlA.appendChild(o); });
+  const dlN=document.getElementById('natList'); dlN.innerHTML=''; natListData.forEach(n=>{ const o=document.createElement('option'); o.value=n; dlN.appendChild(o); });
+}
+window.addAgent=()=>{ const v=prompt('Tambah AGENT baru:'); if(!v) return; const up=v.toUpperCase(); if(!agentListData.includes(up)){ agentListData.push(up); localStorage.setItem('agents', JSON.stringify(agentListData)); refreshDatalist(); } document.getElementById('agent').value=up; };
+window.delAgent=()=>{ const cur=document.getElementById('agent').value; if(!cur) return; if(!confirm('Hapus AGENT '+cur+'?')) return; agentListData=agentListData.filter(a=>a!==cur); localStorage.setItem('agents', JSON.stringify(agentListData)); refreshDatalist(); document.getElementById('agent').value=''; };
+window.addNat=()=>{ const v=prompt('Tambah Nationality baru:'); if(!v) return; const up=v.toUpperCase(); if(!natListData.includes(up)){ natListData.push(up); localStorage.setItem('nats', JSON.stringify(natListData)); refreshDatalist(); } document.getElementById('nationality').value=up; };
+window.delNat=()=>{ const cur=document.getElementById('nationality').value; if(!cur) return; if(!confirm('Hapus Nationality '+cur+'?')) return; natListData=natListData.filter(a=>a!==cur); localStorage.setItem('nats', JSON.stringify(natListData)); refreshDatalist(); document.getElementById('nationality').value=''; };
+
+window.calcIDR = () => {
+  const r=parseFloat(document.getElementById('rate').value.replace(/[^0-9.]/g,''))||14300;
+  const u=parseFloat(document.getElementById('tourUSD').value.replace(/[^0-9.]/g,''))||0;
+  const idr=r*u;
+  document.getElementById('tourIDR').value=idr.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+};
+
+async function generateGuestId(){
+  const datePart=formatDatePartForId().toUpperCase();
+  const snap=await getDocs(collection(db, "marketing"));
+  const count = snap.size + 1;
+  const newId=`SMLDMC-${datePart}-${String(count).padStart(5,'0')}`;
+  document.getElementById('guestId').value=newId;
+  return newId;
+}
+
+// ===== KUNCI FIX ADD EDIT MASTER =====
+window.modeAdd = async () => {
+  isEdit=false;
+  currentDocId=null;
+  selectedRow=null;
+  document.getElementById('btnSave').innerText='Save';
+  document.getElementById('guestName').value='';
+  document.getElementById('totalAdl').value='2';
+  document.getElementById('totalChd').value='0';
+  document.getElementById('agent').value='AURORA';
+  document.getElementById('nationality').value='SPAIN';
+  document.getElementById('flight1').value='';
+  document.getElementById('flight2').value='';
+  document.getElementById('resDate').value=getTodayISO();
+  document.getElementById('arrDate').value=getTodayISO();
+  document.getElementById('depDate').value=getTodayISO();
+  await generateGuestId();
+  document.querySelectorAll('#tbodyMaster tr').forEach(r=>r.classList.remove('sel'));
+  document.getElementById('guestName').focus();
+};
+
+window.modeEdit = () => {
+  if(!currentDocId || !selectedRow){
+    alert('KLIK BARIS BAWAH DULU BEB! Yang warna hijau SMLDMC/19okt26/... baru klik Edit!');
+    return;
+  }
+  isEdit=true;
+  document.getElementById('btnSave').innerText='Update';
+  alert('MODE EDIT AKTIF BEB! Silakan ubah Name of Guest / Agent / dll lalu klik Save/Update!');
+};
+
+window.modeCancel = () => {
+  isEdit=false;
+  currentDocId=null;
+  selectedRow=null;
+  document.getElementById('btnSave').innerText='Save';
+  document.querySelectorAll('#tbodyMaster tr').forEach(r=>r.classList.remove('sel'));
+};
+
+window.modeSave = async () => {
+  const btn=document.getElementById('btnSave');
+  const guestName = document.getElementById('guestName').value.trim();
+  if(!guestName){ alert('Name of Guest wajib diisi beb!'); document.getElementById('guestName').focus(); return; }
+  
+  btn.innerText='SAVING...'; btn.disabled=true;
+  try{
+    let gid=document.getElementById('guestId').value;
+    if(!gid) gid=await generateGuestId();
+    
+    const payload={
+      guestId: gid,
+      resDate: document.getElementById('resDate').value,
+      arrDate: document.getElementById('arrDate').value,
+      depDate: document.getElementById('depDate').value,
+      flightNo1: document.getElementById('flight1').value,
+      flightNo2: document.getElementById('flight2').value,
+      status: document.getElementById('status').value,
+      tMargin: document.getElementById('tMargin').value,
+      travelConsultant: document.getElementById('travelCons').value,
+      totalAdult: document.getElementById('totalAdl').value,
+      totalChild: document.getElementById('totalChd').value,
+      agent: document.getElementById('agent').value.toUpperCase(),
+      packetName: document.getElementById('packetName').value,
+      guestName: guestName.toUpperCase(),
+      nationality: document.getElementById('nationality').value.toUpperCase(),
+      rate: document.getElementById('rate').value,
+      agentsLock: document.getElementById('agentsLock').value,
+      tourPriceUSD: document.getElementById('tourUSD').value,
+      tourPriceIDR: document.getElementById('tourIDR').value,
+      salesPrice: document.getElementById('salesPriceId').value,
+      updatedAt: new Date().toISOString()
+    };
+    
+    if(isEdit && currentDocId){
+      await updateDoc(doc(db, "marketing", currentDocId), payload);
+      alert('UPDATE SUKSES BEB! Data '+gid+' berhasil di update!');
+    }else{
+      const ref=await addDoc(collection(db, "marketing"), {...payload, createdAt: new Date().toISOString()});
+      currentDocId=ref.id;
+      alert('ADD SUKSES BEB! Guest ID baru: '+gid);
+      await generateGuestId();
+    }
+    isEdit=false;
+    btn.innerText='Save';
+    modeCancel();
+  }catch(e){
+    alert('Gagal Save: '+e.message);
+  }finally{
+    btn.disabled=false;
+    btn.innerText='Save';
+  }
+};
+
+window.modeDelete = async () => {
+  if(!currentDocId){
+    alert('KLIK BARIS BAWAH DULU BEB YANG MAU DI HAPUS!');
+    return;
+  }
+  if(!confirm('HAPUS DATA '+document.getElementById('guestId').value+' ? Yakin beb?')) return;
+  try{
+    await deleteDoc(doc(db, "marketing", currentDocId));
+    alert('DELETE SUKSES!');
+    modeCancel();
+  }catch(e){ alert('Gagal delete:'+e.message); }
+};
+
+window.openItin = (type) => {
+  const gid=document.getElementById('guestId').value;
+  if(!gid || gid.includes('...')){ alert('Pilih / Save Guest dulu beb! Klik baris bawah dulu!'); return; }
+  const url = type + '.html?guestId=' + encodeURIComponent(gid);
+  window.open(url, '_blank', 'width=1400,height=750,scrollbars=yes');
+};
+
+// LOAD MASTER DATA
+onSnapshot(collection(db, "marketing"), (snap)=>{
+  const tbody=document.getElementById('tbodyMaster');
+  tbody.innerHTML='';
+  if(snap.empty){
+    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;padding:10px;background:#ffffcc">Belum ada data - Klik Add untuk tambah data baru</td></tr>';
+    return;
+  }
+  snap.forEach(s=>{
+    const d=s.data();
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${d.resDate||''}</td><td style="background:#ffffcc;font-weight:900">${d.guestId||''}</td><td style="font-weight:900">${d.guestName||''}</td><td>${d.agent||''}</td><td>${d.arrDate||''}</td><td>${d.flightNo1||''}</td><td>${d.depDate||''}</td><td>${d.flightNo2||''}</td><td style="text-align:center">${d.totalAdult||''}</td><td style="text-align:center">${d.totalChild||''}</td><td style="text-align:center">${d.status||''}</td><td>${d.nationality||''}</td>`;
+    // KUNCI FIX - KLIK BARIS = BISA EDIT!
+    tr.onclick = () => {
+      document.querySelectorAll('#tbodyMaster tr').forEach(r=>r.classList.remove('sel'));
+      tr.classList.add('sel');
+      selectedRow=tr;
+      currentDocId=s.id;
+      isEdit=false;
+      document.getElementById('btnSave').innerText='Save';
+      // Isi form atas
+      document.getElementById('guestId').value=d.guestId||'';
+      document.getElementById('resDate').value=d.resDate||getTodayISO();
+      document.getElementById('arrDate').value=d.arrDate||getTodayISO();
+      document.getElementById('depDate').value=d.depDate||getTodayISO();
+      document.getElementById('flight1').value=d.flightNo1||'';
+      document.getElementById('flight2').value=d.flightNo2||'';
+      document.getElementById('status').value=d.status||'Ok';
+      document.getElementById('tMargin').value=d.tMargin||'10.00';
+      document.getElementById('travelCons').value=d.travelConsultant||'';
+      document.getElementById('totalAdl').value=d.totalAdult||'2';
+      document.getElementById('totalChd').value=d.totalChild||'0';
+      document.getElementById('agent').value=d.agent||'';
+      document.getElementById('packetName').value=d.packetName||'Package';
+      document.getElementById('guestName').value=d.guestName||'';
+      document.getElementById('nationality').value=d.nationality||'';
+      document.getElementById('rate').value=d.rate||'14,300.00';
+      document.getElementById('agentsLock').value=d.agentsLock||'';
+      document.getElementById('tourUSD').value=d.tourPriceUSD||'';
+      document.getElementById('tourIDR').value=d.tourPriceIDR||'';
+      document.getElementById('salesPriceId').value=d.salesPrice||'1,830,400.00';
+    };
+    tbody.appendChild(tr);
+  });
+});
+
+function tick(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0'); const m=String(now.getMinutes()).padStart(2,'0'); const s=String(now.getSeconds()).padStart(2,'0');
+  const txt=`${h}:${m}:${s}`;
+  const el1=document.getElementById('jamBig'); if(el1) el1.innerText=txt;
+  const el2=document.getElementById('jamTop'); if(el2) el2.innerText=txt;
+}
+setInterval(tick,1000);
+
+window.addEventListener('load', ()=>{
+  refreshDatalist();
+  calcIDR();
+  tick();
+  generateGuestId();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>TRANSPORT V5 LEMBUT - REFRESH AKTIF - NO POPUP AFTER SAVE</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#ffe4c4;font-family:Tahoma,Arial;font-size:11px;overflow:hidden}
+.win{border:2px solid #000;background:#ffe4c4;width:100vw;height:100vh;display:flex;flex-direction:column}
+.titleBar{background:#d4d0c8;border-bottom:2px solid #000;padding:2px 6px;font-weight:700;font-size:11px;display:flex;justify-content:space-between}
+.topBar{background:#ffe4c4;border-bottom:2px solid #000;padding:3px 4px;display:flex;gap:3px;align-items:center}
+.topBar button{height:20px;padding:0 8px;font-size:11px;font-weight:700;border:1.5px solid #000;background:#d4d0c8;cursor:pointer;border-radius:2px;box-shadow:inset 1px 1px 0 #fff}
+.topBar button.save{background:#ffff99;border:2px solid #0000cc;font-weight:900}
+.topBar button.del{background:#ff9999;font-weight:900}
+.topBar button.refresh{background:#ccffcc!important;border:2px solid #006600!important;font-weight:900;color:#006600}
+.orangeBox{width:40px;height:20px;background:#ff9900;border:2px solid #000;margin:0 4px}
+.salesBlue{height:20px;background:#0000cc;color:#fff;font-weight:900;padding:0 6px;display:flex;align-items:center;border:2px solid #000;font-size:10px;white-space:nowrap}
+.salesInput{width:95px;height:20px;border:2px solid #000;background:#c6e8ff;text-align:right;font-weight:900;font-size:11px}
+.salesInput.nett{background:#a8d8ff!important}
+.timeSmall{margin-left:auto;text-align:right;font-size:10px;font-weight:700;line-height:10px}
+.tableWrap{border-bottom:3px solid #000;background:#d4d0c8}
+table.mainTable{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+table.mainTable th{background:#d4d0c8;border:1px solid #000;padding:2px 2px;font-weight:700;font-size:10px;text-align:center;height:18px}
+table.mainTable td{border:1px solid #000;padding:0;background:#fff;height:22px}
+table.mainTable td input, table.mainTable td select{width:100%;height:100%;border:none;outline:none;padding:0 4px;font-weight:700;font-size:11px;background:#fff}
+table.mainTable td input:focus{background:#fff9c4!important}
+table.mainTable td.col-guest{background:#ffffcc}
+table.mainTable td.col-trans{background:#ffff99!important;border:2px solid #0000cc!important}
+table.mainTable td.col-price input{text-align:right;font-weight:900}
+table.mainTable td.col-guestName input{background:#ffffcc!important}
+.grid{flex:1;background:#fffde7;overflow:auto}
+table.list{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+table.list th{background:#f5f5dc;border:1px solid #000;padding:3px 2px;text-align:center;font-weight:700;position:sticky;top:0;font-size:10px;white-space:nowrap}
+table.list td{border:1px solid #999;padding:3px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;background:#fffde7;cursor:pointer}
+tr.sel td{background:#ffe4b5!important;border:2px solid #0000ff!important}
+#popupTrans{position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:99999;display:none;justify-content:center;align-items:center;padding:20px}
+#popupTrans.active{display:flex}
+.popupWin{width:1100px;height:580px;background:#d4d0c8;border:3px solid #000;display:flex;flex-direction:column}
+.popupTitle{background:#d4d0c8;border-bottom:2px solid #000;padding:3px 6px;font-weight:900;font-size:11px;display:flex;justify-content:space-between}
+.popupGrid{flex:1;background:#fff;overflow:auto;border:1px solid #000}
+table.popupTable{width:100%;border-collapse:collapse;font-size:11px}
+table.popupTable th{background:#d8e8d0;border:1px solid #000;padding:4px 3px;text-align:center;font-weight:900;position:sticky;top:0}
+table.popupTable td{border:1px solid #999;padding:3px 5px;white-space:nowrap;font-weight:700;cursor:pointer;background:#fffef0}
+table.popupTable tr:nth-child(even) td{background:#fff8dc}
+table.popupTable tr:hover td{background:#fff9c4!important}
+table.popupTable td.cost{text-align:right;background:#fff9c4!important;font-weight:900}
+.popupFooter{background:#d4d0c8;border-top:2px solid #000;padding:6px 12px;display:flex;justify-content:space-between;align-items:center}
+.popupFooter input{width:300px;height:20px;border:1.5px solid #000;padding:0 6px;font-weight:700}
+.btnNew{width:100px;height:22px;background:#ffff99;border:2px solid #000;font-weight:900;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="win">
+<div class="titleBar"><span>TRANSPORT V5 LEMBUT - Refresh Aktif - ALL DATA</span><span id="jamTop">TRANSPORT</span></div>
+<div class="topBar">
+<button onclick="modeAdd()">Add</button><button class="save" id="btnSave" onclick="modeSave()">Save</button><button onclick="modeEdit()">Edit</button><button class="del" onclick="modeDelete()">Delete</button><button>Preview</button><button>Print</button><button onclick="modeCancel()">Cancel</button><button onclick="window.close()">Exit</button><button class="refresh" onclick="refreshData()">Refresh ALL</button>
+<div class="orangeBox"></div>
+<div class="salesBlue">Total Sales Rp :</div><input id="totalSalesTop" class="salesInput" value="0.00" readonly>
+<div class="salesBlue">Nett Sales Rp :</div><input id="nettSalesTop" class="salesInput nett" value="0.00" readonly>
+<div style="margin-left:6px;display:flex;gap:3px;align-items:center">
+<input id="searchGuestIdFilter" placeholder="Guest ID" style="width:110px;height:20px;border:1.5px solid #0000cc;background:#ffffcc;font-weight:700;font-size:10px;padding:0 4px" oninput="applySearch()">
+<input id="searchGuestNameFilter" placeholder="Guest Name" style="width:110px;height:20px;border:1.5px solid #cc0000;background:#ffffcc;font-weight:700;font-size:10px;padding:0 4px" oninput="applySearch()">
+<button onclick="clearSearch()" style="height:20px;background:#ffcc00;border:1.5px solid #000;font-weight:700;font-size:10px">X</button>
+</div>
+<div class="timeSmall" style="margin-left:auto"><div id="clockSmall">TRANSPORT</div><div style="display:flex;align-items:center;gap:3px;margin-top:2px"><span>T.Pax :</span><input id="tPax" style="width:35px;height:16px;border:1px solid #000;text-align:center;font-weight:900" value="2"></div></div>
+</div>
+
+<div class="tableWrap">
+<table class="mainTable">
+<colgroup>
+<col style="width:145px"><col style="width:85px"><col style="width:155px"><col style="width:190px"><col style="width:90px"><col style="width:50px"><col style="width:55px"><col style="width:150px"><col style="width:40px"><col style="width:95px"><col style="width:110px">
+</colgroup>
+<thead>
+<tr style="background:#fff">
+<td class="col-guest"><input id="guestId" readonly style="background:#ffffcc;font-weight:900;font-size:10px"></td>
+<td><input id="dateTours" type="date" style="text-align:center"></td>
+<td class="col-trans"><input id="transportName" placeholder="OKE JAR" style="background:#ffff99!important;font-weight:900;text-align:center" onclick="checkEmpty()"></td>
+<td><input id="serviceName" placeholder="TRANSFER HOTEL/AIRPORT"></td>
+<td class="col-price"><input id="priceTours" placeholder="750,000.00" style="text-align:right" onfocus="unformat(this)" onblur="formatNominal(this)" oninput="recalc()"></td>
+<td><input id="margin" value="0.00" readonly style="text-align:center;background:#e8e8e8!important;font-weight:900"></td>
+<td><select id="status"><option>RSVTN</option><option>OK</option><option>WL</option><option>CXL</option></select></td>
+<td class="col-guestName"><input id="guestNameInput" placeholder="Guest Name"></td>
+<td><input id="paxInput" value="2.00" style="text-align:center" readonly></td>
+<td><input id="totalSalesInput" readonly style="text-align:right;background:#e8e8e8;font-weight:900"></td>
+<td><input id="nettSalesInput" readonly style="text-align:right;background:#e8e8e8;font-weight:900"></td>
+</tr>
+<tr>
+<th>Guest ID :</th><th>Date Of Tours</th><th>Name Of Transport</th><th>Name Of Service</th><th>Price Tours</th><th>Margin</th><th>Status</th><th style="background:#fff9c4">Guest</th><th>Pax</th><th>Total Sales</th><th style="background:#fff9c4">Nett Sales</th>
+</tr>
+</thead>
+</table>
+</div>
+
+<div class="grid">
+<table class="list">
+<colgroup>
+<col style="width:145px"><col style="width:85px"><col style="width:155px"><col style="width:190px"><col style="width:90px"><col style="width:50px"><col style="width:55px"><col style="width:150px"><col style="width:40px"><col style="width:95px"><col style="width:110px">
+</colgroup>
+<tbody id="tbodyTransport"></tbody>
+</table>
+</div>
+</div>
+
+<div id="popupTrans">
+<div class="popupWin">
+<div class="popupTitle"><span>🔍 Customer - Transport Master</span><span style="cursor:pointer;border:1px solid #000;padding:0 6px" onclick="closePopupTrans()">X</span></div>
+<div class="popupGrid">
+<table class="popupTable">
+<thead><tr><th style="width:70px">Car Code</th><th style="width:130px">Name of Transport</th><th style="width:80px">Car Type</th><th>Service</th><th style="width:100px">Driver</th><th style="width:110px">Car Cost</th><th style="width:60px">HP</th></tr></thead>
+<tbody id="tbodyPopup"></tbody>
+</table>
+</div>
+<div class="popupFooter">
+<div><b>Name of Transport :</b> <input id="searchTrans" placeholder="Filter..." oninput="filterPopup()"></div>
+<div style="font-size:10px;font-weight:700">Margin Master: <b id="masterMarginInfo" style="color:#ff0000">10.00</b> %</div>
+<button class="btnNew" onclick="newMasterData()">New Data</button>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe", storageBucket: "inbound2026-12ffe.firebasestorage.app", messagingSenderId: "368642042481", appId: "1:368642042481:web:0da95081f2039b357089d0" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const urlParams = new URLSearchParams(window.location.search);
+let currentGuestId = urlParams.get('guestId') || '';
+let masterMargin = 10.00;
+let masterGuestName = '';
+let suppressPopupAfterSave = false;
+let allTransportData=[];
+let isShowAllMode=false;
+if(currentGuestId) document.getElementById('guestId').value=currentGuestId;
+
+function getToday(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function toDisplay(iso){ if(!iso) return ''; if(iso.length===10 && iso.includes('-') && iso[2]==='-') return iso; if(iso.length===10 && iso.includes('-')){ const [y,m,d]=iso.split('-'); return `${d}-${m}-${y}`; } return iso; }
+function toInput(s){ if(!s) return getToday(); s=String(s).trim(); let m=s.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(m) return `${m[3]}-${m[2]}-${m[1]}`; return s; }
+function parseNum(v){ if(!v) return 0; return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }
+
+window.formatNominal=(el)=>{ let val=parseNum(el.value); if(isNaN(val)) val=0; el.value=val.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); recalc(); };
+window.unformat=(el)=>{ let val=parseNum(el.value); el.value=val ? String(val) : ''; };
+window.recalc=()=>{ const price=parseNum(document.getElementById('priceTours').value); const margin=parseFloat(document.getElementById('margin').value)||masterMargin; const pax=parseFloat(document.getElementById('paxInput').value)||2; const nett=price * pax; const sales=nett * (1+margin/100); document.getElementById('nettSalesInput').value=nett.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); document.getElementById('totalSalesInput').value=sales.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); };
+
+async function loadMarginFromMaster(){
+  if(!currentGuestId) return;
+  try{
+    const snap=await getDocs(collection(db, "marketing"));
+    snap.forEach(s=>{
+      const d=s.data();
+      if((d.guestId||'')===currentGuestId || (d.guestId||'').toUpperCase()===currentGuestId.toUpperCase()){
+        masterMargin=parseFloat(d.tMargin||d.margin||10)||10;
+        masterGuestName=d.guestName||'';
+        document.getElementById('margin').value=masterMargin.toFixed(2);
+        document.getElementById('masterMarginInfo').innerText=masterMargin.toFixed(2);
+        document.getElementById('guestNameInput').value=masterGuestName;
+        document.getElementById('paxInput').value=(parseInt(d.totalAdult||2)||2).toFixed(2);
+        document.getElementById('tPax').value=d.totalAdult||'2';
+      }
+    });
+  }catch(e){}
+}
+
+window.refreshData=()=>{
+  isShowAllMode=true;
+  document.getElementById('searchGuestIdFilter').value='';
+  document.getElementById('searchGuestNameFilter').value='';
+  renderTransportTable(allTransportData);
+  document.querySelector('.refresh').innerText='ALL ✓';
+  setTimeout(()=>{ document.querySelector('.refresh').innerText='Refresh ALL'; },1200);
+};
+
+window.applySearch=()=>{
+  const sId=document.getElementById('searchGuestIdFilter').value.toUpperCase().trim();
+  const sName=document.getElementById('searchGuestNameFilter').value.toUpperCase().trim();
+  let filtered=allTransportData;
+  if(sId) filtered=filtered.filter(d=> (d.guestId||'').toUpperCase().includes(sId));
+  if(sName) filtered=filtered.filter(d=> (d.guestName||'').toUpperCase().includes(sName));
+  if(!sId && !sName && !isShowAllMode && currentGuestId){
+    filtered=filtered.filter(d=> (d.guestId||'').toUpperCase()===currentGuestId.toUpperCase());
+  }
+  renderTransportTable(filtered);
+};
+
+window.clearSearch=()=>{
+  document.getElementById('searchGuestIdFilter').value='';
+  document.getElementById('searchGuestNameFilter').value='';
+  isShowAllMode=false;
+  let filtered=allTransportData;
+  if(currentGuestId) filtered=filtered.filter(d=> (d.guestId||'').toUpperCase()===currentGuestId.toUpperCase());
+  renderTransportTable(filtered);
+};
+
+function parseDateSort(s){
+  if(!s) return new Date(0);
+  s=String(s).trim();
+  let d,m,y;
+  if(s.includes('-')){
+    const p=s.split('-');
+    if(p[0].length===4){ y=parseInt(p[0]); m=parseInt(p[1])-1; d=parseInt(p[2]); }
+    else { d=parseInt(p[0]); m=parseInt(p[1])-1; y=parseInt(p[2]); }
+  }else if(s.includes('/')){
+    const p=s.split('/');
+    d=parseInt(p[0]); m=parseInt(p[1])-1; y=parseInt(p[2]);
+  }else return new Date(s);
+  return new Date(y,m,d);
+}
+
+function renderTransportTable(list){
+  const dataList=[...list];
+  dataList.sort((a,b)=> parseDateSort(a.dateTours||a.date) - parseDateSort(b.dateTours||b.date));
+  const tbody=document.getElementById('tbodyTransport'); tbody.innerHTML='';
+  let totalSalesAll=0, nettAll=0;
+  if(dataList.length===0){
+    tbody.innerHTML='<tr><td colspan="11" style="text-align:center;padding:20px;background:#fffef0">Belum ada data - Klik Refresh ALL beb!</td></tr>';
+    document.getElementById('totalSalesTop').value='0.00'; document.getElementById('nettSalesTop').value='0.00'; return;
+  }
+  dataList.forEach(d=>{
+    const price=parseNum(d.priceTours||0); const margin=parseFloat(d.margin||masterMargin); const pax=parseFloat(d.pax||2);
+    const nett=price * pax; const sales=nett * (1+margin/100);
+    totalSalesAll+=sales; nettAll+=nett;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${d.guestId||''}</td><td>${d.dateTours||''}</td><td style="background:#fff9c4;font-weight:900;text-align:center">${d.transportName||''}</td><td>${d.serviceName||''}</td><td style="text-align:right;font-weight:900">${parseNum(d.priceTours).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td style="text-align:center">${parseFloat(d.margin||masterMargin).toFixed(2)}</td><td>${d.status||''}</td><td style="background:#fff;font-weight:700">${d.guestName||''}</td><td style="text-align:center">${parseFloat(d.pax||2).toFixed(2)}</td><td style="text-align:right;background:#fff8dc">${parseNum(d.totalSales).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td style="text-align:right;background:#fff9c4;font-weight:900">${parseNum(d.nettSales).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</td>`;
+    tr.onclick=()=>{
+      document.querySelectorAll('#tbodyTransport tr').forEach(r=>r.classList.remove('sel')); tr.classList.add('sel'); currentDocId=d._docId; isEdit=false; suppressPopupAfterSave=false; document.getElementById('btnSave').innerText='Save';
+      document.getElementById('guestId').value=d.guestId||''; document.getElementById('dateTours').value=toInput(d.dateTours||''); document.getElementById('transportName').value=d.transportName||''; document.getElementById('serviceName').value=d.serviceName||''; document.getElementById('priceTours').value=d.priceTours||''; document.getElementById('margin').value=d.margin||masterMargin.toFixed(2); document.getElementById('status').value=d.status||'RSVTN'; document.getElementById('guestNameInput').value=d.guestName||masterGuestName; document.getElementById('paxInput').value=d.pax||'2.00'; recalc();
+    };
+    tbody.appendChild(tr);
+  });
+  document.getElementById('totalSalesTop').value=totalSalesAll.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('nettSalesTop').value=nettAll.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+window.checkEmpty=()=>{ if(suppressPopupAfterSave) return; const v=document.getElementById('transportName').value.trim(); if(!v){ openPopupTrans(); } };
+window.openPopupTrans=()=>{ if(suppressPopupAfterSave) { suppressPopupAfterSave=false; return; } document.getElementById('popupTrans').classList.add('active'); loadMasterPopup(); };
+window.closePopupTrans=()=>{ document.getElementById('popupTrans').classList.remove('active'); };
+
+let masterDataAll=[];
+async function loadMasterPopup(){
+  const tbody=document.getElementById('tbodyPopup'); tbody.innerHTML='<tr><td colspan="7" style="text-align:center">Loading...</td></tr>';
+  try{
+    const snap=await getDocs(collection(db, "transport_master"));
+    masterDataAll=[]; snap.forEach(s=>{ masterDataAll.push({id:s.id, ...s.data()}); });
+    if(masterDataAll.length===0){ masterDataAll=[{carCode:'A1', name:'SMAILING', carType:'HIACE', service:'TRANSFER AIRPORT / HOTEL', driver:'SUMARYA', cost:'500,000.00'}, {carCode:'A2', name:'OKE JAR', carType:'ALPHARD', service:'TRANSFER HOTEL/AIRPORT', driver:'', cost:'600,000.00'}, {carCode:'B1', name:'SMAILING', carType:'ALPHRD', service:'TRFS HOTEL/HOTEL', driver:'', cost:'750,000.00'}]; }
+    renderPopup(masterDataAll);
+  }catch(e){ tbody.innerHTML='<tr><td colspan="7">Error:'+e.message+'</td></tr>'; }
+}
+function renderPopup(list){
+  const tbody=document.getElementById('tbodyPopup'); tbody.innerHTML='';
+  list.forEach(d=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:900;text-align:center">${d.carCode||''}</td><td>${d.name||''}</td><td>${d.carType||''}</td><td style="background:#fff9c4">${d.service||''}</td><td>${d.driver||''}</td><td class="cost">${d.cost||''}</td><td>${d.hp||''}</td>`;
+    tr.onclick=()=>{ document.getElementById('transportName').value=d.name||''; document.getElementById('serviceName').value=d.service||''; document.getElementById('priceTours').value=d.cost||'0.00'; formatNominal(document.getElementById('priceTours')); closePopupTrans(); };
+    tbody.appendChild(tr);
+  });
+}
+window.filterPopup=()=>{ const q=document.getElementById('searchTrans').value.toLowerCase(); if(!q){ renderPopup(masterDataAll); return; } const filtered=masterDataAll.filter(d=> String(d.carCode||'').toLowerCase().includes(q) || String(d.name||'').toLowerCase().includes(q) || String(d.service||'').toLowerCase().includes(q)); renderPopup(filtered); };
+window.newMasterData=async()=>{ const carCode=prompt('Car Code:'); if(!carCode) return; const name=prompt('Name of Transport:'); if(!name) return; const carType=prompt('Car Type:')||''; const service=prompt('Service:')||''; const driver=prompt('Driver:')||''; const cost=prompt('Car Cost (contoh 9000000):')||'0'; const costFmt=parseNum(cost).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); try{ await addDoc(collection(db, "transport_master"), {carCode:carCode.toUpperCase(), name:name.toUpperCase(), carType:carType.toUpperCase(), service:service.toUpperCase(), driver:driver.toUpperCase(), cost:costFmt, createdAt:new Date().toISOString()}); alert('Master Baru Sukses: '+costFmt); loadMasterPopup(); }catch(e){ alert('Gagal:'+e.message); } };
+
+let currentDocId=null; let isEdit=false;
+window.modeAdd=()=>{ isEdit=false; currentDocId=null; suppressPopupAfterSave=false; document.getElementById('btnSave').innerText='Save'; document.getElementById('dateTours').value=getToday(); document.getElementById('transportName').value=''; document.getElementById('serviceName').value=''; document.getElementById('priceTours').value=''; document.getElementById('margin').value=masterMargin.toFixed(2); document.getElementById('guestNameInput').value=masterGuestName; document.getElementById('paxInput').value=(parseInt(document.getElementById('tPax').value)||2).toFixed(2); document.getElementById('totalSalesInput').value=''; document.getElementById('nettSalesInput').value=''; document.querySelectorAll('#tbodyTransport tr').forEach(r=>r.classList.remove('sel')); };
+window.modeEdit=()=>{ if(!currentDocId){ alert('KLIK BARIS KUNING LEMBUT DULU BEB!'); return; } isEdit=true; document.getElementById('btnSave').innerText='Update'; };
+window.modeSave=async()=>{
+  const btn=document.getElementById('btnSave'); const transName=document.getElementById('transportName').value.trim(); if(!transName){ openPopupTrans(); alert('Name Of Transport kosong beb!'); return; }
+  btn.innerText='SAVING...'; btn.disabled=true;
+  try{
+    const price=parseNum(document.getElementById('priceTours').value); const priceFmt=price.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); const margin=parseFloat(document.getElementById('margin').value)||masterMargin; const pax=parseFloat(document.getElementById('paxInput').value)||2;
+    const payload={ guestId: currentGuestId, dateTours: toDisplay(document.getElementById('dateTours').value), transportName: transName.toUpperCase(), serviceName: document.getElementById('serviceName').value, priceTours: priceFmt, margin: margin.toFixed(2), status: document.getElementById('status').value, guestName: document.getElementById('guestNameInput').value||masterGuestName, pax: pax.toFixed(2), totalSales: (price * pax * (1+margin/100)).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}), nettSales: (price * pax).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}), carCost: priceFmt, price: price, total: price * pax, createdAt: new Date().toISOString() };
+    if(isEdit && currentDocId){ await updateDoc(doc(db, "transport", currentDocId), payload); alert('UPDATE SUKSES!'); } else { const ref=await addDoc(collection(db, "transport"), payload); currentDocId=ref.id; alert('ADD SUKSES: '+priceFmt); }
+    suppressPopupAfterSave=true; closePopupTrans(); isEdit=false; btn.innerText='Save'; document.getElementById('transportName').value=''; document.getElementById('serviceName').value=''; document.getElementById('priceTours').value=''; document.getElementById('totalSalesInput').value=''; document.getElementById('nettSalesInput').value=''; setTimeout(()=>{ suppressPopupAfterSave=false; }, 2000);
+  }catch(e){ alert('Gagal Save: '+e.message); }finally{ btn.disabled=false; btn.innerText='Save'; }
+};
+window.modeDelete=async()=>{ if(!currentDocId){ alert('KLIK BARIS KUNING LEMBUT DULU BEB!'); return; } if(!confirm('HAPUS?')) return; try{ await deleteDoc(doc(db, "transport", currentDocId)); alert('DELETE SUKSES!'); modeAdd(); }catch(e){ alert('Gagal delete:'+e.message); } };
+window.modeCancel=()=>{ isEdit=false; currentDocId=null; suppressPopupAfterSave=false; document.getElementById('btnSave').innerText='Save'; document.querySelectorAll('#tbodyTransport tr').forEach(r=>r.classList.remove('sel')); closePopupTrans(); };
+
+onSnapshot(collection(db, "transport"), (snap)=>{
+  allTransportData=[]; snap.forEach(s=>{ const d=s.data(); d._docId=s.id; allTransportData.push(d); });
+  if(isShowAllMode){ renderTransportTable(allTransportData); }
+  else {
+    let filtered=allTransportData;
+    if(currentGuestId) filtered=filtered.filter(d=> (d.guestId||'').toUpperCase()===currentGuestId.toUpperCase());
+    renderTransportTable(filtered);
+  }
+});
+
+function tick(){ const now=new Date(); const h=String(now.getHours()).padStart(2,'0'); const m=String(now.getMinutes()).padStart(2,'0'); const s=String(now.getSeconds()).padStart(2,'0'); const txt=`TRANSPORT${h}:${m}:${s}`; document.getElementById('jamTop').innerText=txt; const el=document.getElementById('clockSmall'); if(el) el.innerText=txt; }
+setInterval(tick,1000);
+window.addEventListener('load', async ()=>{ tick(); document.getElementById('dateTours').value=getToday(); await loadMarginFromMaster(); recalc(); });
+</script>
+</body>
+</html>

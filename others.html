@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MENU RESERVATION OTHERS - FIX DATE LEBAR | SMAILING</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Tahoma,Arial,sans-serif;font-size:12px}
+body{background:#d0ffd0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.titleBar{background:#b8d4ff;padding:6px 10px;font-weight:900;border-bottom:2px solid #000;font-size:13px}
+.actionBar{background:#e8e8e8;padding:5px 8px;display:flex;gap:4px;align-items:center;border-bottom:2px solid #000;flex-wrap:wrap}
+.actionBar button{padding:5px 12px;font-weight:900;border:1px solid #000;height:26px;cursor:pointer}
+.actionBar button.lg{background:#ff99ff!important} .actionBar button.add{background:#ccffcc!important} .actionBar button.save{background:#ffff99!important} .actionBar button.save.update{background:#ff6600!important;color:#fff!important} .actionBar button.edit{background:#ffcc99!important} .actionBar button.del{background:#ff9999!important}
+.totBar{background:#0000cc;color:#fff;padding:4px 10px;display:flex;gap:12px;align-items:center;font-weight:900;border-bottom:2px solid #000}
+.totBar span{background:#fff;color:#000;padding:2px 8px;border:1px solid #000;min-width:90px;text-align:right}
+.totBar .blue{background:#0000cc;color:#ffff00;border:none;font-size:13px;padding:4px 12px}
+
+/* FIX: INPUT GRID = HEADER GRID - 1 KOLOM JUDUL = 1 KOLOM INPUT BEB! */
+.inputGrid{display:grid;grid-template-columns:170px 115px 135px 145px 1fr 55px 55px 110px 65px 70px 1fr;gap:0;background:#fff;border-bottom:2px solid #000}
+.inputGrid input,.inputGrid select{border:1px solid #777;padding:6px 5px;height:30px;width:100%;font-weight:700;font-size:12px}
+.inputGrid input.editMode,.inputGrid select.editMode{background:#ffff00!important;border:2px solid #f00!important}
+.right{text-align:right!important;font-weight:900!important}
+
+/* TABLE HEADER SAMA LEBAR DENGAN INPUT GRID BEB! */
+.grid{flex:1;overflow:auto;background:#c8ffc8}
+table.list{width:100%;border-collapse:collapse;table-layout:fixed;background:#aaffaa}
+table.list th{background:#d4d4d4;border:1px solid #000;padding:6px 2px;font-weight:900;text-align:center;font-size:11px;position:sticky;top:0;z-index:1;height:28px}
+table.list td{border:1px solid #999;padding:4px 3px;font-size:11px;cursor:pointer;background:#aaffaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.list tr.dataRow:hover td{background:#ffff00!important} table.list tr.selected td{background:#ffff99!important;border:2px solid #000!important;font-weight:900}
+
+/* SAMAKAN WIDTH HEADER DENGAN INPUT */
+.th-guest{width:170px} .th-date{width:115px} .th-guestname{width:135px} .th-supplier{width:145px} .th-service{width:auto} .th-adult{width:55px} .th-child{width:55px} .th-price{width:110px} .th-margin{width:65px} .th-status{width:70px} .th-remarks{width:auto}
+</style>
+</head>
+<body>
+<div class="titleBar">MENU RESERVATION OTHERS - FIX DATE LEBAR</div>
+<div class="actionBar">
+<button class="lg">LG</button>
+<button class="add" onclick="addNew()">Add</button>
+<button id="btnSave" class="save" onclick="saveUpdate()">Save</button>
+<button id="btnEdit" class="edit" onclick="editMode()">Edit</button>
+<button class="del" onclick="deleteSelected()">Delete</button>
+<button>pRev</button><button>Print</button><button onclick="cancelEdit(false)">Cancel</button><button>Exit</button><button>Refresh</button>
+<div class="totBar" style="margin-left:auto;border:none;background:transparent;padding:0">
+<span class="blue">TOTAL SALES :</span><span id="lblTotal">0.00</span><span class="blue">NETT SALES :</span><span id="lblNett" style="background:#cce0ff">0.00</span><span id="modeLabel" style="background:#ffff00;color:#000;padding:3px 10px;border:1px solid #000;margin-left:10px">MODE: ADD</span>
+</div>
+</div>
+
+<!-- INPUT ROW - 1 KOLOM JUDUL = 1 KOLOM INPUT BEB! DATE LEBAR 115px -->
+<div class="inputGrid">
+<input id="guestId" class="th-guest" readonly style="background:#e0e0e0" value="SMLDMC-200KT26-00001">
+<input id="mainDate" class="th-date" type="date" style="background:#fff;font-weight:900">
+<input id="guestName" class="th-guestname" readonly style="background:#e0ffe0" value="MR. SAKATOMRS KIP">
+<input id="supplier" class="th-supplier" value="SMAILING DMC">
+<input id="serviceName" class="th-service" placeholder="rafting" style="background:#fff;border:2px solid #000">
+<input id="adult" class="th-adult right" value="4">
+<input id="child" class="th-child right" value="2">
+<input id="price" class="th-price right" value="200,000.00" style="background:#ffffcc">
+<input id="margin" class="th-margin right" value="10.0">
+<select id="status" class="th-status" style="font-weight:900;text-align:center"><option>OK</option><option>WL</option><option>CXL</option></select>
+<input id="remarks" class="th-remarks" placeholder="Remarks">
+</div>
+
+<!-- HEADER TABLE - LEBAR SAMA PERSIS DENGAN INPUT DI ATAS BEB! -->
+<div class="grid">
+<table class="list">
+<thead>
+<tr>
+<th class="th-guest">Guest ID :</th>
+<th class="th-date">Date</th>
+<th class="th-guestname">Guest Name</th>
+<th class="th-supplier">Supplier</th>
+<th class="th-service">Name Of Service</th>
+<th class="th-adult">Adult</th>
+<th class="th-child">Child</th>
+<th class="th-price">Price</th>
+<th class="th-margin">Margin</th>
+<th class="th-status">Status</th>
+<th class="th-remarks">Remarks</th>
+</tr>
+</thead>
+<tbody id="tbodyOthers"></tbody>
+</table>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe", storageBucket: "inbound2026-12ffe.firebasestorage.app", messagingSenderId: "368642042481", appId: "1:368642042481:web:0da95081f2039b357089d0" };
+const db = getFirestore(initializeApp(firebaseConfig));
+
+function parseNum(v){ return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }
+function fmt(n){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function normalizeId(id){ return String(id).toUpperCase().trim(); }
+function toDateInput(str){ if(!str) return new Date().toISOString().split('T')[0]; if(str.includes('/')){ const p=str.split('/'); if(p.length===3) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } if(str.match(/^\d{4}-\d{2}-\d{2}/)) return str.split('T')[0]; return new Date().toISOString().split('T')[0]; }
+function getGuestIdField(o){ for(let k in o){ if(k.toLowerCase().includes('guest')&&k.toLowerCase().includes('id')&&o[k]) return String(o[k]).toUpperCase().trim(); } return ''; }
+
+let selectedId=null, editModeActive=false;
+const urlParams=new URLSearchParams(window.location.search);
+let currentGuestId = urlParams.get('guestId')||'SMLDMC-200KT26-00001';
+document.getElementById('guestId').value=currentGuestId;
+
+function rowToInput(d,id){
+  selectedId=id;
+  document.getElementById('guestId').value=d.GuestID||'';
+  document.getElementById('mainDate').value=toDateInput(d.Date||'');
+  document.getElementById('guestName').value=d.NameOfGuest||'';
+  document.getElementById('supplier').value=d.Supplier||'SMAILING DMC';
+  document.getElementById('serviceName').value=d.NameOfService||'';
+  document.getElementById('adult').value=d.Adult||4;
+  document.getElementById('child').value=d.Child||2;
+  document.getElementById('price').value=fmt(d.Price||200000);
+  document.getElementById('margin').value=d.Margin||'10.0';
+  document.getElementById('status').value=d.Status||'OK';
+  document.getElementById('remarks').value=d.Remarks||'';
+  editModeActive=false; document.getElementById('btnSave').innerText='Save'; document.getElementById('btnSave').classList.remove('update');
+  document.getElementById('modeLabel').innerText='MODE: VIEW';
+  document.querySelectorAll('.inputGrid input, .inputGrid select').forEach(i=>i.classList.remove('editMode'));
+}
+window.editMode=function(){ if(!selectedId){ alert('Pilih data hijau dulu beb!'); return; } editModeActive=true; document.getElementById('btnSave').innerText='Update'; document.getElementById('btnSave').classList.add('update'); document.getElementById('modeLabel').innerText='MODE: UPDATE'; document.getElementById('modeLabel').style.background='#ff6600'; document.getElementById('modeLabel').style.color='#fff'; document.querySelectorAll('.inputGrid input, .inputGrid select').forEach(i=>i.classList.add('editMode')); document.getElementById('mainDate').focus(); }
+
+window.addNew=function(){
+  const now=new Date().toISOString().slice(0,10);
+  document.getElementById('mainDate').value=now;
+  const keepId=document.getElementById('guestId').value;
+  const keepName=document.getElementById('guestName').value;
+  selectedId=null; editModeActive=false;
+  document.getElementById('btnSave').innerText='Save'; document.getElementById('btnSave').classList.remove('update');
+  document.getElementById('modeLabel').innerText='MODE: ADD - Input Tgl Aktifitas'; document.getElementById('modeLabel').style.background='#aaffaa';
+  document.getElementById('guestId').value=keepId; document.getElementById('guestName').value=keepName;
+  document.getElementById('supplier').value='SMAILING DMC'; document.getElementById('serviceName').value=''; document.getElementById('adult').value='4'; document.getElementById('child').value='2'; document.getElementById('price').value='200,000.00'; document.getElementById('margin').value='10.0'; document.getElementById('status').value='OK'; document.getElementById('remarks').value='';
+  document.querySelectorAll('.inputGrid input, .inputGrid select').forEach(i=>i.classList.remove('editMode'));
+  setTimeout(()=>{ const el=document.getElementById('mainDate'); el.focus(); try{ el.showPicker&&el.showPicker(); }catch(e){} },100);
+}
+
+window.cancelEdit=function(isAfterSave){
+  const keepDate=document.getElementById('mainDate').value||new Date().toISOString().slice(0,10);
+  const keepId=document.getElementById('guestId').value;
+  const keepName=document.getElementById('guestName').value;
+  selectedId=null; editModeActive=false;
+  document.getElementById('btnSave').innerText='Save'; document.getElementById('btnSave').classList.remove('update');
+  document.getElementById('modeLabel').innerText='MODE: ADD'; document.getElementById('modeLabel').style.background='#ffff00';
+  document.getElementById('guestId').value=keepId; document.getElementById('mainDate').value=keepDate; document.getElementById('guestName').value=keepName;
+  document.getElementById('supplier').value='SMAILING DMC'; document.getElementById('serviceName').value=''; document.getElementById('adult').value='4'; document.getElementById('child').value='2'; document.getElementById('price').value='200,000.00'; document.getElementById('margin').value='10.0'; document.getElementById('status').value='OK'; document.getElementById('remarks').value='';
+  document.querySelectorAll('.dataRow').forEach(r=>r.classList.remove('selected'));
+  if(isAfterSave) setTimeout(()=>{ document.getElementById('serviceName').focus(); },100);
+}
+
+window.saveUpdate=async function(){
+  const gid=document.getElementById('guestId').value;
+  const data={
+    GuestID:gid, Date:document.getElementById('mainDate').value, NameOfGuest:document.getElementById('guestName').value,
+    Supplier:document.getElementById('supplier').value, NameOfService:document.getElementById('serviceName').value,
+    Adult:parseNum(document.getElementById('adult').value), Child:parseNum(document.getElementById('child').value),
+    Price:parseNum(document.getElementById('price').value), Margin:parseNum(document.getElementById('margin').value),
+    Status:document.getElementById('status').value, Remarks:document.getElementById('remarks').value, UpdatedAt:new Date()
+  };
+  if(!data.NameOfService){ alert('Name Of Service kosong beb!'); document.getElementById('serviceName').focus(); return; }
+  if(editModeActive&&selectedId){ await updateDoc(doc(db,'others',selectedId), data); }else{ await addDoc(collection(db,'others'), {...data, CreatedAt:new Date()}); }
+  cancelEdit(true); loadOthers(gid);
+}
+
+async function loadOthers(gid){
+  const tb=document.getElementById('tbodyOthers'); tb.innerHTML='';
+  try{
+    const snap=await getDocs(collection(db,'others')); let total=0;
+    snap.forEach(s=>{
+      const d=s.data(); if(normalizeId((d.GuestID||'').toUpperCase())!==normalizeId(gid)) return;
+      total+=parseNum(d.Price||0)*(parseNum(d.Adult||0)+parseNum(d.Child||0));
+      const tr=document.createElement('tr'); tr.className='dataRow';
+      tr.innerHTML=`<td>${d.GuestID||''}</td><td>${d.Date||''}</td><td>${d.NameOfGuest||''}</td><td>${d.Supplier||''}</td><td style="background:#ffff99;font-weight:900">${d.NameOfService||''}</td><td class="right">${d.Adult||''}</td><td class="right">${d.Child||''}</td><td class="right">${fmt(d.Price||0)}</td><td class="right">${d.Margin||''}</td><td style="text-align:center;font-weight:900">${d.Status||''}</td><td>${d.Remarks||''}</td>`;
+      tr.onclick=()=>{ document.querySelectorAll('.dataRow').forEach(r=>r.classList.remove('selected')); tr.classList.add('selected'); rowToInput(d,s.id); };
+      tb.appendChild(tr);
+    });
+    document.getElementById('lblTotal').innerText=fmt(total*1.111111); document.getElementById('lblNett').innerText=fmt(total);
+  }catch(e){}
+}
+window.deleteSelected=async function(){ if(!selectedId){ alert('Pilih data dulu!'); return; } if(!confirm('Hapus?')) return; const gid=document.getElementById('guestId').value; await deleteDoc(doc(db,'others',selectedId)); cancelEdit(true); loadOthers(gid); }
+
+document.getElementById('mainDate').value=new Date().toISOString().slice(0,10);
+document.getElementById('mainDate').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('serviceName').focus(); }});
+document.getElementById('guestName').value='MR. SAKATOMRS KIP';
+loadOthers(currentGuestId);
+</script>
+</body>
+</html>

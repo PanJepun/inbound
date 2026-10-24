@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MENU PACKET TOUR - FIX FOTO HILANG</title>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0; user-select:none}
+.top-win{background:linear-gradient(180deg, #cfe3ff, #a9c6ef); border-bottom:2px solid #5a7fb5; padding:6px 10px; display:flex; justify-content:space-between; font-weight:700; font-size:13px; color:#0a1931}
+.form-area{background:#b8a6d8; padding:8px; display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap}
+.form-purple{background:#d1c0ee; padding:10px 12px; border:1px solid #8a6db8; border-radius:3px; width:400px}
+.form-purple.right{width:380px; min-height:108px}
+.row{display:flex; align-items:center; margin-bottom:8px}
+.row label{font-size:11px; font-weight:700; width:95px; flex:none}
+.row label.long{width:110px}
+.row input{font-size:11px; padding:3px 6px; border:1px solid #666; height:22px; background:white}
+.row input:disabled{background:#e5e5e5; color:#555; border-color:#999; cursor:not-allowed}
+.row input.tour{width:200px}
+.row input.desc{width:175px}
+.row input.price{width:110px}
+.row input.tpax{width:45px; text-align:center}
+.row input.supplier{width:150px}
+.row input.cost{width:165px}
+.row input.gf{width:165px}
+.row input.hpp{width:165px}
+.detail-foto-wrap{background:white; border:1px solid #888; border-radius:4px; display:flex; overflow:hidden; height:108px; flex:1; min-width:300px}
+.detail-left{flex:1; padding:5px; border-right:1px solid #bbb; display:flex; flex-direction:column}
+.detail-left b{font-size:11px}
+.detail-left textarea{flex:1; border:none; font-size:11px; resize:none; outline:none; margin-top:3px}
+.detail-left textarea:disabled{background:#e5e5e5; color:#555}
+.foto-right{width:190px; background:#fff; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; border-left:1px solid #bbb}
+.foto-right img{max-width:100%; max-height:100px; border:1px solid #ccc}
+.noimg{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#999; font-size:11px; background:#f5f5f5}
+.upload-row{background:#b8a6d8; padding:3px 0 0 0; display:flex; align-items:center; gap:6px; font-size:11px}
+#imgModal{display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center}
+#imgModal.active{display:flex}
+.modal-box{background:white; border-radius:6px; max-width:750px; width:92%; overflow:hidden}
+.modal-head{background:#b8a6d8; padding:10px 14px; display:flex; justify-content:space-between; font-weight:700}
+.modal-body{padding:14px; display:flex; gap:14px}
+.modal-body img{max-width:400px; max-height:400px; border:1px solid #ddd}
+.modal-desc{flex:1; font-size:12px}
+.toolbar{background:#e9e9e9; padding:5px 10px; display:flex; gap:5px; align-items:center; border-top:1px solid #999; border-bottom:1px solid #999}
+.toolbar button{padding:3px 14px; font-size:11px; font-weight:700; border:1px solid #777; background:linear-gradient(180deg, #fff, #d0d0d0); cursor:pointer; border-radius:2px}
+.toolbar button.update-mode{background:linear-gradient(180deg, #fff7cc, #ff9900)!important; color:#000}
+.toolbar button:disabled{opacity:0.5; cursor:not-allowed}
+.time{font-size:16px; font-weight:700; margin-right:10px}
+.table-wrap{background:white; overflow:auto; height:calc(100vh - 180px)}
+table{width:100%; border-collapse:collapse; font-size:11px}
+th{background:#f0f0f0; border:1px solid #bbb; padding:4px; font-size:10px; position:sticky; top:0}
+td{border:1px solid #ccc; padding:4px 6px; white-space:nowrap; cursor:pointer; user-select:text}
+tr{cursor:pointer}
+tr.selected{background:#00ff00!important}
+tr.selected td{background:#00ff00!important}
+tr:hover{background:#b3ffb3}
+td.blue{color:#0000cc}
+.img-thumb{width:20px; height:14px; background:#ddd; display:inline-block; margin-right:4px; vertical-align:middle; border:1px solid #999; overflow:hidden}
+.img-thumb img{width:100%; height:100%; object-fit:cover}
+</style>
+</head>
+<body>
+<div class="top-win"><span>☰ MENU PACKET TOUR PT. SMAILING TOUR DMC - FIX FOTO TIDAK HILANG</span><span id="clock">13:25:00</span></div>
+<div class="form-area">
+<div class="form-purple">
+<div class="row"><label>Tour Code :</label><input id="tourCode" class="tour" disabled></div>
+<div class="row"><label>Description :</label><input id="desc" class="desc" disabled></div>
+<div class="row"><label>Packet Price :</label><input id="price" class="price" disabled><label style="width:50px; text-align:right; margin-left:8px">T.Pax :</label><input id="tpax" class="tpax" disabled></div>
+<div class="row"><label>Supplier :</label><input id="supplier" class="supplier" disabled></div>
+</div>
+<div class="form-purple right">
+<div class="row"><label class="long">Cost Code :</label><input id="costCode" class="cost" disabled></div>
+<div class="row"><label class="long">Guide Fee Code :</label><input id="gfCode" class="gf" disabled></div>
+<div class="row"><label class="long">HPP :</label><input id="hpp" class="hpp" disabled></div>
+</div>
+<div style="display:flex; flex-direction:column; gap:4px; flex:1">
+<div class="detail-foto-wrap">
+<div class="detail-left"><b>Packet Detail :</b><textarea id="packetDetail" disabled></textarea></div>
+<div class="foto-right" id="fotoBox" onclick="openPopup()"><div class="noimg" id="noimg">No Image - Klik Pilih File</div><img id="packetImg" style="display:none"></div>
+</div>
+<div class="upload-row">
+<input type="file" id="imgFile" accept="image/*" hidden>
+<button id="btnFile" onclick="document.getElementById('imgFile').click()" style="font-size:10px; padding:2px 8px; border:1px solid #777; cursor:pointer; background:#fff; font-weight:bold" disabled>📁 Pilih File Foto</button>
+<span id="fileName" style="font-size:10px">belum ada file</span>
+<span id="imgInfo" style="font-size:9px; color:#666"></span>
+<span id="status" style="margin-left:auto; font-size:10px; font-weight:bold; color:green">● Foto akan dikompres otomatis & disimpan permanen</span>
+</div>
+</div>
+</div>
+<div class="toolbar">
+<div class="time" id="clock2">13:25:00</div>
+<button id="btnAdd" onclick="doAdd()">Add</button><button id="btnSave" onclick="doSave()" disabled>Save</button><button id="btnEdit" onclick="doEdit()">Edit</button><button id="btnDelete" onclick="doDelete()">Delete</button><button id="btnCancel" onclick="doCancel()">Cancel</button><button onclick="window.print()">Print</button><button onclick="location.href='index.html'">Exit</button>
+<span style="margin-left:auto; font-size:11px" id="info">Klik data tengah untuk pilih</span>
+</div>
+<div class="table-wrap">
+<table id="mainTable"><thead><tr><th>📷</th><th>Tour Code</th><th>Pax</th><th>Description</th><th>Sales Price</th><th>HPP</th><th>Supplier</th><th>Detail</th><th>Cost Code</th><th>GF Code</th></tr></thead><tbody id="tbody"></tbody></table>
+</div>
+<div id="imgModal" onclick="if(event.target.id==='imgModal') closePopup()"><div class="modal-box"><div class="modal-head"><span id="modalTitle"></span><span style="cursor:pointer; font-size:18px" onclick="closePopup()">✕</span></div><div class="modal-body"><img id="modalImg"><div class="modal-desc"><b id="modalDescTitle"></b><p id="modalDescText" style="white-space:pre-wrap"></p></div></div></div></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0",
+  measurementId: "G-Q61303QL6F"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "packet_tour");
+let idb;
+let idbRequest = indexedDB.open("SmailingPacketPhotos", 2);
+idbRequest.onupgradeneeded = e => {
+  const d = e.target.result;
+  if(!d.objectStoreNames.contains("photos")) d.createObjectStore("photos", {keyPath:"tc"});
+};
+idbRequest.onsuccess = e => { idb = e.target.result; };
+function savePhotoToIDB(tc, imgData){
+  if(!idb ||!tc ||!imgData) return;
+  try{
+    const tx = idb.transaction("photos","readwrite");
+    tx.objectStore("photos").put({tc:tc, img:imgData, time:Date.now()});
+  }catch(e){}
+}
+function loadPhotoFromIDB(tc){
+  return new Promise(resolve=>{
+    if(!idb){ resolve(null); return; }
+    try{
+      const tx = idb.transaction("photos","readonly");
+      const req = tx.objectStore("photos").get(tc);
+      req.onsuccess = ()=> resolve(req.result? req.result.img : null);
+      req.onerror = ()=> resolve(null);
+    }catch{ resolve(null); }
+  });
+}
+let packets = [];
+let currentImgData = "";
+let selectedIndex = -1;
+let selectedFirebaseId = null;
+function setFormEnabled(enabled){
+  ['tourCode','desc','price','tpax','supplier','costCode','gfCode','hpp','packetDetail'].forEach(id=>{ document.getElementById(id).disabled=!enabled; });
+  document.getElementById('btnFile').disabled=!enabled;
+  document.getElementById('btnSave').disabled=!enabled;
+  document.getElementById('btnCancel').disabled=!enabled;
+  if(enabled){
+    document.getElementById('info').innerText='Mode EDIT - Edit foto & data lalu Save (foto auto kompres)';
+    document.getElementById('info').style.color='#cc0000';
+    document.getElementById('info').style.fontWeight='700';
+  }else{
+    document.getElementById('info').innerText='Klik data tengah - Foto disimpan permanen di browser & cloud';
+    document.getElementById('info').style.color='#333';
+    document.getElementById('info').style.fontWeight='400';
+  }
+}
+function compressImage(file){
+  return new Promise(resolve=>{
+    const reader = new FileReader();
+    reader.onload = e=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        const maxSize = 800;
+        if(w>maxSize || h>maxSize){
+          if(w>h){ h = h*(maxSize/w); w=maxSize; }else{ w = w*(maxSize/h); h=maxSize; }
+        }
+        canvas.width=w; canvas.height=h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        const compressed = canvas.toDataURL('image/jpeg', 0.6);
+        resolve(compressed);
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function render(){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  packets.forEach((p, idx)=>{
+    const tr = document.createElement('tr');
+    tr.dataset.index = idx;
+    if(idx===selectedIndex) tr.className='selected';
+    const hasImg = p.imgData? `<span class="img-thumb"><img src="${p.imgData}"></span>` : `<span class="img-thumb" style="background:#fff"></span>`;
+    tr.innerHTML = `<td>${hasImg}</td><td class="blue">${p.tc}</td><td>${p.pax}</td><td class="blue">${p.desc}</td><td style="text-align:right">${p.price}</td><td style="text-align:right">${p.hpp}</td><td class="blue">${p.supp}</td><td>${p.detail}</td><td>${p.cost}</td><td>${p.gf}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById('tbody').addEventListener('click', async (e)=>{
+  const tr = e.target.closest('tr');
+  if(!tr) return;
+  const idx = parseInt(tr.dataset.index);
+  if(isNaN(idx) || idx>=packets.length) return;
+  selectedIndex = idx;
+  const s = packets[idx];
+  selectedFirebaseId = s.firebaseId;
+  let img = await loadPhotoFromIDB(s.tc);
+  if(!img) img = s.imgData;
+  currentImgData = img||'';
+  document.getElementById('tourCode').value=s.tc;
+  document.getElementById('desc').value=s.desc;
+  document.getElementById('price').value=s.price;
+  document.getElementById('tpax').value=s.pax;
+  document.getElementById('supplier').value=s.supp;
+  document.getElementById('costCode').value=s.cost;
+  document.getElementById('gfCode').value=s.gf;
+  document.getElementById('hpp').value=s.hpp;
+  document.getElementById('packetDetail').value=s.detail;
+  document.getElementById('fileName').innerText=s.pict|| (img? 'foto tersimpan' : 'belum ada file');
+  if(currentImgData){
+    document.getElementById('packetImg').src=currentImgData;
+    document.getElementById('packetImg').style.display='block';
+    document.getElementById('noimg').style.display='none';
+    document.getElementById('imgInfo').innerText = `(${(currentImgData.length/1024).toFixed(0)}KB)`;
+  }else{
+    document.getElementById('packetImg').style.display='none';
+    document.getElementById('noimg').style.display='flex';
+    document.getElementById('imgInfo').innerText='';
+  }
+  setFormEnabled(false);
+  const b=document.getElementById('btnAdd'); b.innerText='Update'; b.classList.add('update-mode');
+  render();
+});
+window.doAdd = ()=>{
+  const b=document.getElementById('btnAdd');
+  if(b.innerText==='Update'){ doSave(); return; }
+  selectedIndex=-1; selectedFirebaseId=null; currentImgData='';
+  const tc='TC-'+String(packets.length+1).padStart(5,'0');
+  document.getElementById('tourCode').value=tc;
+  ['desc','price','tpax','supplier','costCode','gfCode','hpp','packetDetail'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value = (id==='tpax'? '2' : (id==='supplier'? 'SMAILING DMC' : ''));
+  });
+  document.getElementById('fileName').innerText='belum ada file';
+  document.getElementById('imgInfo').innerText='';
+  document.getElementById('packetImg').style.display='none'; document.getElementById('noimg').style.display='flex';
+  setFormEnabled(true);
+};
+window.doEdit = ()=>{
+  if(selectedIndex===-1 &&!document.getElementById('tourCode').value){ alert('Klik data tengah dulu beb!'); return; }
+  setFormEnabled(true);
+};
+window.doSave = async ()=>{
+  const tc=document.getElementById('tourCode').value;
+  if(!tc) return alert('Tour Code kosong');
+  if(currentImgData){
+    savePhotoToIDB(tc, currentImgData);
+  }
+  const payload = {
+    tc: tc,
+    desc: document.getElementById('desc').value,
+    price: document.getElementById('price').value,
+    pax: document.getElementById('tpax').value,
+    supp: document.getElementById('supplier').value,
+    cost: document.getElementById('costCode').value,
+    gf: document.getElementById('gfCode').value,
+    hpp: document.getElementById('hpp').value,
+    detail: document.getElementById('packetDetail').value,
+    pict: document.getElementById('fileName').innerText,
+    imgData: currentImgData? currentImgData.substring(0, 900000) : "",
+    hasPhoto:!!currentImgData,
+    updatedAt: new Date()
+  };
+  try{
+    if(selectedFirebaseId){
+      await updateDoc(doc(db,"packet_tour",selectedFirebaseId), payload);
+    }else{
+      payload.createdAt=new Date();
+      await addDoc(colRef, payload);
+    }
+    setFormEnabled(false);
+    document.getElementById('btnAdd').innerText='Add';
+    document.getElementById('btnAdd').classList.remove('update-mode');
+    document.getElementById('status').innerText='✓ Foto disimpan permanen (IDB + Firebase)';
+  }catch(e){ alert('Error save: '+e.message); }
+};
+window.doDelete = async ()=>{
+  if(selectedIndex===-1){ alert('Klik data tengah dulu beb!'); return; }
+  const tc = document.getElementById('tourCode').value;
+  if(confirm('Hapus '+tc+'? Foto juga ikut kehapus?')){
+    if(selectedFirebaseId) await deleteDoc(doc(db,"packet_tour",selectedFirebaseId));
+    if(idb){
+      try{ const tx=idb.transaction("photos","readwrite"); tx.objectStore("photos").delete(tc); }catch{}
+    }
+    doCancel();
+  }
+};
+window.doCancel = ()=>{
+  selectedIndex=-1; selectedFirebaseId=null; currentImgData='';
+  ['tourCode','desc','price','tpax','supplier','costCode','gfCode','hpp','packetDetail'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('btnAdd').innerText='Add'; document.getElementById('btnAdd').classList.remove('update-mode');
+  document.getElementById('fileName').innerText='belum ada file'; document.getElementById('imgInfo').innerText='';
+  document.getElementById('packetImg').style.display='none'; document.getElementById('noimg').style.display='flex';
+  setFormEnabled(false); render();
+};
+document.getElementById('imgFile').addEventListener('change', async function(){
+  const file=this.files[0]; if(!file) return;
+  document.getElementById('status').innerText='⏳ Kompres foto...';
+  document.getElementById('fileName').innerText=file.name + ' (kompres...)';
+  const compressed = await compressImage(file);
+  currentImgData = compressed;
+  document.getElementById('packetImg').src=compressed;
+  document.getElementById('packetImg').style.display='block';
+  document.getElementById('noimg').style.display='none';
+  document.getElementById('fileName').innerText=file.name;
+  document.getElementById('imgInfo').innerText = `asal ${(file.size/1024).toFixed(0)}KB → jadi ${(compressed.length/1024).toFixed(0)}KB`;
+  document.getElementById('status').innerText='✓ Foto siap - Klik Save biar permanen';
+  const tc=document.getElementById('tourCode').value;
+  if(tc) savePhotoToIDB(tc, compressed);
+});
+window.openPopup=()=>{
+  document.getElementById('modalTitle').innerText=document.getElementById('tourCode').value;
+  document.getElementById('modalDescTitle').innerText=document.getElementById('desc').value;
+  document.getElementById('modalDescText').innerText=document.getElementById('packetDetail').value;
+  const img=document.getElementById('packetImg');
+  const m=document.getElementById('modalImg');
+  if(img.style.display!=='none'){ m.src=img.src; m.style.display='block'; }else m.style.display='none';
+  document.getElementById('imgModal').classList.add('active');
+};
+window.closePopup=()=>{ document.getElementById('imgModal').classList.remove('active'); };
+setInterval(()=>{ const t=new Date().toTimeString().split(' ')[0]; document.getElementById('clock').innerText=t; const c2=document.getElementById('clock2'); if(c2) c2.innerText=t; },1000);
+const q = query(colRef, orderBy("tc","asc"));
+onSnapshot(q, async snap=>{
+  const oldTc = selectedIndex>=0? packets[selectedIndex]?.tc : null;
+  packets=[];
+  for(const d of snap.docs){
+    const data=d.data();
+    let imgData = data.imgData||'';
+    if(!imgData && data.hasPhoto){
+      const fromIDB = await loadPhotoFromIDB(data.tc);
+      if(fromIDB) imgData = fromIDB;
+    }else if(imgData){
+      const fromIDB = await loadPhotoFromIDB(data.tc);
+      if(fromIDB && fromIDB.length > imgData.length) imgData = fromIDB;
+    }
+    packets.push({firebaseId:d.id, tc:data.tc||'', pax:data.pax||'', desc:data.desc||'', price:data.price||'', hpp:data.hpp||'', supp:data.supp||'', detail:data.detail||'', cost:data.cost||'', gf:data.gf||'', pict:data.pict||'', imgData:imgData||''});
+  }
+  if(packets.length===0){
+    packets=[
+      {firebaseId:null, tc:"TC-00001", pax:5, desc:"KINTAMANI TOUR", price:"750,000.00", hpp:"650,000.00", supp:"SMAILING DMC", detail:"Liburan ke Kintamani", cost:"COST-001", gf:"GF-001", pict:"", imgData:""},
+      {firebaseId:null, tc:"TC-00012", pax:2, desc:"FD Tanah Lot, Nedugul, Taman Ayun", price:"1,973,400.00", hpp:"1,200,000.00", supp:"SMAILING", detail:"Full day tour", cost:"", gf:"", pict:"", imgData:""}
+    ];
+  }
+  if(oldTc){
+    const idx=packets.findIndex(p=>p.tc===oldTc);
+    if(idx>=0) selectedIndex=idx;
+  }
+  render();
+  if(selectedIndex>=0 && packets[selectedIndex]){
+    const s=packets[selectedIndex];
+    if(s.imgData && document.getElementById('tourCode').value===s.tc){
+      currentImgData=s.imgData;
+      document.getElementById('packetImg').src=s.imgData;
+      document.getElementById('packetImg').style.display='block';
+      document.getElementById('noimg').style.display='none';
+    }
+  }
+});
+setFormEnabled(false);
+</script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MENU OPTIONAL - LIVE packet_tour SAMA KAYA TOURS.HTML | SMAILING</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Tahoma,Arial,sans-serif;font-size:12px}
+body{background:#d0d0d0;display:flex;flex-direction:column;height:100vh;overflow:hidden;padding:6px}
+.titleBar{background:#0000cc;color:#ffff00;padding:6px 10px;font-weight:900;border:2px solid #000;font-size:13px}
+.actionBar{background:#e0e0e0;border:2px solid #000;border-top:none;padding:5px 8px;display:flex;gap:5px;align-items:center}
+.actionBar button{padding:5px 12px;font-weight:900;border:1px solid #000;height:26px;cursor:pointer;border-radius:2px;background:#ffff99}
+.actionBar button.add{background:#ccffcc!important} .actionBar button.save{background:#ffff99!important} .actionBar button.save.update{background:#ff6600!important;color:#fff!important} .actionBar button.edit{background:#ffcc99!important}
+.searchBar{background:#ffff99;border:2px solid #000;border-top:none;padding:6px 10px;display:flex;gap:10px;align-items:center;font-weight:900}
+.searchBar input{border:2px solid #000;padding:4px 6px;font-weight:900}
+.paymentBar{background:#e9e9e9;border:2px solid #000;border-top:none;padding:5px 10px;display:flex;gap:15px;align-items:center;font-weight:900;font-size:11px}
+.syncBar{background:#ccffcc;border:2px solid #000;border-top:none;padding:4px 10px;font-weight:900;font-size:11px;display:flex;gap:12px;align-items:center}
+.inputGrid{display:grid;grid-template-columns:135px 90px 135px 1fr 105px 105px 50px 100px 65px 90px;gap:0;background:#fff;border:2px solid #000;border-top:none}
+.inputGrid input,.inputGrid select{border:1px solid #999;padding:5px 4px;height:28px;width:100%;font-weight:700}
+.inputGrid input.editMode,.inputGrid select.editMode{background:#ffff00!important;border:2px solid #f00!important}
+#guestId{background:#e0e0e0} #guestName{background:#e0ffe0} #tourName{background:#ffff99;cursor:pointer;font-weight:900}
+.right{text-align:right!important;font-weight:900!important}
+.guideWrap{display:flex;gap:2px;align-items:center} .guideWrap select{flex:1;background:#ffff00!important;font-weight:900!important;border:2px solid #000!important} .guideWrap button{width:22px;height:28px;border:1px solid #000;font-weight:900;cursor:pointer}
+.grid{flex:1;overflow:auto;background:#fff;border:2px solid #000;border-top:none}
+table.list{width:100%;border-collapse:collapse;table-layout:fixed;background:#ffffcc}
+table.list th{background:#e0e0e0;border:1px solid #000;padding:4px 2px;font-weight:900;text-align:center;font-size:10px;position:sticky;top:0;z-index:1}
+table.list td{border:1px solid #999;padding:4px 3px;font-size:11px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.list tr.dataRow:hover td{background:#ffff00!important} table.list tr.selected td{background:#aaffaa!important;border:2px solid #000!important;font-weight:900}
+/* MODAL SAMA PERSIS TOURS.HTML */
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);display:none;justify-content:center;align-items:center;z-index:9999}
+.modal.show{display:flex}
+.modalBox{background:#d4d0c8;border:2px solid #000;width:950px;max-width:96%;height:560px;display:flex;flex-direction:column}
+.modalTitle{background:#000080;color:#fff;padding:5px 10px;font-weight:900;display:flex;justify-content:space-between}
+.modalTitle button{background:#d4d0c8;border:1px solid #000;width:24px;height:22px;font-weight:900;cursor:pointer}
+.modalTableWrap{flex:1;overflow:auto;background:#ffffe0}
+table.popup{width:100%;border-collapse:collapse;table-layout:fixed}
+table.popup th{background:#e8e8e8;border:1px solid #999;padding:5px 4px;font-weight:900;text-align:center;position:sticky;top:0}
+table.popup td{border:1px solid #999;padding:4px 6px;font-size:11px;background:#ffffe0;cursor:pointer;color:#006600}
+table.popup tr:hover td{background:#000080!important;color:#fff!important}
+.modalFooter{background:#d4d0c8;padding:8px 10px;display:flex;gap:8px;align-items:center;border-top:2px solid #000}
+.modalFooter input{border:1px solid #000;padding:4px 6px;height:24px}
+</style>
+</head>
+<body>
+<div class="titleBar">PAKET OPTIONAL DARI GUIDE - DATA MASTER | TABEL DONATION LIVE FROM FIREBASE = packet_tour (SAMA KAYA tours.html)</div>
+<div class="actionBar">
+<button class="add" onclick="addNew()">Add</button>
+<button id="btnSave" class="save" onclick="saveUpdate()">Save</button>
+<button id="btnEdit" class="edit" onclick="editMode()">Edit</button>
+<button onclick="deleteSelected()">Delete</button>
+<button style="background:#ffcc33!important;border:2px solid #000!important">Voucher</button>
+<span id="modeLabel" style="margin-left:auto;background:#ffff00;color:#000;padding:3px 10px;border:1px solid #000;font-weight:900">MODE: ADD</span>
+<span style="background:#000;color:#fff;padding:3px 10px">TOTAL: <span id="lblTotal">0.00</span> | NETT: <span id="lblNett">0.00</span></span>
+</div>
+<div class="searchBar">
+Search Guest ID: <input id="searchGuestId" value="SMLDMC-20OKT26-00001" onkeyup="if(event.key==='Enter')searchGuest()">
+<button onclick="searchGuest()" style="background:#00ccff;border:2px solid #000;padding:5px 14px;font-weight:900;cursor:pointer">🔍 SEARCH MASTER</button>
+Master: <span id="masterInfo" style="background:#fff;border:1px solid #000;padding:4px 10px;min-width:320px;display:inline-block">- Belum search -</span>
+</div>
+<div class="paymentBar">
+Payment: <select id="payment"><option>- Pilih -</option><option>Cash</option><option>Guide Cash</option></select>
+Paid By: <select id="paidBy"><option>- Pilih -</option><option>Guest</option><option>Guide</option></select>
+Date: <span id="todayDate">-</span> | <span id="packetCount" style="background:#ffff00;padding:2px 6px;border:1px solid #000">0 DATA LIVE packet_tour</span>
+</div>
+<div class="syncBar">
+<label><input type="checkbox" id="chkQuotation" checked> Auto tambah ke QUOTATION</label>
+<label><input type="checkbox" id="chkCronofile" checked> Auto tambah ke CRONOFILE</label>
+<span id="syncStatus" style="background:#ffff00;border:1px solid #000;padding:2px 6px">Ready - Add=focus Tgl Aktifitas | Double click Tour=packet_tour LIVE</span>
+</div>
+
+<div class="inputGrid">
+<input id="guestId" readonly>
+<input id="mainDate" type="date">
+<input id="guestName" readonly>
+<input id="tourName" placeholder="KETIK / DBL KLIK UNTUK PILIH TOUR DARI FIREBASE packet_tour" ondblclick="openTourPopup()" onkeydown="if(event.key==='Enter'&&!this.value.trim()){event.preventDefault();openTourPopup();}">
+<div class="guideWrap"><select id="guideName"></select><button style="background:#ccffcc" onclick="addGuide()">+</button><button style="background:#ffcccc" onclick="removeGuide()">-</button></div>
+<input id="supplierMain" value="SMAILING DMC">
+<input id="tPaxMain" class="right" value="3">
+<input id="netPriceMain" class="right" value="500,000.00">
+<input id="marginMain" class="right" value="10.00">
+<input id="remarksMain">
+</div>
+
+<div class="grid">
+<table class="list">
+<thead><tr><th style="width:135px">Guest ID :</th><th style="width:90px">Date</th><th style="width:135px">Name of Guest</th><th>Name of Tour</th><th style="width:105px">Guide (+ -)</th><th style="width:105px">Supplier :</th><th style="width:50px">T.Pax :</th><th style="width:100px">Net Price :</th><th style="width:65px">Margin :</th><th style="width:90px">Remarks</th></tr></thead>
+<tbody id="tbodyOptional"></tbody>
+</table>
+</div>
+
+<div id="tourModal" class="modal" onclick="if(event.target==this)closeTourPopup()">
+<div class="modalBox">
+<div class="modalTitle"><span id="modalTitleText">TABEL DONATION - LIVE FROM FIREBASE packet_tour (0 DATA)</span><button onclick="closeTourPopup()">X</button></div>
+<div class="modalTableWrap"><table class="popup"><thead><tr><th style="width:8%">📷</th><th style="width:32%">Name of Tour</th><th style="width:18%">Supplier</th><th style="width:8%">T.Pax</th><th style="width:17%">Tour Price</th><th style="width:17%">HPP</th></tr></thead><tbody id="popupBody"><tr><td colspan=6 style="text-align:center;padding:20px">Loading LIVE packet_tour...</td></tr></tbody></table></div>
+<div class="modalFooter"><span>Tour :</span><input id="popSearchTour" style="width:220px" oninput="filterPopup()"><span>Supplier :</span><input id="popSearchSupp" style="width:160px" oninput="filterPopup()"><span id="popupInfo" style="font-size:10px;font-weight:700;margin-left:10px">0 tours LIVE packet_tour</span><button style="background:#ffff99;border:1px solid #000;padding:4px 15px;font-weight:900;cursor:pointer;margin-left:auto" onclick="closeTourPopup()">Tutup</button></div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe", storageBucket: "inbound2026-12ffe.firebasestorage.app", messagingSenderId: "368642042481", appId: "1:368642042481:web:0da95081f2039b357089d0" };
+const db = getFirestore(initializeApp(firebaseConfig));
+
+function getGuestIdField(o){ for(let k in o){ if(k.toLowerCase().includes('guest')&&k.toLowerCase().includes('id')&&o[k]) return String(o[k]).toUpperCase().trim(); } return ''; }
+function parseNum(v){ return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }
+function fmt(n){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function normalizeId(id){ return String(id).toUpperCase().trim(); }
+function toDateInput(str){ if(!str) return new Date().toISOString().split('T')[0]; if(str.includes('/')){ const p=str.split('/'); if(p.length===3) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } if(str.match(/^\d{4}-\d{2}-\d{2}/)) return str.split('T')[0]; return new Date().toISOString().split('T')[0]; }
+function formatRupiah(num){ if(num===''||num==null||isNaN(num)) return '0.00'; return Number(num).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function parseRupiah(str){ if(!str) return 0; return parseFloat(String(str).replace(/,/g,''))||0; }
+
+let guideList = JSON.parse(localStorage.getItem('guideList')||'["BARU","WAYAN","KETUT","MADE","PUTU","NYOMAN","RYAN","GEDE"]');
+function loadGuideDropdown(){ const sel=document.getElementById('guideName'); const cur=sel.value||'BARU'; sel.innerHTML=''; guideList.forEach(g=>{ const o=document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); }); sel.value=guideList.includes(cur)?cur:'BARU'; }
+window.addGuide=async function(){ const n=prompt('Nama Guide Baru?',''); if(!n) return; const up=n.toUpperCase().trim(); if(guideList.includes(up)){ document.getElementById('guideName').value=up; return; } guideList.push(up); localStorage.setItem('guideList', JSON.stringify(guideList)); loadGuideDropdown(); document.getElementById('guideName').value=up; try{ await addDoc(collection(db,'guides'), {name:up, createdAt:new Date()}); }catch(e){} }
+window.removeGuide=function(){ const cur=document.getElementById('guideName').value; if(cur==='BARU') return; if(!confirm('Hapus '+cur+'?')) return; guideList=guideList.filter(g=>g!==cur); localStorage.setItem('guideList', JSON.stringify(guideList)); loadGuideDropdown(); }
+async function loadGuidesFromDB(){ try{ const s=await getDocs(collection(db,'guides')); s.forEach(d=>{ const n=String(d.data().name||'').toUpperCase().trim(); if(n&&!guideList.includes(n)) guideList.push(n); }); localStorage.setItem('guideList', JSON.stringify(guideList)); }catch(e){} loadGuideDropdown(); }
+
+let selectedId=null, editModeActive=false, selectedTour=null, masterTours=[];
+
+function renderPopup(list){
+  const tb=document.getElementById('popupBody'); tb.innerHTML='';
+  if(!list||list.length===0){ tb.innerHTML='<tr><td colspan=6 style="text-align:center;padding:15px;color:red;font-weight:900">Belum ada data packet_tour! Isi di MENU PACKET TOUR beb!</td></tr>'; return; }
+  document.getElementById('popupInfo').innerText=list.length+' tours LIVE packet_tour';
+  document.getElementById('packetCount').innerText=list.length+' DATA LIVE packet_tour';
+  document.getElementById('modalTitleText').innerText='TABEL DONATION - LIVE FROM FIREBASE packet_tour ('+list.length+' DATA)';
+  list.forEach(t=>{
+    const tr=document.createElement('tr');
+    const img=t.imgData?`<span style="width:20px;height:14px;display:inline-block;overflow:hidden;border:1px solid #999"><img src="${t.imgData}" style="width:100%;height:100%;object-fit:cover"></span>`:`<span style="width:20px;height:14px;display:inline-block;background:#ddd;border:1px solid #999"></span>`;
+    tr.innerHTML=`<td style="text-align:center">${img}</td><td>${t.name}</td><td>${t.supplier}</td><td style="text-align:center">${t.pax}</td><td style="text-align:right">${formatRupiah(t.price)}</td><td style="text-align:right">${formatRupiah(t.sgl)}</td>`;
+    tr.onclick=()=>{ selectedTour=t; document.querySelectorAll('#popupBody tr').forEach(r=>r.style.background=''); tr.style.background='#ffff99'; document.getElementById('popSearchTour').value=t.name; document.getElementById('popSearchSupp').value=t.supplier; };
+    tr.ondblclick=()=>pickTour(t);
+    tb.appendChild(tr);
+  });
+}
+window.filterPopup=function(){ const q1=document.getElementById('popSearchTour').value.toLowerCase(); const q2=document.getElementById('popSearchSupp').value.toLowerCase(); const f=masterTours.filter(t=>t.name.toLowerCase().includes(q1)&&t.supplier.toLowerCase().includes(q2)); renderPopup(f); }
+function pickTour(t){
+  document.getElementById('tourName').value=t.name;
+  document.getElementById('supplierMain').value=t.supplier;
+  document.getElementById('tPaxMain').value=t.pax;
+  document.getElementById('netPriceMain').value=formatRupiah(t.price);
+  document.getElementById('marginMain').value='10.00';
+  closeTourPopup();
+  document.getElementById('guideName').focus();
+}
+window.openTourPopup=function(){ document.getElementById('tourModal').classList.add('show'); renderPopup(masterTours); document.getElementById('popSearchTour').focus(); }
+window.closeTourPopup=function(){ document.getElementById('tourModal').classList.remove('show'); document.getElementById('tourName').focus(); }
+
+function rowToInput(d,id){
+  selectedId=id;
+  document.getElementById('guestId').value=d.GuestID||'';
+  document.getElementById('mainDate').value=toDateInput(d.Date||'');
+  document.getElementById('guestName').value=d.NameOfGuest||'';
+  document.getElementById('tourName').value=d.NameOfTour||'';
+  let g=String(d.Guide||'BARU').toUpperCase(); if(!guideList.includes(g)){ guideList.push(g); localStorage.setItem('guideList', JSON.stringify(guideList)); loadGuideDropdown(); }
+  document.getElementById('guideName').value=g;
+  document.getElementById('supplierMain').value=d.Supplier||'SMAILING DMC';
+  document.getElementById('tPaxMain').value=d.TPax||3;
+  document.getElementById('netPriceMain').value=formatRupiah(d.NetPrice||0);
+  document.getElementById('marginMain').value=formatRupiah(d.Margin||10);
+  document.getElementById('remarksMain').value=d.Remarks||'';
+  editModeActive=false; document.getElementById('btnSave').innerText='Save'; document.getElementById('btnSave').classList.remove('update'); document.getElementById('modeLabel').innerText='MODE: VIEW - Klik Edit';
+  document.querySelectorAll('.inputGrid input, .inputGrid select').forEach(i=>i.classList.remove('editMode'));
+}
+window.editMode=function(){ if(!selectedId){ alert('Pilih data dulu! Klik baris tabel bawah!'); return; } editModeActive=true; document.getElementById('btnSave').innerText='Update'; document.getElementById('btnSave').classList.add('update'); document.getElementById('btnEdit').classList.add('active'); document.getElementById('modeLabel').innerText='MODE: UPDATE'; document.getElementById('modeLabel').style.background='#ff6600'; document.getElementById('modeLabel').style.color='#fff'; document.querySelectorAll('.inputGrid input, .inputGrid select').forEach(i=>i.classList.add('editMode')); document.getElementById('mainDate').focus(); }
+
+// ADD = CURSOR LANGSUNG KE TGL AKTIFITAS BEB!
+window.addNew=function(){
+  const now=new Date().toISOString().slice(0,10);
+  document.getElementById('mainDate').value=now;
+  const keepId=document.getElementById('guestId').value;
+  const keepName=document.getElementById('guestName').value;
+  selectedId=null; editModeActive=false;
+  document.getElementById('btnSave').innerText='Save'; document.getElementById('btnSave').classList.remove('update');
+  document.getElementById('modeLabel').innerText='MODE: ADD - Input Tgl Aktifitas'; document.getElementById('modeLabel').style.background='#aaffaa';
+  document.getElementById('guestId').value=keepId; document.getElementById('guestName').value=keepName;
+  document.getElementById('tourName').value=''; document.getElementById('guideName').value='BARU';
+  document.getElementById('supplierMain').value='SMAILING DMC'; document.getElementById('tPaxMain').value='3';
+  document.getElementById('netPriceMain').value='500,000.00'; document.getElementById('marginMain').value='10.00'; document.getElementById('remarksMain').value='';
+  setTimeout(()=>{ const el=document.getElementById('mainDate'); el.focus(); el.select&&el.select(); try{ el.showPicker&&el.showPicker(); }catch(e){} },100);
+}
+window.cancelEdit=function(isAfterSave){
+  const keepDate=document.getElementById('mainDate').value||new Date().toISOString().slice(0,10);
+  const keepId=document.getElementById('guestId').value;
+  const keepName=document.getElementById('guestName').value;
+  selectedId=null; editModeActive=false;
+  document.getElementById('btnSave').innerText='Save'; document.getElementById('btnSave').classList.remove('update'); document.getElementById('btnEdit').classList.remove('active');
+  document.getElementById('modeLabel').innerText='MODE: ADD'; document.getElementById('modeLabel').style.background='#ffff00'; document.getElementById('modeLabel').style.color='#000';
+  document.querySelectorAll('.inputGrid input, .inputGrid select').forEach(i=>i.classList.remove('editMode'));
+  document.getElementById('guestId').value=keepId; document.getElementById('mainDate').value=keepDate; document.getElementById('guestName').value=keepName;
+  document.getElementById('tourName').value=''; document.getElementById('guideName').value='BARU'; document.getElementById('supplierMain').value='SMAILING DMC';
+  document.getElementById('tPaxMain').value='3'; document.getElementById('netPriceMain').value='500,000.00'; document.getElementById('marginMain').value='10.00'; document.getElementById('remarksMain').value='';
+  document.querySelectorAll('.dataRow').forEach(r=>r.classList.remove('selected'));
+  if(isAfterSave) setTimeout(()=>{ document.getElementById('tourName').focus(); },100);
+}
+window.saveUpdate=async function(){
+  const gid=document.getElementById('guestId').value; if(!gid){ alert('Search Guest ID dulu!'); return; }
+  const data={ GuestID:gid, Date:document.getElementById('mainDate').value, NameOfGuest:document.getElementById('guestName').value, NameOfTour:document.getElementById('tourName').value, Guide:document.getElementById('guideName').value||'BARU', Supplier:document.getElementById('supplierMain').value, TPax:parseNum(document.getElementById('tPaxMain').value), NetPrice:parseNum(document.getElementById('netPriceMain').value), Margin:parseNum(document.getElementById('marginMain').value), Remarks:document.getElementById('remarksMain').value, UpdatedAt:new Date() };
+  if(!data.NameOfTour){ alert('Name Tour kosong! Double click ambil dari packet_tour!'); openTourPopup(); return; }
+  if(editModeActive&&selectedId){ await updateDoc(doc(db,'optional',selectedId), data); }else{ await addDoc(collection(db,'optional'), {...data, CreatedAt:new Date()}); }
+  document.getElementById('syncStatus').innerText='✓ '+data.NameOfTour+' | '+formatRupiah(data.NetPrice)+' | Guide '+data.Guide+' → OK';
+  document.getElementById('syncStatus').style.background='#aaffaa';
+  cancelEdit(true); loadOptional(gid); // BLANK KECUALI TANGGAL BEB!
+}
+window.searchGuest=async function(){
+  const raw=document.getElementById('searchGuestId').value.toUpperCase().trim(); if(!raw) return;
+  const gid=normalizeId(raw); document.getElementById('guestId').value=gid; document.getElementById('masterInfo').innerText='Searching...';
+  let found=false;
+  for(let col of ["marketing","master","bookings"]){ try{ const snap=await getDocs(collection(db,col)); snap.forEach(s=>{ const d=s.data(); const g=normalizeId(getGuestIdField(d)||''); if(g===gid||g.includes(gid)){ found=true; const name=String(d.guestName||d.clientName||'').toUpperCase(); document.getElementById('masterInfo').innerText=name+' | '+(d.agent||'')+' | PAX:'+(d.totalPax||2)+' | '+gid; document.getElementById('masterInfo').style.background='#aaffaa'; document.getElementById('guestName').value=name; document.getElementById('tPaxMain').value=d.totalPax||2; } }); if(found) break; }catch(e){} }
+  if(!found){ document.getElementById('masterInfo').innerText=gid+' TIDAK ADA di MASTER'; document.getElementById('masterInfo').style.background='#ffcccc'; }
+  loadOptional(gid);
+}
+async function loadOptional(gid){
+  const tb=document.getElementById('tbodyOptional'); tb.innerHTML='';
+  try{
+    const snap=await getDocs(collection(db,'optional')); let tot=0;
+    snap.forEach(s=>{
+      const d=s.data(); if(normalizeId((d.GuestID||'').toUpperCase())!==gid) return;
+      if(String(d.NameOfGuest||'').toUpperCase().includes('MARIA HERNANDEZ')) return;
+      tot+=parseNum(d.NetPrice||0)*parseNum(d.TPax||0);
+      const tr=document.createElement('tr'); tr.className='dataRow';
+      tr.innerHTML=`<td>${d.GuestID||''}</td><td>${d.Date||''}</td><td style="background:#aaffaa;font-weight:700">${d.NameOfGuest||''}</td><td>${d.NameOfTour||''}</td><td style="background:#ffff00;font-weight:900">${d.Guide||''}</td><td>${d.Supplier||''}</td><td class="right">${d.TPax||''}</td><td class="right">${formatRupiah(d.NetPrice)}</td><td class="right">${formatRupiah(d.Margin)}</td><td>${d.Remarks||''}</td>`;
+      tr.onclick=()=>{ document.querySelectorAll('.dataRow').forEach(r=>r.classList.remove('selected')); tr.classList.add('selected'); rowToInput(d,s.id); };
+      tr.ondblclick=()=>{ document.querySelectorAll('.dataRow').forEach(r=>r.classList.remove('selected')); tr.classList.add('selected'); rowToInput(d,s.id); editMode(); };
+      tb.appendChild(tr);
+    });
+    document.getElementById('lblNett').innerText=fmt(tot); document.getElementById('lblTotal').innerText=fmt(tot*1.1);
+  }catch(e){}
+}
+window.deleteSelected=async function(){ if(!selectedId){ alert('Pilih data bawah dulu!'); return; } if(!confirm('Hapus?')) return; const gid=document.getElementById('guestId').value; await deleteDoc(doc(db,'optional',selectedId)); cancelEdit(true); loadOptional(gid); }
+
+document.getElementById('mainDate').value=new Date().toISOString().slice(0,10);
+document.getElementById('todayDate').innerText=new Date().toLocaleDateString('en-GB');
+loadGuidesFromDB(); searchGuest();
+
+// LIVE FROM packet_tour - SAMA PERSIS KAYA tours.html BEB!
+const q = query(collection(db, "packet_tour"), orderBy("tc","asc"));
+onSnapshot(q, (snap)=>{
+  masterTours=[];
+  snap.forEach(docSnap=>{
+    const d=docSnap.data();
+    let p=parseRupiah(d.price||'0'); let h=parseRupiah(d.hpp||'0');
+    if(p===0&&d.price) p=Number(String(d.price).replace(/,/g,''))||0;
+    if(h===0&&d.hpp) h=Number(String(d.hpp).replace(/,/g,''))||0;
+    const name=(d.desc||'').toUpperCase().trim(); if(!name) return;
+    masterTours.push({name:name,supplier:(d.supp||'SMAILING DMC').toUpperCase(),pax:parseInt(d.pax)||2,price:p,sgl:h,imgData:d.imgData||''});
+  });
+  document.getElementById('modalTitleText').innerText='TABEL DONATION - LIVE FROM FIREBASE packet_tour ('+masterTours.length+' DATA)';
+  document.getElementById('packetCount').innerText=masterTours.length+' DATA LIVE packet_tour';
+  document.getElementById('popupInfo').innerText=masterTours.length+' tours LIVE packet_tour';
+  if(document.getElementById('tourModal').classList.contains('show')) renderPopup(masterTours);
+});
+document.getElementById('mainDate').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('tourName').focus(); openTourPopup(); }});
+</script>
+</body>
+</html>

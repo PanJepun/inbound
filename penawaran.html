@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QUOTATION GLOBAL vs DETAIL + OPTIONAL + OTHERS</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#777;padding:0;display:flex;flex-direction:column;align-items:center;font-family:"Courier New", monospace}
+.controls{width:100%;max-width:1100px;background:#fff;padding:10px 12px;margin:6px 0;border:2px solid #000;display:flex;justify-content:space-between;font-family:Arial;font-weight:900;font-size:11px}
+.controls button{padding:8px 14px;border:2px solid #000;cursor:pointer;font-weight:900}
+.btn-active{outline:3px solid #f00 !important}
+.wrapper{width:100%;max-width:1100px;overflow-x:auto;background:#fff;border:2px solid #000}
+.paper{width:100%;min-width:750px;background:#fff;padding:18px 20px;color:#000}
+.top{display:flex;justify-content:space-between;border-bottom:2.5px solid #000;padding-bottom:8px;margin-bottom:12px}
+.logo{font-family:Arial;font-weight:900;font-size:20px;color:#2a7ab5;line-height:12px} .logo span{font-size:8px;color:#000;font-weight:400;display:block;margin-top:2px}
+.title{font-family:"Times New Roman",serif;font-size:38px;font-style:italic}
+.head{display:flex;justify-content:space-between;margin-bottom:14px;font-size:12px}
+.head .left{width:48%} .head .right{width:50%}
+.arrivalBox{font-family:"Courier New", monospace;font-size:12px;font-weight:700;line-height:16px}
+.arrivalRow{display:flex;align-items:center}
+.arrivalRow .label{width:85px} .arrivalRow .colon{width:10px;text-align:center} .arrivalRow .dateVal{width:110px} .arrivalRow .flightLabel{width:60px;margin-left:20px} .arrivalRow .flightVal{width:120px}
+.clientNames{font-weight:400;line-height:14px;margin-top:4px;display:block;white-space:pre-line;font-family:Arial}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th{border:1.5px solid #000;padding:5px 6px;font-size:11px;font-weight:900;text-align:center;font-family:Arial;background:#f2f2f2}
+td{border:1px solid #000;padding:4px 6px;font-size:11px;line-height:14px;font-family:Arial}
+td.hotelName{text-transform:uppercase}
+.iteRow td{border:1px solid #000;padding:4px 6px}
+.rightNum{text-align:right;font-weight:600;white-space:nowrap}
+.centerNum{text-align:center}
+.footerFinal{border-top:2px solid #000;margin-top:16px;padding-top:10px;display:flex;justify-content:space-between;font-weight:900;font-size:12px;font-family:Arial}
+.green{color:#006600} .double{border-top:3px double #000;border-bottom:3px double #000;padding:0 6px;margin-left:6px}
+.record{text-align:center;margin-top:30px;font-size:10px;font-family:Arial}
+.detailOnly{display:none}
+@media print{.controls{display:none !important} body{background:#fff !important} .wrapper{border:none !important} @page{size:A4 portrait;margin:10mm}}
+</style>
+</head>
+<body>
+<div class="controls">
+<div style="display:flex;gap:6px;align-items:center">
+<button id="btnGlobal" onclick="setMode('global')" class="btn-active">GLOBAL</button>
+<button id="btnDetail" onclick="setMode('detail')">DETAIL</button>
+<button onclick="window.print()" style="background:#222;color:#fff;padding:8px 18px;border:2px solid #000;cursor:pointer;font-weight:900;margin-left:8px">🖨️ PRINT</button>
+<span style="margin-left:10px">Guest ID: <span id="gIdCtrl" style="background:yellow;padding:2px 6px">SMLDMC-20OKT26-00001</span> | <span id="optCount" style="background:#aaffaa;padding:2px 6px">0 OPTIONAL</span> | <span id="othersCount" style="background:#ffcc99;padding:2px 6px">0 OTHERS</span></span>
+</div>
+</div>
+<div class="wrapper">
+<div class="paper">
+<div class="top"><div class="logo">SMAILING TOUR<span>Travel Management Expert</span></div><div class="title">QUOTATION</div></div>
+<div class="head">
+<div class="left"><b>Clients Name :</b><span class="clientNames" id="cName">MR. SAKATO
+MRS KINI JARI</span><br><br>Guest ID : <span id="gIdShow" style="background:yellow;padding:2px 6px">SMLDMC-20OKT26-00001</span></div>
+<div class="right">
+<div>TOTAL PAX : <span id="tPax">2</span></div>
+<div class="arrivalBox" style="margin-top:4px">
+<div class="arrivalRow"><span class="label">Arrival</span><span class="colon">:</span><span class="dateVal" id="arr">25-10-2026</span><span class="flightLabel">Flight</span><span class="colon">:</span><span class="flightVal" id="flIn">GA 998</span></div>
+<div class="arrivalRow"><span class="label">Deaparture</span><span class="colon">:</span><span class="dateVal" id="dep">31-10-2026</span><span class="flightLabel">Flight</span><span class="colon">:</span><span class="flightVal" id="flOut">GS 763</span></div>
+</div>
+</div>
+</div>
+
+<div id="viewGlobal">
+<table>
+<tr><th style="width:200px">Date</th><th>Hotels & Service</th></tr>
+<tbody id="tbodyHotelGlobal"></tbody>
+</table>
+<table style="margin-top:14px">
+<tr><th style="width:160px">Date</th><th style="width:45px">Pax</th><th>Service / Transport</th></tr>
+<tbody id="tbodyIteGlobal"></tbody>
+</table>
+</div>
+
+<div id="viewDetail" class="detailOnly">
+<table>
+<tr><th>Date In</th><th>Date Out</th><th>Hotel Name</th><th>T.Room</th><th>Price+Abf</th><th>HB</th><th>FB</th><th>S.SUPL</th><th>X-Bed</th><th>SALES/PAX</th></tr>
+<tbody id="tbodyHotelDetail"></tbody>
+</table>
+<div style="font-weight:900;text-align:right;padding:6px;border:1px solid #000;border-top:2px solid #000;background:#e8e8e8">Sub Total Hotel : Rp . <span id="subHotelDetail">0.00</span></div>
+<table style="margin-top:14px">
+<tr><th>Date</th><th>Pax</th><th>Service / Transport</th><th>Total Nett</th><th>Total Sales</th><th>Price/Pax</th></tr>
+<tbody id="tbodyIteDetail"></tbody>
+<tfoot>
+<tr style="background:#ffff99;font-weight:900;border-top:2px solid #000">
+<td colspan="3" style="text-align:right;font-weight:900">Sub Total Transport ( + OPTIONAL + OTHERS ) :</td>
+<td class="rightNum" id="subIteNett" style="font-weight:900">0.00</td>
+<td class="rightNum" id="subIteSales" style="background:#ffeb99;font-weight:900">0.00</td>
+<td></td>
+</tr>
+</tfoot>
+</table>
+</div>
+
+<div class="footerFinal">
+<div>AGENCY : <span id="agency">AURORA</span></div>
+<div class="green">TOTAL SALES : Rp . <span id="grandTotal" class="double">27,047,600.00</span></div>
+</div>
+<div class="record">Record: EOF/8 &nbsp;&nbsp;&nbsp; Exclusive | + OPTIONAL + OTHERS from Guide</div>
+</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe" };
+const db = getFirestore(initializeApp(firebaseConfig));
+let activePNR = new URLSearchParams(window.location.search).get('guestId')||'SMLDMC-20OKT26-00001'; activePNR=activePNR.toUpperCase().trim();
+let mode = new URLSearchParams(window.location.search).get('mode')||'global';
+let hotelMarginPct=10, tourMarginPct=10;
+let cacheHotels=[], cacheIte=[];
+function parseDate(s){ if(!s) return new Date(9999,0,1); s=String(s).trim().replace(/\s+/g,''); const p=s.split(/[-/]/); if(p.length===3){ if(p[0].length===4) return new Date(+p[0],+p[1]-1,+p[2]); return new Date(+p[2],+p[1]-1,+p[0]); } const d=new Date(s); return isNaN(d)?new Date(9999,0,1):d; }
+function fmt(n){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function parseNum(v){ if(v==null) return 0; return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }
+function formatDateFromAny(val){ if(!val) return ''; try{ let d; if(val && typeof val.toDate==='function'){ d=val.toDate(); } else if(val && typeof val.seconds==='number'){ d=new Date(val.seconds*1000); } else if(val instanceof Date){ d=val; } else if(typeof val==='string'){ let s=val.trim().replaceAll('/','-').replace(/\s+/g,''); if(s.match(/^\d{2}-\d{2}-\d{4}$/)) return s; if(s.match(/^\d{4}-\d{2}-\d{2}/)){ const p=s.split('-'); return `${p[2].substring(0,2)}-${p[1]}-${p[0]}`; } d=new Date(s); } if(!d || isNaN(d.getTime())) return String(val).replaceAll('/','-'); const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0'); const yyyy=d.getFullYear(); if(yyyy<2000||yyyy>2100) return String(val).replaceAll('/','-'); return `${dd}-${mm}-${yyyy}`; }catch(e){ return String(val).replaceAll('/','-'); } }
+function getGuestId(obj){ for(let k in obj){ const lk=k.toLowerCase(); if(lk.includes('guest') && lk.includes('id') && obj[k]) return String(obj[k]).toUpperCase().trim(); } return (obj.guestId||obj.GuestID||'').toString().toUpperCase().trim(); }
+function getField(obj, includes){ const keys=Object.keys(obj); for(let k of keys){ const lk=k.toLowerCase().replace(/\s+/g,''); let ok=true; for(let inc of includes){ if(!lk.includes(inc)) { ok=false; break; } } if(ok) return obj[k]; } return ''; }
+window.setMode=function(m){ mode=m; const url=new URL(window.location); url.searchParams.set('mode',m); window.history.replaceState({},'',url); render(); }
+function calcNites(ci,co){ const d1=parseDate(ci); const d2=parseDate(co); if(isNaN(d1)||isNaN(d2)) return 1; return Math.round((d2-d1)/86400000)||1; }
+function render(){
+  document.getElementById('btnGlobal').classList.toggle('btn-active',mode==='global');
+  document.getElementById('btnDetail').classList.toggle('btn-active',mode==='detail');
+  document.getElementById('viewGlobal').style.display = mode==='global' ? 'block' : 'none';
+  document.getElementById('viewDetail').style.display = mode==='detail' ? 'block' : 'none';
+  const tbodyHG=document.getElementById('tbodyHotelGlobal'); tbodyHG.innerHTML='';
+  cacheHotels.sort((a,b)=> parseDate(a.checkIn)-parseDate(b.checkIn));
+  cacheHotels.forEach(h=>{ const ci=formatDateFromAny(h.checkIn); const co=formatDateFromAny(h.checkOut); const dateDisplay = ci && co ? `${ci} - ${co}` : ci || co || ''; const name=(h.hotelName||'').toString().toUpperCase(); const room=(h.roomType||'DOUBLE/TWIN').toString().toUpperCase(); let line=name; if(room && !name.includes(room)) line+='/'+room; tbodyHG.innerHTML+=`<tr><td style="white-space:nowrap;width:200px">${dateDisplay}</td><td class="hotelName">${line}</td></tr>`; });
+  const tbodyIG=document.getElementById('tbodyIteGlobal'); tbodyIG.innerHTML='';
+  cacheIte.sort((a,b)=> parseDate(a.date)-parseDate(b.date));
+  cacheIte.forEach(r=>{
+    let badge = '';
+    if(r.source==='OPTIONAL') badge=' [OPTIONAL]';
+    if(r.source==='OTHERS') badge=' [OTHERS]';
+    tbodyIG.innerHTML+=`<tr class="iteRow"><td style="width:160px;white-space:nowrap">${formatDateFromAny(r.date)}</td><td style="width:45px;text-align:center">${r.pax}</td><td style="text-transform:uppercase">${r.service}${badge}</td></tr>`;
+  });
+  const tbodyHD=document.getElementById('tbodyHotelDetail'); tbodyHD.innerHTML='';
+  let subHotelNett=0, subHotelSales=0;
+  cacheHotels.forEach(h=>{ const rate=parseNum(h.rate); const abf=parseNum(h.abf); const hb=parseNum(h.hb); const fb=parseNum(h.fb); const ssupl=parseNum(h.sglsup||h.supl); const xbed=parseNum(h.xbed); const troom=parseInt(h.troom||1)||1; const nites=calcNites(h.checkIn,h.checkOut); const priceRoomAbf=(rate+abf)*nites; const nett=priceRoomAbf+hb+fb+ssupl+xbed; const sales=nett*(1+hotelMarginPct/100); subHotelNett+=nett*troom; subHotelSales+=sales*troom; tbodyHD.innerHTML+=`<tr><td>${formatDateFromAny(h.checkIn)}</td><td>${formatDateFromAny(h.checkOut)}</td><td>${(h.hotelName||'').toString().toUpperCase()}</td><td class="centerNum">${troom}/${nites}</td><td class="rightNum">${fmt(priceRoomAbf)}</td><td class="rightNum">${fmt(hb)}</td><td class="rightNum">${fmt(fb)}</td><td class="rightNum">${fmt(ssupl)}</td><td class="rightNum">${fmt(xbed)}</td><td class="rightNum" style="background:#ffff99;font-weight:900">${fmt(sales)}</td></tr>`; });
+  document.getElementById('subHotelDetail').innerText=fmt(subHotelSales);
+  const tbodyID=document.getElementById('tbodyIteDetail'); tbodyID.innerHTML='';
+  let subIteNett=0, subIteSales=0;
+  cacheIte.forEach(r=>{
+    const nettTotal=r.nett*r.pax; const salesTotal=nettTotal*(1+(r.marginPct||tourMarginPct)/100); subIteNett+=nettTotal; subIteSales+=salesTotal;
+    let bg = ''; let badge='';
+    if(r.source==='OPTIONAL'){ bg='background:#ffffcc'; badge=' [OPTIONAL]'; }
+    if(r.source==='OTHERS'){ bg='background:#ffe0cc'; badge=' [OTHERS]'; }
+    tbodyID.innerHTML+=`<tr style="${bg}"><td>${formatDateFromAny(r.date)}</td><td class="centerNum">${r.pax}</td><td style="text-transform:uppercase;font-weight:700">${r.service}${badge}</td><td class="rightNum">${fmt(nettTotal)}</td><td class="rightNum" style="background:${r.source==='OPTIONAL'?'#aaffaa': r.source==='OTHERS'?'#ffcc99':'#ffeb99'};font-weight:900">${fmt(salesTotal)}</td><td class="rightNum">${fmt(r.nett)}</td></tr>`;
+  });
+  document.getElementById('subIteNett').innerText=fmt(subIteNett);
+  document.getElementById('subIteSales').innerText=fmt(subIteSales);
+  document.getElementById('grandTotal').innerText=fmt(subHotelSales+subIteSales);
+  document.getElementById('optCount').innerText = cacheIte.filter(x=>x.source==='OPTIONAL').length + ' OPTIONAL';
+  const othersEl = document.getElementById('othersCount');
+  if(othersEl) othersEl.innerText = cacheIte.filter(x=>x.source==='OTHERS').length + ' OTHERS';
+  const allDates=[]; cacheHotels.forEach(h=>{ if(h.checkIn) allDates.push(h.checkIn); if(h.checkOut) allDates.push(h.checkOut); }); cacheIte.forEach(r=>{ if(r.date) allDates.push(r.date); });
+  if(allDates.length>0){ allDates.sort((a,b)=> parseDate(a)-parseDate(b)); document.getElementById('arr').innerText=formatDateFromAny(allDates[0]); document.getElementById('dep').innerText=formatDateFromAny(allDates[allDates.length-1]); }
+}
+async function load(){
+ document.getElementById('gIdShow').innerText=activePNR; document.getElementById('gIdCtrl').innerText=activePNR;
+ const collections=["marketing","master","bookings"];
+ for(let colName of collections){ try{ const snap=await getDocs(collection(db,colName)); snap.forEach(s=>{ const d=s.data(); const g=getGuestId(d); if(!g || (g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g))) return; let totalPax=parseInt(parseNum(d.totalPax||d.pax||2))||2; let arrRaw = d.arrivalDate || d.arrival || null; let depRaw = d.departureDate || d.departure || null; for(let k in d){ const lk=k.toLowerCase(); if(lk.includes('arrival') && !arrRaw) arrRaw=d[k]; if((lk.includes('departure')||lk.includes('depature')) && !depRaw) depRaw=d[k]; } let flIn = d.flightIn || d.flightNo1 || ''; let flOut = d.flightOut || d.flightNo2 || ''; for(let k in d){ const lk=k.toLowerCase(); if(lk.includes('flight')){ if(lk.includes('in')||lk==='flightno1') flIn=d[k]||flIn; else if(lk.includes('out')||lk==='flightno2') flOut=d[k]||flOut; } } for(let k in d){ const lk=k.toLowerCase(); if(lk.includes('hotel') && lk.includes('margin')) hotelMarginPct=parseFloat(parseNum(d[k]))||hotelMarginPct; if(lk.includes('tour') && lk.includes('margin')) tourMarginPct=parseFloat(parseNum(d[k]))||tourMarginPct; if(lk==='margin'||lk==='profitmargin'){ const v=parseFloat(parseNum(d[k])); if(v>0){ hotelMarginPct=v; tourMarginPct=v; } } } if(d.hotelMargin) hotelMarginPct=parseFloat(d.hotelMargin)||hotelMarginPct; if(d.tourMargin) tourMarginPct=parseFloat(d.tourMargin)||tourMarginPct; if(d.profitMargin){ hotelMarginPct=parseFloat(d.profitMargin)||hotelMarginPct; tourMarginPct=parseFloat(d.profitMargin)||tourMarginPct; } document.getElementById('cName').innerHTML=String(d.guestName||d.clientName||'MR. SAKATO\nMRS KINI JARI').toUpperCase().replace(/\n/g,'<br>'); document.getElementById('tPax').innerText=totalPax; if(formatDateFromAny(arrRaw)) document.getElementById('arr').innerText=formatDateFromAny(arrRaw); if(formatDateFromAny(depRaw)) document.getElementById('dep').innerText=formatDateFromAny(depRaw); document.getElementById('flIn').innerText=flIn||'GA 998'; document.getElementById('flOut').innerText=flOut||'GS 763'; document.getElementById('agency').innerText=String(d.agent||d.agency||'AURORA').toUpperCase(); }); }catch(e){} }
+ const snapH = await getDocs(collection(db,"hotel_transactions")); snapH.forEach(s=>{ const d=s.data(); const g=getGuestId(d)||(d.guestId||'').toString().toUpperCase().trim(); if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return; cacheHotels.push(d); });
+ const cols=["transp","transport","transport_transactions","tour_transactions"];
+ for(let colName of cols){ try{ const snap=await getDocs(collection(db,colName)); let found=0; snap.forEach(s=>{ const d=s.data(); const g = getGuestId(d) || String(d.GuestID||d.guestID||'').toUpperCase().trim(); let match = g && (g===activePNR || g.includes(activePNR) || activePNR.includes(g)); if(!match){ for(let k in d){ if(k.toLowerCase().includes('guest') && String(d[k]).toUpperCase().trim()===activePNR){ match=true; break; } } } if(!match) return; const dateVal = getField(d,['date','tour']) || getField(d,['date']) || ''; const nameTrans = getField(d,['name','transport']) || ''; const nameServ = getField(d,['name','service']) || ''; const price = parseNum(getField(d,['price','tour']) || getField(d,['price']) || 0); const margin = parseNum(getField(d,['margin']) || 0); const totalSales = parseNum(getField(d,['total','sales']) || 0); const nettSales = parseNum(getField(d,['nett','sales']) || getField(d,['net','sales']) || 0); const pax = parseInt(parseNum(getField(d,['pax']) || 2))||2; if(totalSales===0 && nettSales===0 && price===750000) return; let serviceName = String(nameServ||'').toUpperCase().trim() || String(nameTrans||'').toUpperCase().trim(); if(!serviceName) serviceName='SERVICE'; const nettPerPax = price>0 ? price : (nettSales>0 ? nettSales/pax : 0); if(nettPerPax===0 && serviceName==='SERVICE') return; cacheIte.push({date:dateVal, pax:pax, service:serviceName, nett:nettPerPax, marginPct:margin||tourMarginPct, source:'TRANSPORT'}); found++; }); if(found>0) break; }catch(e){} }
+
+ // OPTIONAL
+ try{
+   const snapOpt = await getDocs(collection(db,"optional"));
+   snapOpt.forEach(s=>{
+     const d=s.data();
+     const g = String(d.GuestID||d.GuestId||'').toUpperCase().trim();
+     if(!g) return;
+     if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return;
+     if(String(d.NameOfGuest||'').toUpperCase().includes('MARIA HERNANDEZ')) return;
+     if(!d.NameOfTour) return;
+     const pax = parseInt(parseNum(d.TPax||2))||2;
+     const net = parseNum(d.NetPrice||0);
+     const margin = parseNum(d.Margin||10);
+     cacheIte.push({ date: d.Date||'', pax: pax, service: String(d.NameOfTour||'').toUpperCase(), nett: net, marginPct: margin, source: 'OPTIONAL', supplier: d.Supplier||'' });
+   });
+ }catch(e){}
+
+ // === TAMBAHAN OTHERS BEB! FORM TETAP, CUMA ITINERARY DITAMBAH! ===
+ try{
+   const snapOthers = await getDocs(collection(db,"others"));
+   snapOthers.forEach(s=>{
+     const d=s.data();
+     const g = String(d.GuestID||d.guestId||d.GuestId||'').toUpperCase().trim();
+     if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return;
+     const nameService = d.NameOfService || d.serviceName || d.NameOfTour || '';
+     if(!nameService) return;
+     const adult = parseInt(parseNum(d.Adult||0))||0;
+     const child = parseInt(parseNum(d.Child||0))||0;
+     const pax = (adult + child) || parseInt(parseNum(d.Pax||d.pax||2))||2;
+     const price = parseNum(d.Price||d.price||d.TotalPrice||0);
+     const margin = parseNum(d.Margin||d.margin||10);
+     cacheIte.push({
+       date: d.Date||d.date||'',
+       pax: pax,
+       service: String(nameService).toUpperCase(),
+       nett: price,
+       marginPct: margin,
+       source: 'OTHERS',
+       supplier: d.Supplier||'SMAILING DMC'
+     });
+   });
+ }catch(e){ console.log('Others quotation error', e); }
+ // === END OTHERS ===
+
+ render();
+}
+load();
+</script>
+</body>
+</html>

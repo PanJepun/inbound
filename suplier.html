@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUPPLIER - PT SMAILING TOUR DMC</title>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0; overflow:hidden}
+.top-bar{background:#e0e0e0; padding:5px 8px; display:flex; gap:4px; align-items:center; border-bottom:2px solid #999; flex-wrap:wrap}
+.top-bar button{padding:4px 10px; font-size:11px; font-weight:700; border:1px solid #777; cursor:pointer; border-radius:2px; background:linear-gradient(180deg,#fff,#d0d0d0)}
+.top-bar button.add{background:#a8e6a8; border:2px solid #2e8b57}
+.top-bar button.exit{background:#ffff99; border:2px solid #000; font-weight:900}
+.top-bar button.print{background:linear-gradient(180deg,#a8cfff,#5f8fbf); border:2px solid #000; font-weight:900}
+.top-bar label{font-size:11px; font-weight:700; margin-left:4px}
+.top-bar input.search{height:23px; border:1px solid #666; padding:2px 6px; font-size:11px; background:white; border-radius:3px}
+.top-bar input#searchSupplier{width:240px}
+.top-bar input#searchAddress{width:200px; background:#e0f0ff}
+.table-wrap{background:white; overflow:auto; height:calc(100vh - 72px); border:1px solid #999}
+table.main-table{width:100%; border-collapse:collapse; font-size:11px}
+.main-table th{background:#f0f0f0; border:1px solid #999; padding:5px; font-size:10px; position:sticky; top:0; text-align:center; font-weight:900; cursor:pointer; background:linear-gradient(180deg,#fff,#e0e0e0)}
+.main-table td{border:1px solid #8a4a4a; padding:4px 6px; white-space:nowrap; cursor:pointer}
+.main-table tr.selected td{background:#00ff7f!important; font-weight:700}
+.main-table tr:hover td{background:#b3ffda}
+.main-table td.addr{white-space:normal; max-width:400px; word-break:break-word}
+.main-table td.name{font-weight:900; color:#0000cc; background:#e0ffe0}
+.main-table tr:nth-child(even) td.name{background:#c0ffc0}
+.main-table td.account{background:#fff0b3; text-align:center; font-weight:700}
+.bottom-bar{background:#e0f0d0; padding:5px 10px; display:flex; gap:6px; align-items:center; border-top:2px solid #999; font-size:11px; flex-wrap:wrap}
+.price-info{margin-left:auto; background:#e0ffe0; border:1px solid #999; padding:3px 10px; font-size:10px; font-weight:700; border-radius:3px}
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.25); display:none; justify-content:center; align-items:center; z-index:1000; padding:12px}
+.modal-overlay.active{display:flex}
+.modal-popup{background:#7CFF7C; border:2px solid #2e8b57; width:700px; max-width:98vw; padding:14px; box-shadow:0 8px 28px rgba(0,0,0,0.35); border-radius:4px; max-height:95vh; overflow:auto}
+.modal-header{font-size:12px; font-weight:900; text-align:center; margin-bottom:10px; background:#2e8b57; color:white; padding:6px; border-radius:2px}
+.form-group{display:flex; align-items:flex-start; gap:6px; margin-bottom:8px}
+.form-group label{font-size:11px; width:130px; text-align:right; font-weight:900; flex:none; padding-top:4px}
+.form-group input,.form-group textarea{border:1px solid #666; padding:4px 6px; font-size:11px; background:#ffe0ff; border-radius:2px; flex:1}
+.form-group input.supplier-name{height:24px; background:#fff; font-weight:900; border:2px solid #666; font-size:12px}
+.form-group input.account{height:22px; background:#ffff99; font-weight:900; border:2px solid #000; width:200px}
+.form-group textarea{height:70px; resize:vertical; background:#fff; font-size:11px}
+.modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:14px; padding-top:10px; border-top:1px solid #2e8b57}
+.modal-actions button{padding:6px 18px; font-size:11px; font-weight:900; border:1px solid #555; cursor:pointer; border-radius:4px; min-width:70px}
+.modal-actions button.save{background:#a8e6a8}
+.modal-actions button.cancel{background:#b8b8ff}
+.btn-side{display:flex; flex-direction:column; gap:4px; margin-left:10px}
+.btn-side button{padding:5px 14px; font-size:11px; font-weight:900; border:1px solid #777; cursor:pointer; border-radius:3px; min-width:60px; background:linear-gradient(180deg,#fff,#d0d0d0)}
+.btn-side button.add{background:#a8e6a8; border:2px solid #2e8b57}
+.btn-side button.save{background:#a8cfff; border:2px solid #000}
+.btn-side button.edit{background:#fff0b3; border:2px solid #000}
+.btn-side button.delete{background:#ffb8b8; border:2px solid #8b0000}
+.btn-side button.exit{background:#ffff99; border:2px solid #000}
+</style>
+</head>
+<body>
+<div class="top-bar">
+<button class="add" onclick="openModal()">Add</button>
+<button class="save" onclick="saveFromModal()">Save</button>
+<button class="edit" onclick="editSelected()">Edit</button>
+<button class="delete" onclick="deleteSelected()">Delete</button>
+<button class="print" onclick="printNice()">🖨️ Print BW</button>
+<button class="cancel" onclick="closeModal()">Cancel</button>
+<button class="exit" onclick="location.href='index.html'">Exit</button>
+<button class="refresh" onclick="location.reload()">Refresh</button>
+<label>Name of Supplier:</label><input class="search" id="searchSupplier" placeholder="SWISS BELRESORT, THE 101..." oninput="applyFilter()">
+<label>Address:</label><input class="search" id="searchAddress" placeholder="Jl. Sunset Road..." oninput="applyFilter()">
+<button onclick="clearFilters()" style="background:#ffff99; font-weight:700; border:2px solid #000">Clear</button>
+<button onclick="printNice()" style="background:#fff; font-weight:900; border:2px solid #000">🖨️ PRINT BW - SUPPLIER</button>
+</div>
+<div class="table-wrap">
+<table class="main-table"><thead><tr>
+<th style="width:35%">Name of Supplier</th><th style="width:45%">Address</th><th style="width:20%">No Account</th>
+</tr></thead><tbody id="tbody"></tbody></table>
+</div>
+<div class="bottom-bar">
+<button onclick="scrollTopTable()">Top</button>
+<button onclick="scrollNext()">Next</button>
+<button onclick="scrollPrev()">Prev</button>
+<button onclick="scrollBottom()">Bott</button>
+<button onclick="clearFilters()" style="background:#ffff99; font-weight:700; border:2px solid #000">Clear Filter</button>
+<div class="price-info" id="priceInfo">Total: 0 Supplier</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+<div class="modal-popup">
+<div class="modal-header">PT. Smailing Tour DMC - Data Supplier - Add / Edit Supplier</div>
+<div style="display:flex">
+<div style="flex:1">
+<div class="form-group"><label>Name of Supplier :</label><input id="nameSupplier" class="supplier-name" placeholder="SWISS BELRESORT WATU JIMBARAN..."></div>
+<div class="form-group"><label>Rec Account :</label><input id="recAccount" class="account" placeholder="121093213"></div>
+<div class="form-group"><label>Address :</label><textarea id="address" placeholder="Jl. Danau Tamblingan No.99, Sanur, Denpasar..."></textarea></div>
+</div>
+<div class="btn-side">
+<button class="add" onclick="newSupplier()">Add</button>
+<button class="save" onclick="saveFromModal()">Save</button>
+<button class="edit" onclick="editFromModal()">Edit</button>
+<button class="delete" onclick="deleteSelected()">Delete</button>
+<button class="exit" onclick="closeModal()">Exit</button>
+</div>
+</div>
+<div class="modal-actions">
+<button class="cancel" onclick="closeModal()">Cancel</button>
+<button class="save" onclick="saveFromModal()">Save</button>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "supplier");
+
+let suppliers = []; let filteredSuppliers = []; let selectedIndex = -1; let selectedFirebaseId = null;
+
+function openModal(isEdit=false){
+  if(!isEdit){ selectedIndex=-1; selectedFirebaseId=null; document.getElementById('nameSupplier').value=''; document.getElementById('recAccount').value=''; document.getElementById('address').value=''; }
+  document.getElementById('modalOverlay').classList.add('active');
+  setTimeout(()=>{ document.getElementById('nameSupplier').focus(); },100);
+}
+window.openModal=openModal;
+window.closeModal=()=>{ document.getElementById('modalOverlay').classList.remove('active'); };
+window.newSupplier=()=>{ selectedIndex=-1; selectedFirebaseId=null; document.getElementById('nameSupplier').value=''; document.getElementById('recAccount').value=''; document.getElementById('address').value=''; document.getElementById('nameSupplier').focus(); };
+
+window.saveFromModal=async()=>{
+  const name=document.getElementById('nameSupplier').value.trim();
+  if(!name){ alert('Name of Supplier wajib isi beb!'); document.getElementById('nameSupplier').focus(); return; }
+  const payload={
+    nameSupplier: name.toUpperCase(),
+    address: document.getElementById('address').value,
+    recAccount: document.getElementById('recAccount').value.trim(),
+    updatedAt: new Date()
+  };
+  try{
+    if(selectedFirebaseId){ await updateDoc(doc(db,"supplier",selectedFirebaseId), payload); }
+    else{ payload.createdAt=new Date(); await addDoc(colRef, payload); }
+    closeModal();
+  }catch(e){ alert('Error: '+e.message); }
+};
+window.editFromModal=()=>{ if(selectedIndex===-1){ alert('Pilih data di tabel dulu beb!'); return; } editSelected(); };
+window.editSelected=()=>{
+  if(selectedIndex===-1){ alert('Klik data di tabel dulu beb!'); return; }
+  const s=suppliers[selectedIndex]; selectedFirebaseId=s.firebaseId;
+  document.getElementById('nameSupplier').value=s.nameSupplier;
+  document.getElementById('recAccount').value=s.recAccount||'';
+  document.getElementById('address').value=s.address||'';
+  document.getElementById('modalOverlay').classList.add('active');
+};
+window.deleteSelected=async()=>{
+  if(selectedIndex===-1 ||!selectedFirebaseId){ alert('Klik data di tabel dulu beb!'); return; }
+  if(confirm('Hapus supplier: '+suppliers[selectedIndex].nameSupplier+'?')){ await deleteDoc(doc(db,"supplier",selectedFirebaseId)); selectedIndex=-1; selectedFirebaseId=null; closeModal(); }
+};
+window.applyFilter=()=>{
+  const sName=document.getElementById('searchSupplier').value.toUpperCase();
+  const sAddr=document.getElementById('searchAddress').value.toUpperCase();
+  filteredSuppliers=suppliers.filter(h=>{
+    const matchName =!sName || (h.nameSupplier||'').toUpperCase().includes(sName) || (h.recAccount||'').includes(sName);
+    const matchAddr =!sAddr || (h.address||'').toUpperCase().includes(sAddr);
+    return matchName && matchAddr;
+  });
+  updatePriceInfo(); render();
+};
+window.clearFilters=()=>{
+  document.getElementById('searchSupplier').value='';
+  document.getElementById('searchAddress').value='';
+  applyFilter();
+};
+function updatePriceInfo(){
+  const total=filteredSuppliers.length;
+  const hasFilter = document.getElementById('searchSupplier').value || document.getElementById('searchAddress').value;
+  const displayTotal = hasFilter? total : suppliers.length;
+  document.getElementById('priceInfo').innerText=`Tampil: ${displayTotal} dari ${suppliers.length} Supplier`;
+}
+function render(){
+  const tbody=document.getElementById('tbody'); tbody.innerHTML='';
+  const hasFilter = document.getElementById('searchSupplier').value || document.getElementById('searchAddress').value;
+  let finalList = hasFilter? filteredSuppliers : (filteredSuppliers.length>0? filteredSuppliers : suppliers);
+  if(!hasFilter && filteredSuppliers.length===0 && suppliers.length>0) finalList=suppliers;
+  if(hasFilter) finalList=filteredSuppliers;
+  else finalList= filteredSuppliers.length>0? filteredSuppliers : suppliers;
+  // fix logic
+  if(hasFilter) finalList=filteredSuppliers; else finalList=suppliers.length>0 && filteredSuppliers.length===suppliers.length? filteredSuppliers : suppliers;
+  if(hasFilter) finalList=filteredSuppliers; else finalList=suppliers;
+
+  // simple
+  let listToShow = hasFilter? filteredSuppliers : suppliers;
+  if(!hasFilter && filteredSuppliers.length>0 && filteredSuppliers.length!==suppliers.length) listToShow=filteredSuppliers;
+  else if(!hasFilter) listToShow=suppliers;
+
+  // actual display
+  const display = hasFilter? filteredSuppliers : suppliers;
+  display.forEach((h)=>{
+    const originalIdx=suppliers.findIndex(x=> x.firebaseId===h.firebaseId);
+    const tr=document.createElement('tr'); tr.dataset.index=originalIdx; tr.className = originalIdx===selectedIndex? 'selected' : '';
+    tr.innerHTML=`<td class="name">${h.nameSupplier}</td><td class="addr">${h.address||''}</td><td class="account">${h.recAccount||''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById('tbody').addEventListener('click',(e)=>{
+  const tr=e.target.closest('tr'); if(!tr||tr.dataset.index===undefined) return;
+  const idx=parseInt(tr.dataset.index); if(isNaN(idx)||idx>=suppliers.length) return;
+  selectedIndex=idx; render();
+});
+window.scrollTopTable=()=>{ document.querySelector('.table-wrap').scrollTop=0; };
+window.scrollBottom=()=>{ const w=document.querySelector('.table-wrap'); w.scrollTop=w.scrollHeight; };
+window.scrollNext=()=>{ const w=document.querySelector('.table-wrap'); w.scrollTop+=200; };
+window.scrollPrev=()=>{ const w=document.querySelector('.table-wrap'); w.scrollTop-=200; };
+
+// PRINT BLACK & WHITE - IRIT TINTA - 1 RECORD 2 BARIS
+window.printNice=()=>{
+  const hasFilter = document.getElementById('searchSupplier').value || document.getElementById('searchAddress').value;
+  const data = hasFilter? filteredSuppliers : suppliers;
+  if(data.length===0){ alert('Tidak ada data untuk di print beb!'); return; }
+  const now = new Date();
+  const tglCetak = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID');
+  let html = `
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Print Supplier BW - ${data.length}</title>
+<style>
+@page {size: landscape; margin:8mm}
+*{font-family: Tahoma, Arial, sans-serif; font-size:8.5px; color:#000!important; background:#fff!important}
+body{margin:0; padding:8px}
+.header{text-align:center; margin-bottom:8px; border-bottom:2px solid #000; padding-bottom:6px}
+.header h1{margin:0; font-size:14px; font-weight:900}
+.header h2{margin:2px 0; font-size:10px; font-weight:700}
+.header.info{font-size:7.5px; margin-top:3px}
+table{width:100%; border-collapse:collapse; border:1.5px solid #000}
+th{background:#fff!important; color:#000!important; border:1px solid #000!important; padding:5px 4px; font-size:8px; text-align:center; font-weight:900; text-transform:uppercase}
+td{border:1px solid #000!important; padding:4px 5px; vertical-align:top; background:#fff!important}
+tr.row-main td{font-weight:700; border-bottom:1px solid #000!important}
+tr.row-detail td{font-size:7.5px; border-top:none!important; padding:3px 5px}
+tr.row-detail td.label{font-weight:900; text-align:right; width:100px}
+.footer{margin-top:8px; display:flex; justify-content:space-between; font-size:7px; border-top:1.5px solid #000; padding-top:5px; font-weight:700}
+@media print{.no-print{display:none}}
+</style>
+</head><body>
+<div class="header">
+<h1>PT. SMAILING TOUR DMC - DATA SUPPLIER</h1>
+<h2>LAPORAN SUPPLIER - FORMAT 1 RECORD 2 BARIS - BLACK & WHITE - IRIT TINTA</h2>
+<div class="info">Dicetak: ${tglCetak} | Total: ${data.length} Supplier | Filter: ${document.getElementById('searchSupplier').value||'ALL'} / ${document.getElementById('searchAddress').value||'ALL'}</div>
+</div>
+<table>
+<thead><tr><th style="width:25px">No</th><th style="width:35%">Name of Supplier</th><th style="width:40%">Address</th><th style="width:20%">No Account</th></tr></thead><tbody>
+`;
+  data.forEach((h,i)=>{
+    html += `
+<tr class="row-main">
+<td style="text-align:center">${i+1}</td>
+<td style="font-weight:900; text-transform:uppercase">${h.nameSupplier}</td>
+<td>${h.address||''}</td>
+<td style="text-align:center; font-weight:900">${h.recAccount||''}</td>
+</tr>
+<tr class="row-detail">
+<td style="border-top:none"></td>
+<td class="label">Rec Account / No Account:</td>
+<td>${h.address||''} - Account: ${h.recAccount||'-'}</td>
+<td style="font-weight:900">${h.recAccount||''}</td>
+</tr>
+`;
+  });
+  html += `
+</tbody></table>
+<div class="footer"><div>PT. Smailing Tour DMC - Bali - Supplier System</div><div>Total ${data.length} Supplier - BW Irit Tinta</div><div>Dicetak: ${tglCetak}</div></div>
+<div class="no-print" style="text-align:center; margin-top:18px; padding:12px; border:1px solid #000">
+<div style="font-size:11px; font-weight:900; margin-bottom:8px">MODE BLACK & WHITE - IRIT TINTA - TANPA WARNA</div>
+<button onclick="window.print()" style="padding:10px 30px; font-weight:900; font-size:13px; background:#fff!important; color:#000!important; border:2px solid #000; cursor:pointer; border-radius:4px">🖨️ CETAK SEKARANG (BW)</button>
+<button onclick="window.close()" style="padding:8px 16px; margin-left:10px; border:1px solid #000; cursor:pointer; background:#fff!important">Tutup</button>
+</div>
+</body></html>
+`;
+  const win = window.open('', '_blank', 'width=1100,height=800');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>{ win.focus(); }, 400);
+};
+
+onSnapshot(colRef, snap=>{
+  const oldName=selectedIndex>=0? suppliers[selectedIndex]?.nameSupplier : null;
+  suppliers=[]; snap.forEach(d=>{ const data=d.data(); suppliers.push({ firebaseId:d.id, nameSupplier:data.nameSupplier||'', address:data.address||'', recAccount:data.recAccount||'' }); });
+  suppliers.sort((a,b)=> a.nameSupplier.localeCompare(b.nameSupplier));
+  filteredSuppliers=[...suppliers];
+  if(oldName){ const idx=suppliers.findIndex(c=>c.nameSupplier===oldName); if(idx>=0) selectedIndex=idx; }
+  updatePriceInfo(); render();
+});
+document.getElementById('modalOverlay').addEventListener('click',(e)=>{ if(e.target.id==='modalOverlay') closeModal(); });
+</script>
+</body>
+</html>

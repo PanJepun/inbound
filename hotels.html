@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOTELS V42 - REFRESH ALL GUEST</title>
+<style>
+*{box-sizing:border-box;font-family:Tahoma,Arial,sans-serif}
+body{margin:0;background:#d4d0c8;overflow:hidden;font-size:11px}
+.win{width:100vw;height:100vh;display:flex;flex-direction:column;border:3px solid #000;background:#d4d0c8}
+.topBar{background:#a8a8a8;border-bottom:2px solid #000;padding:3px 3px;display:flex;gap:2px;flex-wrap:wrap}
+.btnGroup{display:flex;gap:2px}
+.btnGroup button{height:22px;padding:0 10px;font-size:11px;font-weight:900;border:1.5px solid #000;background:#d4d0c8;cursor:pointer}
+.btnSave{background:#a8ffb0!important} .btnDelete{color:#ff0000!important} .btnExit{background:#ffff00!important} .btnVoucher{background:#99ccff!important;color:#0000ff!important;border:2px solid #0000ff!important;margin-left:4px} .btnPrint{background:#ffff99!important;border:2px solid #000!important} .btnRefresh{background:#c6e8ff!important;border:2px solid #000!important}
+.totals{display:flex;gap:2px;margin-left:8px} .totBox{display:flex} .lblY{background:#ffff00;border:1.5px solid #000;padding:0 6px;font-weight:900;height:22px;display:flex;align-items:center;min-width:85px} .valB{background:#c6e8ff;border:1.5px solid #000;border-left:none;padding:0 6px;font-weight:900;height:22px;min-width:90px;justify-content:flex-end;display:flex;align-items:center}
+.earlyBar{background:#d4d0c8;border-bottom:2px solid #000;display:flex;align-items:center;padding:2px 4px;gap:4px;font-weight:700;font-size:11px;flex-wrap:wrap}
+.earlyBar input{height:20px;border:1.5px solid #000;text-align:center;font-weight:700;background:#fff}
+.searchGroup{display:flex;align-items:center;gap:3px;margin-left:10px;background:#e8e8e8;padding:2px 5px;border:1.5px solid #000}
+.searchGroup span{font-weight:900;font-size:10px}
+.searchGroup input{height:20px;border:1.5px solid #000;width:95px;padding:0 4px;font-size:10px;font-weight:700;background:#fff;text-align:left}
+.searchGroup input.small{width:88px}
+.searchGroup button{height:20px;padding:0 8px;font-size:10px;font-weight:900;border:1.5px solid #000;background:#ffff00;cursor:pointer}
+.inputMainBar{border-bottom:2px solid #000;background:#fff;display:flex;overflow:hidden}
+.inputMainBar table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+.inputMainBar td{border:1px solid #000;padding:0;height:22px;background:#fff}
+.inputMainBar input, .inputMainBar select{width:100%;height:20px;border:none;font-weight:700;padding:0 3px;font-size:11px;text-align:center;background:#fff}
+.inputMainBar input.left{text-align:left} .inputMainBar input.grayBg{background:#d4d0c8!important} .inputMainBar input.yellowBg{background:#ffff99!important} .inputMainBar input.cyanBg{background:#a8ffff!important}
+.statusDrop{height:20px!important;border:none!important;font-weight:900!important;cursor:pointer!important}
+.status-OK-select{background:#b0ffb0!important} .status-WL-select{background:#ffff99!important} .status-CXL-select{background:#ff9999!important}
+.greenHeader{background:#90EE90;border-bottom:2px solid #000;display:flex}
+.greenHeader table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+.greenHeader th{background:#90EE90;border:1px solid #000;padding:3px 2px;text-align:center;font-weight:900;font-size:10px}
+.hotelGrid{flex:1;overflow:auto;background:#fff}
+.hotelGrid table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+.hotelGrid td{border:1px solid #000;padding:2px 3px;white-space:nowrap;font-size:11px;font-weight:700;text-align:center;height:20px;cursor:pointer}
+.hotelGrid td.left{text-align:left} .hotelGrid td.right{text-align:right}
+.hotelGrid tr.status-OK td{background:#b0ffb0!important} .hotelGrid tr.status-CXL td{background:#ff9999!important;color:#990000!important} .hotelGrid tr.status-WL td{background:#ffff99!important;color:#996600!important} .hotelGrid tr.sel td{background:#00ff66!important;border:2px solid #0000cc!important}
+#hotelLookup{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:96%;max-width:1200px;height:78%;background:#c0c0c0;border:3px solid #0000ff;z-index:9999;display:none;flex-direction:column;box-shadow:0 0 0 9999px rgba(0,0,0,0.6)}
+#hotelLookup.active{display:flex}
+.lookupTitle{background:#0000ff;color:#fff;padding:4px 8px;font-weight:900;font-size:12px;display:flex;justify-content:space-between}
+.lookupGrid{flex:1;background:#fff;overflow:auto;border:2px solid #000;margin:0}
+.lookupGrid table{width:100%;border-collapse:collapse;font-size:11px}
+.lookupGrid th{background:#d4d0c8;border:1px solid #000;padding:4px 4px;text-align:center;font-weight:700;position:sticky;top:0;font-size:10px;cursor:pointer}
+.lookupGrid td{border:1px solid #999;padding:3px 6px;white-space:nowrap;font-size:11px;background:#fff;height:19px}
+.lookupGrid td.red{color:#ff0000!important;font-weight:700!important;text-align:center} .lookupGrid td.right{text-align:right;font-weight:700}
+.lookupGrid tr:hover td{background:#ffff00!important;cursor:pointer} .lookupGrid tr.selRow td{background:#00ff66!important}
+.lookupFooter{background:#d4d0c8;border-top:2px solid #000;padding:4px 6px;display:flex;align-items:center;gap:6px;font-weight:900;font-size:11px}
+.lookupFooter input{height:22px;border:2px solid #000;width:320px;padding:0 6px;font-weight:700;background:#fff}
+.btnNewData{background:#ffff99!important;border:2px solid #000!important;padding:0 14px!important;height:22px!important;font-weight:900!important;cursor:pointer}
+.btnRoomPrice{background:#a8e8a8!important;border:2px solid #000!important;padding:0 14px!important;height:22px!important;font-weight:900!important;cursor:pointer}
+#hotelFormPopup{position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:10010;display:none;justify-content:center;align-items:center;padding:10px}
+#hotelFormPopup.active{display:flex}
+.hotelFormWindow{width:98%;max-width:850px;height:92%;background:#7CFF7C;border:3px solid #2e8b57;display:flex;flex-direction:column}
+.formHeader{background:#2e8b57;color:#fff;padding:6px 10px;font-weight:900;font-size:12px;display:flex;justify-content:space-between}
+.formBody{flex:1;background:#7CFF7C;padding:10px;overflow:auto}
+.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+.fGroup{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.fGroup label{width:110px;text-align:right;font-weight:700;font-size:11px;flex:none}
+.fGroup input{height:22px;border:1px solid #666;padding:2px 6px;font-size:11px;background:#ffe0ff;flex:1}
+.fGroup.full{grid-column:span 2}
+.validBox{background:linear-gradient(90deg,#ff7f00,#ff9f33);padding:6px 10px;border:2px solid #000;margin:8px 0;display:flex;align-items:center;gap:8px;color:white}
+.validBox input{width:110px;height:22px;border:1px solid #666;background:white;font-weight:700}
+.formActions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid #2e8b57}
+.formActions button{padding:6px 18px;font-weight:900;border:1px solid #555;cursor:pointer;min-width:70px}
+.btnSaveForm{background:#a8e6a8} .btnCancelForm{background:#b8b8ff}
+#validityWarning, #dateWarning{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);width:480px;background:#ffcc00;border:4px solid #ff0000;z-index:10011;display:none;flex-direction:column;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,0.7)}
+#validityWarning.active, #dateWarning.active{display:flex}
+.warnHeader{background:#ff0000;color:#fff;padding:10px 12px;font-weight:900;font-size:15px;text-align:center}
+.warnBody{background:#ffff99;padding:18px 15px;font-size:12px;font-weight:700;line-height:22px;text-align:center}
+.warnBody span.red{color:#ff0000;font-weight:900;background:#fff;padding:1px 4px;border:1px solid #ff0000}
+.warnFooter{background:#d4d0c8;padding:10px;display:flex;justify-content:center;gap:12px;border-top:2px solid #000}
+.warnFooter button{padding:7px 22px;font-weight:900;border:2px solid #000;cursor:pointer;border-radius:5px}
+.btnWarnOK{background:#00ff66!important} .btnWarnCancel{background:#ffb3b3!important}
+#voucherModal{position:fixed;left:0;top:0;width:100vw;height:100vh;background:#fff;z-index:10020;display:none;overflow:auto;padding:0}
+#voucherModal.active{display:flex;justify-content:center}
+.voucherPaper{width:820px;min-height:900px;background:#fff;padding:25px 35px;font-family:Arial,Helvetica,sans-serif;color:#000}
+.vTop{display:flex;justify-content:space-between;align-items:flex-start}
+.vLogoImg{width:280px;height:auto}
+.vVoucherTitle{font-size:20px;font-weight:900;letter-spacing:1px;text-align:center;flex:1;margin-top:10px}
+.vInfoTable{width:100%;border-collapse:collapse;margin-top:20px;font-family:'Courier New',Courier,monospace;font-size:13px;line-height:20px}
+.vInfoTable td{padding:2px 4px;vertical-align:top;white-space:nowrap}
+.vInfoTable td.label{font-weight:700;width:75px} .vInfoTable td.colon{width:10px;font-weight:700} .vInfoTable td.value{font-weight:400} .vInfoTable td.rightLabel{font-weight:700;width:110px;text-align:left;padding-left:30px}
+.vLineTable{border-top:2px solid #000;border-bottom:2px solid #000;margin-top:20px;padding:6px 0;font-family:'Courier New',Courier,monospace}
+.vLineHeader{display:flex;font-weight:700;font-size:11px;border-bottom:1px solid #000;padding-bottom:5px;margin-bottom:6px}
+.vLineRow{display:flex;font-size:11px;padding:2px 0}
+.vRemarks{margin-top:15px;font-family:'Courier New',Courier,monospace;font-size:12px;font-weight:700}
+.vSign{margin-top:80px;display:flex;justify-content:flex-end} .vSignBox{text-align:center} .vSignName{font-weight:700;font-size:12px;border-top:1px solid #000;padding-top:3px;width:180px}
+.vPrintBar{position:fixed;top:10px;right:20px;display:flex;gap:8px;z-index:10021} .vPrintBar button{padding:8px 18px;font-weight:900;border:2px solid #000;cursor:pointer;border-radius:4px}
+#printModal{position:fixed;left:0;top:0;width:100vw;height:100vh;background:#fff;z-index:10022;display:none;overflow:auto;padding:0}
+#printModal.active{display:flex;justify-content:center}
+.printPaper{width:850px;min-height:900px;background:#fff;padding:20px 30px;font-family:Arial,Helvetica,sans-serif;color:#000}
+.printLogo{width:260px;height:auto} .printTitle{font-weight:900;font-size:13px;margin-top:15px;margin-bottom:10px;letter-spacing:0.5px}
+.printTable{width:100%;border-collapse:collapse;font-family:'Courier New',Courier,monospace;font-size:11px}
+.printTable th{border:1.5px solid #000;padding:4px 6px;text-align:left;font-weight:700;background:#fff;white-space:nowrap}
+.printTable td{padding:2px 6px;vertical-align:top;white-space:nowrap} .printTable tr:hover td{background:#ffffcc}
+.printFooter{margin-top:30px;border-top:1px solid #000;padding-top:8px;font-family:'Courier New',Courier,monospace;font-size:10px;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="win">
+<div class="topBar"><div class="btnGroup"><button onclick="modeAdd()">Add</button><button class="btnSave" id="btnSave" onclick="modeSave()">Save</button><button onclick="modeEdit()">Edit</button><button class="btnDelete" onclick="modeDelete()">Delete</button><button class="btnPrint" onclick="openPrint()">Print</button><button>Cancel</button><button class="btnExit" onclick="window.close()">Exit</button><button class="btnRefresh" onclick="refreshAll()">Refresh</button><button class="btnVoucher" onclick="openVoucher()">Voucher</button></div><div class="totals"><div class="totBox"><div class="lblY" style="background:#0000ff;color:#fff">TOTAL SALES :</div><div class="valB" id="totalSales">0.00</div></div><div class="totBox"><div class="lblY">NETT SALES :</div><div class="valB" id="nettSales">0.00</div></div><div class="totBox"><div class="lblY">Room Category :</div><div class="valB" style="background:#fff;min-width:125px" id="roomCat">-</div></div></div></div>
+<div class="earlyBar">
+<span>Early Bird :</span><input id="earlyBird" value="0.00" style="width:50px;background:#ffff99">
+<span>% Discount Nite(s) :</span><input id="discNite" value="0" style="width:30px;background:#ffff99">
+<span>Nite(s) Limit Deposit :</span><input id="limitDeposit" type="date">
+<div class="searchGroup">
+<span>🔍 Search:</span>
+<input id="searchCheckIn" class="small" type="date" oninput="doSearch()">
+<input id="searchCheckOut" class="small" type="date" oninput="doSearch()">
+<input id="searchGuest" placeholder="Guest ID" oninput="doSearch()">
+<input id="searchHotel" placeholder="Hotel Name" oninput="doSearch()">
+<button onclick="clearSearch()">Clear</button>
+</div>
+</div>
+<div class="inputMainBar"><table><colgroup><col style="width:13%"><col style="width:18%"><col style="width:9%"><col style="width:9%"><col style="width:12%"><col style="width:8%"><col style="width:3.5%"><col style="width:3.5%"><col style="width:3%"><col style="width:3%"><col style="width:3%"><col style="width:4%"><col style="width:4%"><col style="width:3.5%"><col style="width:4%"></colgroup><tr><td><input id="fGuestId" class="left grayBg" readonly value="SMLDMC-20OKT26-00002" style="background:#ffff99!important;font-weight:900!important;border:2px solid #0000ff!important"></td><td><input id="fHotel" class="left whiteBg" onclick="openLookup()" placeholder="KLIK UNTUK PILIH HOTEL"></td><td><input id="fCheckIn" type="date" onchange="validateDates()"></td><td><input id="fCheckOut" type="date" onchange="validateDates()"></td><td><input id="fTypeRoom" value="DOUBLE/TWIN"></td><td><input id="fRate" class="right" value="0"></td><td><input id="fXBed" value="0"></td><td><input id="fTRoom" class="yellowBg" value="1"></td><td><input id="fABF" value="0"></td><td><input id="fHB" value="0"></td><td><input id="fFB" value="0"></td><td><input id="fSglSup" class="cyanBg" value="0"></td><td><input id="fMargin" class="yellowBg" value="10.00"></td><td><select id="fStatus" class="statusDrop status-OK-select" onchange="updateStatusColor()"><option value="OK">OK</option><option value="WL">WL</option><option value="CXL">CXL</option></select></td><td><input id="fRemarks"></td></tr></table></div>
+<div class="greenHeader"><table><colgroup><col style="width:13%"><col style="width:18%"><col style="width:9%"><col style="width:9%"><col style="width:12%"><col style="width:8%"><col style="width:3.5%"><col style="width:3.5%"><col style="width:3%"><col style="width:3%"><col style="width:3%"><col style="width:4%"><col style="width:4%"><col style="width:3.5%"><col style="width:4%"></colgroup><tr><th>Guest ID :</th><th>Name of Hotel</th><th>Chek In</th><th>Chek Out</th><th>Type Of Room</th><th>Rate Room</th><th>X-Bed</th><th>TRoom</th><th>ABF</th><th>HB</th><th>FB</th><th>Sgl Sup</th><th>Margin</th><th>Status</th><th>Remarks</th></tr></table></div>
+<div class="hotelGrid"><table><colgroup><col style="width:13%"><col style="width:18%"><col style="width:9%"><col style="width:9%"><col style="width:12%"><col style="width:8%"><col style="width:3.5%"><col style="width:3.5%"><col style="width:3%"><col style="width:3%"><col style="width:3%"><col style="width:4%"><col style="width:4%"><col style="width:3.5%"><col style="width:4%"></colgroup><tbody id="tbodyDetail"></tbody></table></div>
+</div>
+<div id="hotelLookup"><div class="lookupTitle"><span>PT. Smailing Tour DMC - Master Hotel</span><button onclick="closeLookup()" style="background:#ff0000;color:#fff;border:1px solid #000;font-weight:900;padding:0 8px;cursor:pointer">X</button></div><div class="lookupGrid"><table><thead><tr><th>Hotel Name</th><th>Type of Room</th><th>Kategori</th><th id="thPrice" onclick="toggleSortPrice()">Price ↕</th><th>Validity 1</th><th>Validity 2</th><th>XBed</th><th>Hss Date 1</th><th>HSS Date 2</th><th>HSS Rate</th></tr></thead><tbody id="tbodyLookup"></tbody></table></div><div class="lookupFooter"><span>Name of Hotel :</span><input id="filterHotel" oninput="filterLookup(this.value)" placeholder="ketik untuk filter..."><button class="btnNewData" onclick="openNewDataPopup()">New Data</button><button class="btnRoomPrice" id="btnRoomPrice" onclick="toggleSortPrice()">Room Price</button></div></div>
+<div id="hotelFormPopup"><div class="hotelFormWindow"><div class="formHeader"><span>Hotel - Tambah Data Baru</span><button onclick="closeNewDataPopup()" style="background:#ff0000;color:#fff;border:1px solid #000;font-weight:900;padding:0 8px;cursor:pointer">X</button></div><div class="formBody"><div class="formGrid"><div class="fGroup"><label>Code Of Hotel :</label><input id="newCodeHotel" placeholder="HTL-001"></div><div class="fGroup"><label>City :</label><input id="newCity" value="BALI"></div><div class="fGroup"><label>Area Hotel :</label><input id="newAreaHotel"></div><div class="fGroup"><label>Market :</label><input id="newMarket" value="ALL MARKET"></div><div class="fGroup full"><label>Name Of Hotel :</label><input id="newNameHotel" style="background:#fff;font-weight:bold;border:2px solid #666"></div><div class="fGroup"><label>Type Of Room :</label><input id="newTypeRoom" value="SINGLE" style="background:#00ff7f;font-weight:900"></div><div class="fGroup"><label>Category :</label><input id="newCategory"></div><div class="fGroup"><label>Room Rate :</label><input id="newRoomRate" value="0.00" style="text-align:right"></div><div class="fGroup"><label>X-Bed Rate :</label><input id="newXBedRate" value="0.00" style="text-align:right"></div></div><div class="validBox"><span style="font-weight:900">Validity :</span> From <input id="newValidFrom" type="date"> To <input id="newValidTo" type="date"></div><div style="border:1px solid #000;padding:6px;background:#8cff8c">High Season From <input id="newHsFrom" type="date" style="width:100px"> Until <input id="newHsTo" type="date" style="width:100px"> Rate <input id="newRateHSS" style="width:80px"> Remarks <input id="newRemarks" style="width:150px"> COA <input id="newCoa" style="width:80px;background:#00ff00"></div><div style="margin-top:6px">MEALS ABF <input id="newAbf" style="width:70px"> HB <input id="newHb" style="width:70px"> FB <input id="newFb" style="width:70px"></div><div class="formActions"><button class="btnCancelForm" onclick="closeNewDataPopup()">Cancel</button><button class="btnSaveForm" onclick="saveNewHotel()">Save</button></div></div></div></div>
+<div id="validityWarning"><div class="warnHeader">⚠️ WARNING - VALIDITY EXPIRED! ⚠️</div><div class="warnBody">Hotel: <span class="red" id="warnHotel"></span><br>Validity: <span class="red" id="warnValid"></span><br>Chek In: <span class="red" id="warnCheckIn"></span> SUDAH LEWAT!<br>System: <span class="red" id="warnSysDate"></span></div><div class="warnFooter"><button class="btnWarnOK" onclick="closeValidityWarn()">OK</button><button class="btnWarnCancel" onclick="closeValidityWarn(); openLookup()">Pilih Hotel Lain</button></div></div>
+<div id="dateWarning"><div class="warnHeader">⚠️ WARNING - TANGGAL SALAH! ⚠️</div><div class="warnBody">Chek Out harus LEBIH BESAR dari Chek In!<br><br>Chek In: <span class="red" id="warnDateIn"></span><br>Chek Out: <span class="red" id="warnDateOut"></span><br><br>Silakan perbaiki tanggal Chek Out!</div><div class="warnFooter"><button class="btnWarnOK" onclick="closeDateWarn()">OK - Perbaiki</button></div></div>
+<div id="voucherModal"><div class="vPrintBar printBtnBar"><button onclick="window.print()" style="background:#a8ffb0">🖨️ PRINT</button><button onclick="closeVoucher()" style="background:#ffb3b3">CLOSE</button></div><div class="voucherPaper"><div class="vTop"><img src="smailing_logo.png" class="vLogoImg" alt="SMAILING TOUR"><div class="vVoucherTitle">VOUCHER</div><div style="width:200px"></div></div><table class="vInfoTable"><tr><td class="label">To</td><td class="colon">:</td><td class="value" id="vTo" style="font-weight:900">ALILA UBUD</td><td class="rightLabel">PNR :</td><td class="colon">:</td><td class="value" id="vPNR">SMLDMC/19okt26/0002</td></tr><tr><td class="label">Attn</td><td class="colon">:</td><td class="value" id="vAttn">Reservation Team</td><td class="rightLabel">Date :</td><td class="colon">:</td><td class="value" id="vDate">19-10-2026</td></tr><tr><td class="label" style="padding-top:12px">Clients</td><td class="colon" style="padding-top:12px">:</td><td class="value" style="padding-top:12px" id="vClients">Roberto Campagna</td><td class="rightLabel" style="padding-top:12px">Issued By :</td><td class="colon" style="padding-top:12px">:</td><td class="value" style="padding-top:12px" id="vIssued">-</td></tr><tr><td class="label"></td><td class="colon"></td><td class="value" id="vClients2">Juan Carlos Sanda</td><td class="rightLabel">Participant</td><td class="colon">:</td><td class="value" id="vPax">2 Pax</td></tr></table><div class="vLineTable"><div class="vLineHeader"><div style="width:35px">No.</div><div style="width:85px">Date In</div><div style="width:85px">Date Out</div><div style="width:55px">T.Room</div><div style="flex:1">Type Of Room</div><div style="width:120px;text-align:right">Confirm No.</div></div><div class="vLineRow" id="vRow"><div style="width:35px">1</div><div style="width:85px" id="vDateIn">12-10-2023</div><div style="width:85px" id="vDateOut">14-10-2023</div><div style="width:55px" id="vTRoom">1</div><div style="flex:1" id="vTypeRoom">DOUBLE/TWIN</div><div style="width:120px;text-align:right" id="vConfirm"></div></div></div><div class="vRemarks">REMARKS :<br><span id="vRemarksText" style="font-weight:400">-</span></div><div class="vSign"><div class="vSignBox"><div class="vSignName">PUTU NGURAH</div><div style="font-size:11px;margin-top:2px">Authorized Signature</div></div></div><div style="margin-top:40px;border-top:1px solid #000;padding-top:6px;font-size:9px;font-family:'Courier New',Courier,monospace;display:flex;justify-content:space-between"><span>Printed By Smailing DMC on <span id="vPrintedBy">19-10-2026 12:34:56</span></span><span id="vPrintGuest">PNR: SMLDMC/19okt26/0002</span></div></div></div>
+<div id="printModal"><div class="vPrintBar printBtnBar"><button onclick="window.print()" style="background:#ffff99;padding:8px 18px;font-weight:900;border:2px solid #000;cursor:pointer">🖨️ PRINT</button><button onclick="closePrint()" style="background:#ffb3b3;padding:8px 18px;font-weight:900;border:2px solid #000;cursor:pointer">CLOSE</button></div><div class="printPaper"><img src="smailing_logo.png" class="printLogo" alt="SMAILING TOUR"><div class="printTitle">SUMMARY OF ROOM NITES</div><table class="printTable" id="printTable"><thead><tr><th>ChekIn/Out</th><th>T.Room</th><th>T.Nites</th><th>Hotel Names</th><th>Category</th><th>Agents</th></tr></thead><tbody id="printTbody"></tbody></table><div class="printFooter"><span>Printed By Smailing DMC on <span id="printDateTime">19-10-2026 12:34:56</span></span><span>Guest ID: <span id="printGuestId">-</span> | Total: <span id="printTotal">0</span> Nites</span></div></div></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, deleteDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe" };
+const db = getFirestore(initializeApp(firebaseConfig));
+const params = new URLSearchParams(window.location.search);
+let guestId = params.get('guestId') || params.get('GuestID') || `SMLDMC-20OKT26-00002`;
+guestId = guestId.toUpperCase();
+document.getElementById('fGuestId').value = guestId;
+let masterHotels=[], currentDocId=null, selectedRow=null, isEdit=false, sortAsc=true, currentFilter='', selectedHotelValidity=null;
+let allRowsData=[];
+let isShowAllMode = false; // FALSE = filter per Guest ID, TRUE = tampil semua Guest ID (Refresh)
+const today = new Date(); const tomorrow = new Date(); tomorrow.setDate(today.getDate()+1);
+function toISO(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function toTimeStr(d){ return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`; }
+function formatIndo(v){ if(!v) return ''; let s=String(v).trim(); if(s.match(/^\d{2}-\d{2}-\d{4}$/)) return s.replace(/-/g,'/'); if(s.match(/^\d{4}-\d{2}-\d{2}$/)){ const [y,m,d]=s.split('-'); return `${d}/${m}/${y}`; } return s; }
+function formatCheckInOut(checkIn, checkOut){
+  const parse = (s)=>{ if(!s) return null; s=String(s).trim().replace(/\//g,'-'); let m=s.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(m) return new Date(m[3],m[2]-1,m[1]); m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return new Date(m[1],m[2]-1,m[3]); return null; };
+  const ci=parse(checkIn); const co=parse(checkOut);
+  if(!ci||!co) return (checkIn||'')+' / '+(checkOut||'');
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(ci.getMonth()===co.getMonth() && ci.getFullYear()===co.getFullYear()){
+    return `${String(ci.getDate()).padStart(2,'0')}-${String(co.getDate()).padStart(2,'0')} ${months[ci.getMonth()]} ${ci.getFullYear()}`;
+  } else {
+    return `${String(ci.getDate()).padStart(2,'0')}-${String(co.getDate()).padStart(2,'0')} ${months[ci.getMonth()]}/${months[co.getMonth()]} ${ci.getFullYear()}`;
+  }
+}
+function calcNites(checkIn, checkOut){
+  const parse = (s)=>{ if(!s) return null; s=String(s).trim().replace(/\//g,'-'); let m=s.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(m) return new Date(m[3],m[2]-1,m[1]); m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return new Date(m[1],m[2]-1,m[3]); return null; };
+  const ci=parse(checkIn); const co=parse(checkOut);
+  if(!ci||!co) return 1;
+  const diff=Math.round((co-ci)/(1000*60*60*24)); return diff>0?diff:1;
+}
+const sysISO = toISO(today); const sysIndo = `${String(today.getDate()).padStart(2,'0')}-${String(today.getMonth()+1).padStart(2,'0')}-${today.getFullYear()}`;
+document.getElementById('limitDeposit').value = sysISO;
+document.getElementById('fCheckIn').value = sysISO;
+document.getElementById('fCheckOut').value = toISO(tomorrow);
+document.getElementById('newValidFrom').value = sysISO;
+document.getElementById('newValidTo').value = toISO(new Date(today.getFullYear()+1, today.getMonth(), today.getDate()));
+document.getElementById('newHsFrom').value = sysISO;
+document.getElementById('newHsTo').value = sysISO;
+function parsePrice(s){ return parseFloat((s||'').toString().replace(/[^0-9]/g,''))||0; }
+function toDateInput(v){ if(!v) return sysISO; let s=String(v).trim(); let m=s.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(m) return `${m[3]}-${m[2]}-${m[1]}`; let m2=s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); if(m2) return `${m2[3]}-${m2[2]}-${m2[1]}`; if(s.match(/^\d{4}-\d{2}-\d{2}$/)) return s; return sysISO; }
+function toDisplay(v){ if(!v) return sysIndo; let s=String(v).trim(); if(s.match(/^\d{4}-\d{2}-\d{2}$/)){ const [y,m,d]=s.split('-'); return `${d}-${m}-${y}`; } return s; }
+function parseIndoDate(s){ if(!s) return null; s=String(s).trim().replace(/\//g,'-'); let m=s.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(m) return new Date(m[3],m[2]-1,m[1]); m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return new Date(m[1],m[2]-1,m[3]); return null; }
+window.validateDates=()=>{
+  const ciVal=document.getElementById('fCheckIn').value;
+  const coVal=document.getElementById('fCheckOut').value;
+  if(!ciVal||!coVal) return true;
+  const ci=new Date(ciVal); const co=new Date(coVal);
+  if(co<=ci){
+    document.getElementById('warnDateIn').innerText=formatIndo(toDisplay(ciVal));
+    document.getElementById('warnDateOut').innerText=formatIndo(toDisplay(coVal));
+    document.getElementById('dateWarning').classList.add('active');
+    document.getElementById('dateWarning').style.display='flex';
+    const next=new Date(ci); next.setDate(ci.getDate()+1);
+    document.getElementById('fCheckOut').value=toISO(next);
+    return false;
+  }
+  return true;
+};
+window.closeDateWarn=()=>{
+  document.getElementById('dateWarning').classList.remove('active');
+  document.getElementById('dateWarning').style.display='none';
+  document.getElementById('fCheckOut').focus();
+};
+window.doSearch=()=>{
+  const ci = document.getElementById('searchCheckIn').value;
+  const co = document.getElementById('searchCheckOut').value;
+  const g = (document.getElementById('searchGuest').value||'').toUpperCase();
+  const h = (document.getElementById('searchHotel').value||'').toUpperCase();
+  const tbody=document.getElementById('tbodyDetail');
+  tbody.innerHTML='';
+  let filtered=allRowsData.filter(r=>{
+    let ok=true;
+    if(ci){ const rCi=toDateInput(r.checkIn); if(rCi!==ci) ok=false; }
+    if(co){ const rCo=toDateInput(r.checkOut); if(rCo!==co) ok=false; }
+    if(g && !((r.guestId||'').toUpperCase().includes(g) )) ok=false;
+    if(h && !(r.hotelName||'').toUpperCase().includes(h)) ok=false;
+    return ok;
+  });
+  if(filtered.length===0){
+    tbody.innerHTML=`<tr><td colspan="15" style="text-align:center;background:#ffffcc;padding:8px;font-weight:900">Tidak ada data - Filter: ${g||h||'-'} </td></tr>`;
+    calcTotal();
+    return;
+  }
+  filtered.forEach(r=>{ createRow(r, tbody); });
+  calcTotal();
+};
+window.clearSearch=()=>{
+  document.getElementById('searchCheckIn').value=''; 
+  document.getElementById('searchCheckOut').value=''; 
+  document.getElementById('searchGuest').value=''; 
+  document.getElementById('searchHotel').value='';
+  isShowAllMode = false;
+  loadHotels(false);
+};
+window.refreshAll=()=>{
+  document.getElementById('searchCheckIn').value=''; 
+  document.getElementById('searchCheckOut').value=''; 
+  document.getElementById('searchGuest').value=''; 
+  document.getElementById('searchHotel').value='';
+  isShowAllMode = true; // REFRESH = TAMPILKAN SEMUA GUEST ID
+  loadHotels(true);
+};
+window.updateStatusColor=()=>{
+  const st=(document.getElementById('fStatus').value||'OK').toUpperCase();
+  const sel=document.getElementById('fStatus');
+  sel.className='statusDrop';
+  if(st.includes('CXL')||st.includes('CANCEL')){ sel.classList.add('status-CXL-select'); }
+  else if(st.includes('WL')){ sel.classList.add('status-WL-select'); }
+  else { sel.classList.add('status-OK-select'); }
+};
+function getStatusClass(status){
+  const s=(status||'OK').toUpperCase();
+  if(s.includes('CXL')||s.includes('CANCEL')) return 'status-CXL';
+  if(s.includes('WL')) return 'status-WL';
+  return 'status-OK';
+}
+
+function createRow(r, tbody){
+  const tr=document.createElement('tr');
+  tr.className=getStatusClass(r.status);
+  tr.id='row_'+r.id;
+  // BEB - INI KUNCI NYA - KOLOM EDITABLE LANGSUNG SAVE!
+  tr.innerHTML=`
+  <td class="left" style="font-size:10px">${r.guestId||''}</td>
+  <td class="left" style="font-size:10px;white-space:normal" title="${r.hotelName||''}">${r.hotelName||''}</td>
+  <td style="font-size:10px">${r.checkIn||''}</td>
+  <td style="font-size:10px">${r.checkOut||''}</td>
+  <td style="font-size:10px">${r.typeRoom||''}</td>
+  <td class="right" style="font-size:10px">${r.rate||''}</td>
+  <td style="padding:0"><input id="edit_xbed_${r.id}" value="${r.xbed||0}" style="width:100%;height:19px;border:none;text-align:center;font-weight:700;background:${r.xbed>0?'#ffff99':'#fff'}" onchange="quickSave('${r.id}','xbed',this.value)"></td>
+  <td style="padding:0"><input id="edit_troom_${r.id}" value="${r.troom||1}" style="width:100%;height:19px;border:none;text-align:center;font-weight:700;background:#ffff99" onchange="quickSave('${r.id}','troom',this.value)"></td>
+  <td style="padding:0"><input id="edit_abf_${r.id}" value="${r.abf||0}" style="width:100%;height:19px;border:none;text-align:center;font-weight:900;background:${r.abf>0?'#a8ffff':'#fff'};color:${r.abf>0?'#ff0000':'#000'}" onchange="quickSave('${r.id}','abf',this.value)"></td>
+  <td style="padding:0"><input id="edit_hb_${r.id}" value="${r.hb||0}" style="width:100%;height:19px;border:none;text-align:center;font-weight:700;background:${r.hb>0?'#ffff99':'#fff'}" onchange="quickSave('${r.id}','hb',this.value)"></td>
+  <td style="padding:0"><input id="edit_fb_${r.id}" value="${r.fb||0}" style="width:100%;height:19px;border:none;text-align:center;font-weight:700;background:${r.fb>0?'#ffff99':'#fff'}" onchange="quickSave('${r.id}','fb',this.value)"></td>
+  <td style="padding:0"><input id="edit_sgl_${r.id}" value="${r.sglsup||0}" style="width:100%;height:19px;border:none;text-align:center;font-weight:700;background:${r.sglsup>0?'#a8ffff':'#fff'}" onchange="quickSave('${r.id}','sglsup',this.value)"></td>
+  <td style="padding:0"><input id="edit_margin_${r.id}" value="${r.margin||10}" style="width:100%;height:19px;border:none;text-align:center;font-weight:900;background:#ffff99" onchange="quickSave('${r.id}','margin',this.value)"></td>
+  <td style="padding:0"><select id="edit_status_${r.id}" style="width:100%;height:19px;border:none;text-align:center;font-weight:900;background:#fff" onchange="quickSave('${r.id}','status',this.value)"><option value="OK" ${r.status==='OK'?'selected':''}>OK</option><option value="WL" ${r.status==='WL'?'selected':''}>WL</option><option value="CXL" ${r.status==='CXL'?'selected':''}>CXL</option></select></td>
+  <td class="left" style="padding:0"><input id="edit_remarks_${r.id}" value="${r.remarks||''}" style="width:100%;height:19px;border:none;text-align:left;font-weight:700;padding-left:3px" onchange="quickSave('${r.id}','remarks',this.value)"></td>`;
+  
+  // Klik baris tetap untuk load ke form atas - jangan bentrok sama input
+  tr.addEventListener('click', (e)=>{
+    if(e.target.tagName==='INPUT' || e.target.tagName==='SELECT') return; // kalau klik input, jangan load form
+    document.querySelectorAll('#tbodyDetail tr').forEach(x=>{ x.classList.remove('sel'); });
+    tr.classList.add('sel');
+    selectedRow=tr; currentDocId=r.id;
+    document.getElementById('fGuestId').value=r.guestId;
+    guestId = r.guestId;
+    document.getElementById('fHotel').value=r.hotelName;
+    document.getElementById('fCheckIn').value=toDateInput(r.checkIn);
+    document.getElementById('fCheckOut').value=toDateInput(r.checkOut);
+    document.getElementById('fTypeRoom').value=r.typeRoom;
+    document.getElementById('fRate').value=r.rate;
+    document.getElementById('fXBed').value=r.xbed||'0';
+    document.getElementById('fTRoom').value=r.troom||'1';
+    document.getElementById('fABF').value=r.abf||'0';
+    document.getElementById('fHB').value=r.hb||'0';
+    document.getElementById('fFB').value=r.fb||'0';
+    document.getElementById('fSglSup').value=r.sglsup||'0';
+    document.getElementById('fMargin').value=r.margin||'10.00';
+    document.getElementById('fStatus').value=(r.status||'OK');
+    document.getElementById('fRemarks').value=r.remarks||'';
+    if(r.limitDeposit) document.getElementById('limitDeposit').value=toDateInput(r.limitDeposit);
+    updateStatusColor();
+    isShowAllMode = false;
+    calcTotal();
+  });
+  tbody.appendChild(tr);
+}
+
+// FUNGSI BARU BEB - SAVE LANGSUNG DARI TABEL BAWAH!
+window.quickSave = async (docId, field, value)=>{
+  try{
+    const el = document.getElementById(`edit_${field}_${docId}`) || document.getElementById(`edit_${field==='sglsup'?'sgl':field}_${docId}`);
+    if(el) { el.style.background='#00ff00'; el.style.color='#000'; }
+    await updateDoc(doc(db,"hotel_transactions",docId), {[field]: value, updatedAt: new Date().toISOString()});
+    // update allRowsData biar gak hilang pas refresh
+    const idx = allRowsData.findIndex(x=>x.id===docId);
+    if(idx>=0) allRowsData[idx][field]=value;
+    if(el) setTimeout(()=>{ el.style.background = field==='abf' && value>0 ? '#a8ffff' : (field==='sglsup' && value>0 ? '#a8ffff' : '#fff'); el.style.background = el.style.background==='rgb(255, 255, 255)' && (field==='margin'||field==='troom'||field==='hb'||field==='fb') && value>0 ? '#ffff99' : el.style.background; }, 500);
+    console.log('Saved beb:', docId, field, value);
+  }catch(e){ alert('Gagal save: '+e.message); }
+};
+
+window.calcTotal=()=>{
+  let total=0;
+  const margin=parseFloat(document.getElementById('fMargin').value)||10;
+  const tbody = document.getElementById('tbodyDetail');
+  const rows = tbody.querySelectorAll('tr');
+  
+  if(rows.length>0){
+    rows.forEach(tr=>{
+      if(tr.cells.length<8) return;
+      const checkInText = tr.cells[2]?.textContent||'';
+      const checkOutText = tr.cells[3]?.textContent||'';
+      if(checkInText.includes('Tidak ada data')) return;
+      const rate = parseFloat((tr.cells[5]?.textContent||'0').replace(/[^0-9]/g,''))||0;
+      const troom = parseInt((tr.cells[7]?.textContent||'1').replace(/[^0-9]/g,''))||1;
+      const nite = calcNites(checkInText, checkOutText);
+      if(rate>0) total += rate * troom * nite;
+    });
+  }
+  
+  if(total===0){
+    const ciForm = toDisplay(document.getElementById('fCheckIn').value) || document.getElementById('fCheckIn').value;
+    const coForm = toDisplay(document.getElementById('fCheckOut').value) || document.getElementById('fCheckOut').value;
+    const rateForm = parseFloat((document.getElementById('fRate').value||'').replace(/[^0-9]/g,''))||0;
+    const troomForm = parseInt((document.getElementById('fTRoom').value||'1').replace(/[^0-9]/g,''))||1;
+    if(rateForm>0){
+      const niteForm = calcNites(ciForm, coForm);
+      total = rateForm * troomForm * niteForm;
+    }
+  }
+  
+  const sales=total*(1+margin/100);
+  document.getElementById('nettSales').innerText=total.toLocaleString('en-US',{minimumFractionDigits:2});
+  document.getElementById('totalSales').innerText=sales.toLocaleString('en-US',{minimumFractionDigits:2});
+};
+window.openLookup=()=>{ document.getElementById('hotelLookup').classList.add('active'); document.getElementById('hotelLookup').style.display='flex'; filterLookup(document.getElementById('filterHotel').value); };
+window.closeLookup=()=>{ document.getElementById('hotelLookup').classList.remove('active'); document.getElementById('hotelLookup').style.display='none'; };
+window.toggleSortPrice=()=>{ sortAsc=!sortAsc; const btn=document.getElementById('btnRoomPrice'), th=document.getElementById('thPrice'); masterHotels.sort((a,b)=> sortAsc ? parsePrice(a.price)-parsePrice(b.price) : parsePrice(b.price)-parsePrice(a.price)); btn.innerText=sortAsc?'Room Price ↑ Murah':'Room Price ↓ Mahal'; th.innerText=sortAsc?'Price ↑':'Price ↓'; filterLookup(currentFilter); };
+window.openNewDataPopup=()=>{ const filterVal = document.getElementById('filterHotel').value.trim(); document.getElementById('newNameHotel').value = filterVal ? filterVal.toUpperCase() : ''; document.getElementById('newCodeHotel').value = 'HTL-'+String(masterHotels.length+1).padStart(4,'0'); document.getElementById('hotelFormPopup').classList.add('active'); document.getElementById('hotelFormPopup').style.display='flex'; };
+window.closeNewDataPopup=()=>{ document.getElementById('hotelFormPopup').classList.remove('active'); document.getElementById('hotelFormPopup').style.display='none'; };
+window.saveNewHotel=async()=>{
+  const code = document.getElementById('newCodeHotel').value.trim();
+  const name = document.getElementById('newNameHotel').value.trim();
+  if(!code||!name){ alert('Code & Name wajib!'); return; }
+  const btn = document.querySelector('.btnSaveForm'); btn.innerText='Saving...'; btn.disabled=true;
+  const payload={codeHotel:code.toUpperCase(),city:document.getElementById('newCity').value.toUpperCase(),areaHotel:document.getElementById('newAreaHotel').value.toUpperCase(),market:document.getElementById('newMarket').value.toUpperCase(),nameHotel:name.toUpperCase(),typeRoom:document.getElementById('newTypeRoom').value.toUpperCase(),category:document.getElementById('newCategory').value.toUpperCase(),roomRate:document.getElementById('newRoomRate').value.replace(/,/g,''),xBedRate:document.getElementById('newXBedRate').value.replace(/,/g,''),validFrom:formatIndo(document.getElementById('newValidFrom').value).replace(/\//g,'-'),validTo:formatIndo(document.getElementById('newValidTo').value).replace(/\//g,'-'),hsFrom:formatIndo(document.getElementById('newHsFrom').value).replace(/\//g,'-'),hsTo:formatIndo(document.getElementById('newHsTo').value).replace(/\//g,'-'),rateHSS:document.getElementById('newRateHSS').value.replace(/,/g,''),remarks:document.getElementById('newRemarks').value,coa:document.getElementById('newCoa').value,abf:document.getElementById('newAbf').value.replace(/,/g,''),hb:document.getElementById('newHb').value.replace(/,/g,''),fb:document.getElementById('newFb').value.replace(/,/g,''),createdAt:new Date()};
+  try{ await addDoc(collection(db,"hotel"),payload); alert('✅ '+name.toUpperCase()+' ditambah!'); closeNewDataPopup(); await loadMaster(); filterLookup(name.toUpperCase()); document.getElementById('filterHotel').value=name.toUpperCase(); }catch(e){ alert(e.message); }finally{ btn.innerText='Save'; btn.disabled=false; }
+};
+window.filterLookup=(q)=>{
+  currentFilter=q||''; const tbody=document.getElementById('tbodyLookup'); tbody.innerHTML='';
+  const qq=(q||'').toUpperCase(); let list=masterHotels; if(qq) list=list.filter(h=>h.name.toUpperCase().includes(qq));
+  if(list.length===0){ tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;background:#ffcccc;padding:10px;color:#ff0000;font-weight:900">Tidak ada hotel "${q||''}" - Klik New Data!</td></tr>`; return; }
+  list.slice(0,800).forEach(h=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:#000080;font-weight:700">${h.name}</td><td>${h.typeRoom}</td><td>${h.kategori}</td><td class="right">${h.price?parsePrice(h.price).toLocaleString('en-US'):'0'}</td><td class="red">${formatIndo(h.valid1)}</td><td class="red">${formatIndo(h.valid2)}</td><td class="right">${h.xbed||'0'}</td><td class="center">${formatIndo(h.hss1)}</td><td class="center">${formatIndo(h.hss2)}</td><td class="right">${h.hssRate||'0'}</td>`;
+    tr.ondblclick=()=>{
+      const ciVal=document.getElementById('fCheckIn').value||sysISO;
+      let ci=null; if(ciVal.match(/^\d{4}-\d{2}-\d{2}$/)){ const [y,m,d]=ciVal.split('-'); ci=new Date(y,m-1,d); } else ci=parseIndoDate(ciVal);
+      const vf=parseIndoDate(h.valid1); const vt=parseIndoDate(h.valid2); const priceNum=parsePrice(h.price);
+      if((ci&&vf&&vt&&(ci<vf||ci>vt))||priceNum===0){
+        document.getElementById('warnHotel').innerText=h.name; document.getElementById('warnValid').innerText=`${formatIndo(h.valid1)} s/d ${formatIndo(h.valid2)}`; document.getElementById('warnCheckIn').innerText=formatIndo(toDisplay(ciVal)); document.getElementById('warnSysDate').innerText=sysIndo;
+        document.getElementById('validityWarning').classList.add('active'); document.getElementById('validityWarning').style.display='flex'; return;
+      }
+      document.getElementById('fHotel').value=h.name; document.getElementById('fTypeRoom').value=h.typeRoom; document.getElementById('fRate').value=h.price; document.getElementById('roomCat').innerText=h.kategori; selectedHotelValidity={name:h.name,from:h.valid1,to:h.valid2}; closeLookup(); calcTotal();
+    };
+    tr.onclick=()=>{ document.querySelectorAll('#tbodyLookup tr').forEach(r=>r.classList.remove('selRow')); tr.classList.add('selRow'); };
+    tbody.appendChild(tr);
+  });
+};
+window.checkValidity=()=>{
+  const ciVal=document.getElementById('fCheckIn').value||sysISO;
+  if(!ciVal||!selectedHotelValidity) return;
+  let ci=null; if(ciVal.match(/^\d{4}-\d{2}-\d{2}$/)){ const [y,m,d]=ciVal.split('-'); ci=new Date(y,m-1,d); } else ci=parseIndoDate(ciVal);
+  const vf=parseIndoDate(selectedHotelValidity.from); const vt=parseIndoDate(selectedHotelValidity.to);
+  if(!ci||!vf||!vt) return;
+  if(ci<vf||ci>vt){
+    document.getElementById('warnHotel').innerText=selectedHotelValidity.name;
+    document.getElementById('warnValid').innerText=`${formatIndo(selectedHotelValidity.from)} s/d ${formatIndo(selectedHotelValidity.to)}`;
+    document.getElementById('warnCheckIn').innerText=formatIndo(toDisplay(ciVal));
+    document.getElementById('warnSysDate').innerText=sysIndo;
+    document.getElementById('validityWarning').classList.add('active'); document.getElementById('validityWarning').style.display='flex';
+  }
+};
+window.closeValidityWarn=()=>{ document.getElementById('validityWarning').classList.remove('active'); document.getElementById('validityWarning').style.display='none'; };
+document.getElementById('fCheckIn').addEventListener('change',()=>{ validateDates(); checkValidity(); calcTotal(); });
+document.getElementById('fCheckOut').addEventListener('change',()=>{ validateDates(); calcTotal(); });
+document.getElementById('fRate').addEventListener('input',()=>{ calcTotal(); });
+document.getElementById('fTRoom').addEventListener('input',()=>{ calcTotal(); });
+document.getElementById('fMargin').addEventListener('input',()=>{ calcTotal(); });
+window.openPrint=async()=>{
+  const tbody=document.getElementById('printTbody'); tbody.innerHTML='';
+  const now=new Date();
+  const dateTimeStr = `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}-${now.getFullYear()} ${toTimeStr(now)}`;
+  document.getElementById('printDateTime').innerText=dateTimeStr;
+  document.getElementById('printGuestId').innerText=guestId;
+  document.getElementById('vPrintedBy').innerText=dateTimeStr;
+  let totalNites=0;
+  allRowsData.forEach(r=>{
+    if(!isShowAllMode && (r.guestId||'').toUpperCase() !== guestId.toUpperCase()) return;
+    const nites=calcNites(r.checkIn, r.checkOut); totalNites+=nites;
+    const trP=document.createElement('tr');
+    trP.innerHTML=`<td>${formatCheckInOut(r.checkIn,r.checkOut)}</td><td style="text-align:center">${r.troom||'1'}</td><td style="text-align:center">${nites}</td><td>${r.hotelName||''}</td><td>${r.roomCat||''} - ${r.guestId||''}</td><td></td>`;
+    tbody.appendChild(trP);
+  });
+  document.getElementById('printTotal').innerText=totalNites;
+  document.getElementById('printModal').classList.add('active'); document.getElementById('printModal').style.display='flex';
+};
+window.closePrint=()=>{ document.getElementById('printModal').classList.remove('active'); document.getElementById('printModal').style.display='none'; };
+window.openVoucher=async()=>{
+  const hotel = document.getElementById('fHotel').value.trim();
+  if(!hotel){ alert('Pilih hotel dulu!'); openLookup(); return; }
+  if(!validateDates()) return;
+  const now=new Date(); const dateTimeStr = `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}-${now.getFullYear()} ${toTimeStr(now)}`;
+  document.getElementById('vPrintedBy').innerText=dateTimeStr;
+  document.getElementById('vTo').innerText = hotel.toUpperCase();
+  document.getElementById('vPNR').innerText = guestId;
+  document.getElementById('vAttn').innerText = 'Reservation Team';
+  document.getElementById('vDate').innerText = sysIndo;
+  document.getElementById('vClients').innerText = guestId;
+  document.getElementById('vClients2').innerText = '';
+  document.getElementById('vIssued').innerText = '-';
+  document.getElementById('vPax').innerText = '2 Pax';
+  document.getElementById('vDateIn').innerText = formatIndo(toDisplay(document.getElementById('fCheckIn').value)).replace(/\//g,'-');
+  document.getElementById('vDateOut').innerText = formatIndo(toDisplay(document.getElementById('fCheckOut').value)).replace(/\//g,'-');
+  document.getElementById('vTRoom').innerText = document.getElementById('fTRoom').value||'1';
+  document.getElementById('vTypeRoom').innerText = document.getElementById('fTypeRoom').value||'DOUBLE/TWIN';
+  document.getElementById('vRemarksText').innerText = document.getElementById('fRemarks').value||'';
+  document.getElementById('vPrintGuest').innerText='PNR: '+guestId;
+  document.getElementById('voucherModal').classList.add('active'); document.getElementById('voucherModal').style.display='flex';
+};
+window.closeVoucher=()=>{ document.getElementById('voucherModal').classList.remove('active'); document.getElementById('voucherModal').style.display='none'; };
+window.modeAdd=()=>{
+  isEdit=false; 
+  currentDocId=null; 
+  selectedRow=null; 
+  document.getElementById('btnSave').innerText='Save'; 
+  // GUEST ID TETAP TERKUNCI - TIDAK DIRUBAH!
+  document.getElementById('fHotel').value=''; 
+  document.getElementById('fTypeRoom').value='DOUBLE/TWIN';
+  document.getElementById('fRate').value='0';
+  document.getElementById('fTRoom').value='1';
+  document.getElementById('fXBed').value='0';
+  document.getElementById('fRemarks').value='';
+  document.getElementById('fStatus').value='OK';
+  document.getElementById('roomCat').innerText='-';
+  document.getElementById('fCheckIn').value=sysISO; 
+  document.getElementById('fCheckOut').value=toISO(tomorrow); 
+  selectedHotelValidity=null; 
+  updateStatusColor(); 
+  calcTotal();
+};
+window.modeEdit=()=>{ if(!selectedRow){ alert('KLIK BARIS HIJAU!'); return; } isEdit=true; document.getElementById('btnSave').innerText='Update'; };
+window.modeDelete=async()=>{ if(!currentDocId){ alert('KLIK BARIS!'); return; } if(!confirm('HAPUS?')) return; await deleteDoc(doc(db,"hotel_transactions",currentDocId)); selectedRow.remove(); modeAdd(); loadHotels(isShowAllMode); };
+window.modeSave=async()=>{
+  if(!validateDates()) return;
+  const btn=document.getElementById('btnSave'); const hotelName=document.getElementById('fHotel').value.trim();
+  if(!hotelName){ alert('Pilih hotel!'); openLookup(); return; }
+  btn.innerText='SAVING...'; btn.disabled=true;
+  const currentGuestToSave = document.getElementById('fGuestId').value || guestId;
+  const payload={guestId:currentGuestToSave.toUpperCase(),hotelName:hotelName.toUpperCase(),checkIn:toDisplay(document.getElementById('fCheckIn').value),checkOut:toDisplay(document.getElementById('fCheckOut').value),typeRoom:document.getElementById('fTypeRoom').value,rate:document.getElementById('fRate').value,xbed:document.getElementById('fXBed').value,troom:document.getElementById('fTRoom').value,abf:document.getElementById('fABF').value,hb:document.getElementById('fHB').value,fb:document.getElementById('fFB').value,sglsup:document.getElementById('fSglSup').value,margin:document.getElementById('fMargin').value,status:document.getElementById('fStatus').value,remarks:document.getElementById('fRemarks').value,roomCat:document.getElementById('roomCat').innerText,limitDeposit:toDisplay(document.getElementById('limitDeposit').value),earlyBird:document.getElementById('earlyBird').value,discNite:document.getElementById('discNite').value,updatedAt:new Date().toISOString()};
+  try{ if(isEdit&&currentDocId) await updateDoc(doc(db,"hotel_transactions",currentDocId),payload); else await addDoc(collection(db,"hotel_transactions"),{...payload,createdAt:new Date().toISOString()}); alert('✅ Data disimpan untuk Guest '+payload.guestId); modeAdd(); loadHotels(isShowAllMode); }catch(e){ alert(e.message); }finally{ btn.disabled=false; btn.innerText='Save'; }
+};
+
+async function loadHotels(showAll = false){
+  const tbody=document.getElementById('tbodyDetail'); tbody.innerHTML='';
+  try{
+    // SELALU FETCH TERBARU BEB - JANGAN PAKAI CACHE LAMA!
+    const snap=await getDocs(collection(db,"hotel_transactions"));
+    allRowsData=[]; snap.forEach(d=>{ allRowsData.push({id:d.id,...d.data()}); });
+    
+    let filtered = allRowsData;
+    if(!showAll){
+      filtered = allRowsData.filter(r=> (r.guestId||'').toUpperCase() === guestId.toUpperCase());
+      if(filtered.length===0){
+        tbody.innerHTML=`<tr><td colspan="15" style="text-align:center;background:#ffffcc;padding:8px;font-weight:900">Belum ada hotel untuk ${guestId} - Klik Add | Klik Refresh untuk lihat SEMUA Guest</td></tr>`;
+        calcTotal();
+        return;
+      }
+    }
+    filtered.forEach(r=> createRow(r, tbody));
+    calcTotal();
+  }catch(e){ tbody.innerHTML=`<tr><td colspan="15">${e.message}</td></tr>`; }
+}
+
+async function loadMaster(){ try{ const snap=await getDocs(collection(db,"hotel")); masterHotels=[]; snap.forEach(d=>{ const data=d.data(); let nama=data.nameHotel||data.hotelName||data.name||''; if(!nama) return; masterHotels.push({name:String(nama).toUpperCase(),typeRoom:(data.typeRoom||'SINGLE').toUpperCase(),kategori:(data.category||'').toUpperCase(),price:data.roomRate||'0',valid1:data.validFrom||'',valid2:data.validTo||'',xbed:data.xBedRate||'0',hss1:data.hsFrom||'',hss2:data.hsTo||'',hssRate:data.rateHSS||'0'}); }); masterHotels.sort((a,b)=> a.name.localeCompare(b.name)); }catch(e){ console.log(e); } }
+window.addEventListener('load', async()=>{ await loadMaster(); await loadHotels(false); calcTotal(); updateStatusColor(); });
+</script>
+</body>
+</html>

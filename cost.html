@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MENU COST PRICE - FIX MASUK FIREBASE</title>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0}
+.top-win{background:linear-gradient(180deg, #cfe3ff, #a9c6ef); border-bottom:2px solid #5a7fb5; padding:6px 10px; display:flex; justify-content:space-between; font-weight:700; font-size:13px; color:#0a1931}
+.form-area{background:#e8e8f0; padding:8px; display:grid; grid-template-columns: 380px 1fr; gap:12px; align-items:start; border-bottom:2px solid #999}
+.form-left{padding:6px 10px}
+.form-right{padding:6px 10px; display:flex; gap:10px}
+.row{display:flex; align-items:center; margin-bottom:8px}
+.row label{font-size:11px; font-weight:700; width:95px; flex:none; text-align:right; margin-right:6px}
+.row label.left{text-align:left; width:85px}
+.row input,.row textarea{font-size:11px; padding:3px 6px; border:1px solid #666; background:white}
+.row input{height:22px}
+.row input:disabled,.row textarea:disabled{background:#e5e5e5; color:#555}
+.row input.tour{width:110px}
+.row input.service{width:150px}
+.row input.name{width:240px}
+.row input.sales{width:110px; text-align:right}
+.row input.supplier{width:150px}
+.row textarea.remarks{width:260px; height:72px; resize:none}
+.toolbar{background:#e9e9e9; padding:5px 10px; display:flex; gap:4px; align-items:center; border-top:1px solid #999; border-bottom:1px solid #999}
+.toolbar button{padding:4px 0; width:62px; font-size:11px; font-weight:700; border:1px solid #777; cursor:pointer; border-radius:2px; background:linear-gradient(180deg, #fff, #d0d0d0)}
+.toolbar button.add{background:#a8e6a8}
+.toolbar button.edit{background:#fff7a8}
+.toolbar button.exit{background:#b8b8ff}
+.toolbar button:disabled{opacity:0.5}
+.toolbar button.update-mode{background:linear-gradient(180deg, #fff7cc, #ff9900)!important}
+.time{font-size:18px; font-weight:700; margin-left:auto}
+.table-wrap{background:white; overflow:auto; height:calc(100vh - 185px); border-top:2px solid #00cc99}
+table{width:100%; border-collapse:collapse; font-size:11px}
+th{background:#f0f0f0; border:1px solid #bbb; padding:5px 4px; font-size:10px; position:sticky; top:0; text-align:center}
+td{border:1px solid #6de2c0; padding:4px 6px; white-space:nowrap; cursor:pointer}
+tr.selected{background:#00ff7f!important}
+tr.selected td{background:#00ff7f!important}
+tr:hover{background:#b3ffda}
+#debug{position:fixed; bottom:0; left:0; right:0; background:#000; color:#0f0; font-size:10px; padding:4px 8px; font-family:monospace; max-height:80px; overflow:auto; display:none}
+</style>
+</head>
+<body>
+<div class="top-win"><span>☰ MENU COST PRICE PT. SMAILING TOUR DMC - FIX MASUK FIREBASE</span><div class="time" id="clockTop">10:25:55</div></div>
+
+<div class="form-area">
+<div class="form-left">
+<div class="row"><label>Tour Code :</label><input id="tourCode" class="tour" disabled></div>
+<div class="row"><label>Name of tour :</label><input id="nameTour" class="name" disabled></div>
+<div class="row"><label>Supplier :</label><input id="supplier" class="supplier" disabled></div>
+</div>
+<div class="form-right">
+<div>
+<div class="row"><label class="left">Service :</label><input id="service" class="service" disabled></div>
+<div class="row"><label class="left">Sales Cost :</label><input id="salesCost" class="sales" disabled></div>
+</div>
+<div><div class="row" style="align-items:flex-start"><label class="left">Remarks :</label><textarea id="remarks" class="remarks" disabled></textarea></div></div>
+</div>
+</div>
+
+<div class="toolbar">
+<button id="btnAdd" class="add" onclick="doAdd()">Add</button>
+<button id="btnSave" onclick="doSave()" disabled>Save</button>
+<button id="btnEdit" class="edit" onclick="doEdit()">Edit</button>
+<button onclick="doDelete()">Delete</button>
+<button id="btnCancel" onclick="doCancel()">Cancel</button>
+<button onclick="doPrint()">Print</button>
+<button class="exit" onclick="location.href='index.html'">Exit</button>
+<span style="margin-left:12px; font-size:11px" id="info">Klik data tengah untuk pilih</span>
+<span id="fbStatus" style="margin-left:auto; font-size:11px; font-weight:bold; color:green">● Menunggu Firebase...</span>
+</div>
+
+<div class="table-wrap">
+<table id="costTable"><thead><tr><th>Tour Code</th><th>Name of Tour</th><th>Supplier</th><th>Service</th><th>Sales Cost</th><th>Remarks</th></tr></thead><tbody id="tbody"></tbody></table>
+</div>
+
+<div id="debug"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+function log(msg){
+  const d=document.getElementById('debug');
+  d.style.display='block';
+  d.innerHTML+= `<div>${new Date().toLocaleTimeString()} - ${msg}</div>`;
+  console.log(msg);
+}
+
+const colRef = collection(db, "cost_price");
+log('Firebase init OK - project: inbound2026-12ffe, collection: cost_price');
+
+let costs = [];
+let selectedIndex = -1;
+let selectedFirebaseId = null;
+
+function setFormEnabled(enabled){
+  ['tourCode','nameTour','supplier','service','salesCost','remarks'].forEach(id=>{ document.getElementById(id).disabled=!enabled; });
+  document.getElementById('btnSave').disabled=!enabled;
+  document.getElementById('btnCancel').disabled=!enabled;
+  document.getElementById('info').innerText=enabled?'Mode EDIT aktif - isi lalu Save':'Klik data tengah untuk pilih - Klik Edit untuk aktifkan';
+  document.getElementById('info').style.color=enabled?'#cc0000':'#333';
+}
+
+function render(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  costs.forEach((c, idx)=>{
+    const tr=document.createElement('tr');
+    tr.dataset.index=idx;
+    if(idx===selectedIndex) tr.className='selected';
+    tr.innerHTML=`<td>${c.tc}</td><td>${c.name}</td><td>${c.supp}</td><td>${c.service}</td><td style="text-align:right">${c.sales}</td><td>${c.remarks}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('fbStatus').innerText = `● Firebase Connected - ${costs.length} data`;
+  log(`Render ${costs.length} data`);
+}
+
+document.getElementById('tbody').addEventListener('click', (e)=>{
+  const tr=e.target.closest('tr');
+  if(!tr || tr.dataset.index===undefined) return;
+  const idx=parseInt(tr.dataset.index);
+  if(isNaN(idx) || idx>=costs.length) return;
+  selectedIndex=idx;
+  const s=costs[idx];
+  selectedFirebaseId=s.firebaseId;
+  document.getElementById('tourCode').value=s.tc;
+  document.getElementById('nameTour').value=s.name;
+  document.getElementById('supplier').value=s.supp;
+  document.getElementById('service').value=s.service;
+  document.getElementById('salesCost').value=s.sales;
+  document.getElementById('remarks').value=s.remarks;
+  setFormEnabled(false);
+  const b=document.getElementById('btnAdd'); b.innerText='Update'; b.classList.add('update-mode');
+  render();
+  log(`Pilih data: ${s.tc} - FirebaseID: ${s.firebaseId}`);
+});
+
+window.doAdd=()=>{
+  const b=document.getElementById('btnAdd');
+  if(b.innerText==='Update'){ doSave(); return; }
+  selectedIndex=-1; selectedFirebaseId=null;
+  const tc='TC-'+String(costs.length+2).padStart(5,'0');
+  document.getElementById('tourCode').value=tc;
+  document.getElementById('nameTour').value=''; document.getElementById('supplier').value='SMAILING';
+  document.getElementById('service').value=''; document.getElementById('salesCost').value=''; document.getElementById('remarks').value='';
+  setFormEnabled(true);
+  document.getElementById('nameTour').focus();
+  log('Mode ADD - Tour Code: '+tc);
+};
+
+window.doEdit=()=>{
+  if(selectedIndex===-1 &&!document.getElementById('tourCode').value){ alert('Klik data di tengah dulu beb!'); return; }
+  setFormEnabled(true);
+  log('Mode EDIT aktif');
+};
+
+window.doSave=async()=>{
+  const tc=document.getElementById('tourCode').value;
+  if(!tc){ alert('Tour Code kosong'); return; }
+  const nameTour=document.getElementById('nameTour').value.trim();
+  if(!nameTour){ alert('Name of tour wajib isi beb!'); return; }
+
+  const payload={
+    tc: tc,
+    name: nameTour.toUpperCase(),
+    supp: document.getElementById('supplier').value.toUpperCase() || 'SMAILING',
+    service: document.getElementById('service').value.toUpperCase(),
+    sales: document.getElementById('salesCost').value || '0.00',
+    remarks: document.getElementById('remarks').value,
+    createdAt: new Date().toISOString()
+  };
+
+  log('Mencoba save: '+JSON.stringify(payload));
+  document.getElementById('fbStatus').innerText='⏳ Saving to Firebase...';
+  document.getElementById('fbStatus').style.color='orange';
+
+  try{
+    if(selectedFirebaseId){
+      log('Update doc ID: '+selectedFirebaseId);
+      await updateDoc(doc(db,"cost_price",selectedFirebaseId), payload);
+      log('✅ UPDATE BERHASIL!');
+    }else{
+      log('Add new doc to cost_price');
+      const docRef = await addDoc(colRef, payload);
+      log('✅ ADD BERHASIL! ID: '+docRef.id);
+    }
+    setFormEnabled(false);
+    document.getElementById('btnAdd').innerText='Add';
+    document.getElementById('btnAdd').classList.remove('update-mode');
+    document.getElementById('fbStatus').innerText='✓ Berhasil masuk Firebase!';
+    document.getElementById('fbStatus').style.color='green';
+    setTimeout(()=>{ document.getElementById('fbStatus').innerText=`● Firebase Connected - ${costs.length} data`; },2000);
+  }catch(e){
+    log('❌ ERROR: '+e.message);
+    document.getElementById('fbStatus').innerText='❌ Error: '+e.message;
+    document.getElementById('fbStatus').style.color='red';
+    alert('GAGAL SIMPAN BEB! Error: '+e.message+'\n\nCek 1: Sudah ganti RULES di Firebase belum?\nCek 2: Lihat console bawah hitam, ada tulisan merah?');
+  }
+};
+
+window.doDelete=async()=>{
+  if(selectedIndex===-1 ||!selectedFirebaseId){ alert('Klik data di tengah dulu beb yang mau dihapus!'); return; }
+  if(confirm('Hapus '+document.getElementById('tourCode').value+'?')){
+    try{
+      await deleteDoc(doc(db,"cost_price",selectedFirebaseId));
+      log('✅ DELETE BERHASIL');
+      doCancel();
+    }catch(e){ log('❌ Delete error: '+e.message); alert(e.message); }
+  }
+};
+
+window.doCancel=()=>{
+  selectedIndex=-1; selectedFirebaseId=null;
+  ['tourCode','nameTour','supplier','service','salesCost','remarks'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('btnAdd').innerText='Add'; document.getElementById('btnAdd').classList.remove('update-mode');
+  setFormEnabled(false); render();
+};
+
+window.doPrint=()=>{
+  window.print();
+};
+
+setInterval(()=>{ document.getElementById('clockTop').innerText=new Date().toTimeString().split(' ')[0]; },1000);
+
+// LISTENER TANPA orderBy BIAR GAK ERROR INDEX
+onSnapshot(colRef,
+  (snap)=>{
+    log(`onSnapshot dapat ${snap.size} dokumen dari cost_price`);
+    const oldTc=selectedIndex>=0? costs[selectedIndex]?.tc : null;
+    costs=[];
+    snap.forEach(d=>{
+      const data=d.data();
+      costs.push({firebaseId:d.id, tc:data.tc||'', name:data.name||'', supp:data.supp||'', service:data.service||'', sales:data.sales||'', remarks:data.remarks||''});
+    });
+    // sort manual by tc
+    costs.sort((a,b)=> a.tc.localeCompare(b.tc));
+    if(oldTc){
+      const idx=costs.findIndex(c=>c.tc===oldTc);
+      if(idx>=0) selectedIndex=idx;
+    }
+    render();
+  },
+  (err)=>{
+    log('❌ onSnapshot ERROR: '+err.message);
+    document.getElementById('fbStatus').innerText='❌ Error listen: '+err.message;
+    document.getElementById('fbStatus').style.color='red';
+    alert('Error Firebase: '+err.message+' - Pastikan RULES sudah di PUBLISH!');
+  }
+);
+
+setFormEnabled(false);
+log('Menunggu data dari Firebase cost_price...');
+</script>
+</body>
+</html>

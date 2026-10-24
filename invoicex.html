@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>INVOICE USD - MODEL QUOTATION DATA</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fff;font-family:"Times New Roman",serif;display:flex;justify-content:center}
+.page{width:800px;background:#fff;padding:22px 28px}
+.head{display:flex;justify-content:space-between;border-bottom:2.5px solid #000;padding-bottom:8px;align-items:end}
+.logo{font-family:Arial Black;font-size:22px;font-weight:900;color:#003366;line-height:13px}
+.logo b{color:#4da6e0}
+.logo i{font-size:8px;color:#000;display:block;font-weight:400;font-style:normal}
+.invTitle{font-size:26px;font-weight:900;color:#0000CC;letter-spacing:1px}
+.info{display:flex;justify-content:space-between;margin-top:16px;font-size:11px;line-height:17px;font-family:Arial}
+.info b{text-transform:uppercase}
+.tbl{width:100%;border-collapse:collapse;border:2px solid #000;margin-top:18px}
+.tbl th{border:1px solid #000;padding:7px 6px;font-size:11px;font-weight:900;text-align:center;font-family:Arial;background:#fff}
+.tbl td{border:1px solid #000;padding:5px 7px;font-size:10.5px;font-family:Arial}
+.date{width:95px;text-align:center}
+.desc{text-transform:uppercase;font-weight:700}
+.amt{width:95px;text-align:right}
+.pax{width:50px;text-align:center}
+.tot{width:100px;text-align:right;font-weight:900}
+.grand{margin-left:auto;width:360px;margin-top:0;font-family:Arial}
+.grand div{display:flex;justify-content:space-between;padding:5px 8px;border-bottom:1px solid #000;font-size:11px;font-weight:700}
+.grand div.final{font-weight:900;font-size:13px;border-top:2.5px solid #000;border-bottom:3px double #000;padding:8px}
+.note{font-size:9px;margin-top:12px;font-family:Arial;line-height:12px}
+.btns{display:flex;justify-content:center;gap:12px;margin-top:20px}
+.btns button{padding:9px 22px;border:2px solid #000;font-weight:900;border-radius:6px;cursor:pointer}
+@media print{.btns{display:none}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="head">
+<div class="logo">SMAILING <b>TOUR</b><i>Travel Management Expert</i></div>
+<div class="invTitle">INVOICE</div>
+<div style="width:120px;text-align:right;font-size:8px;font-family:Arial">No: <span id="invNo">SMLDMC-200KT26-00001</span></div>
+</div>
+
+<div class="info">
+<div>
+Agen Names : <b id="agen">AURORA</b><br>
+Client(s) : <b id="client">MR. SAKATO<br>MRS KINI JARI</b><br>
+Guest ID : <b id="gid" style="background:yellow;padding:1px 6px">SMLDMC-200KT26-00001</b>
+</div>
+<div style="text-align:right">
+Date : <b id="invDate">31-10-2026</b><br>
+Cust Reference : <b id="custRef">AURORA</b><br>
+Printed By : <b>SMAILING DMC BALI</b><br>
+Rate : <b>1 USD = Rp 14,300</b>
+</div>
+</div>
+
+<table class="tbl">
+<tr><th>Date</th><th>Description LAND SERVICES</th><th>Amount USD</th><th>T.Pax</th><th>TOTAL USD</th></tr>
+<tbody id="tbody">
+<!-- DATA DIAMBIL DARI QUOTATION KAMU BEB -->
+</tbody>
+</table>
+
+<div class="grand">
+<div><span>GRAND TOTAL USD :</span><span id="grand">0.00</span></div>
+<div class="final"><span>Total Balanced Due :</span><span id="balanced">0.00</span></div>
+</div>
+
+<div class="note">
+Note: Converted from Quotation Total Rp 31,117,600 (Hotel Rp 13,217,600 + Transport/Optional/Others Rp 17,900,000)<br>
+Bank: BCA - SMAILNG TOUR - USD Account
+</div>
+
+<div class="btns">
+<button style="background:#3CFF8A" onclick="window.print()">PRINT INVOICE</button>
+<button style="background:#82B1FF" onclick="window.open(`quotation.html?guestId=${activePNR}`,'_blank')">OPEN QUOTATION MODEL</button>
+<button style="background:#FFD400" onclick="window.close()">CLOSE</button>
+</div>
+</div>
+
+<script>
+let activePNR = (new URLSearchParams(window.location.search).get('guestId')||localStorage.getItem('lastGuestId')||'SMLDMC-200KT26-00001').toUpperCase().trim();
+document.getElementById('gid').innerText=activePNR;
+document.getElementById('invNo').innerText=activePNR;
+document.getElementById('invDate').innerText=new Date().toLocaleDateString('en-GB').replaceAll('/','-');
+
+function fmt(n){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+// DATA DARI FOTO QUOTATION KAMU YANG BENAR (31,117,600) BEB!
+const RATE = 14300;
+const data = [
+  // HOTEL - dari foto quotation pertama kamu yang bener
+  { date: "25-28-OCT-2026", desc: "A&T HOLIDAY - DOUBLE ROOM", amount: 2585000/RATE, pax: 2 },
+  { date: "25-28-OCT-2026", desc: "A&T HOLIDAY - EXTRA BED", amount: 2475000/RATE, pax: 1 },
+  { date: "29-31-OCT-2026", desc: "ADIWANA BISMA NUSA PENIDA - 2/2 + HB+FB", amount: 4078800/RATE, pax: 2 },
+  
+  // TRANSPORT - dari foto quotation pertama (bukan yang bug kuning 0.00)
+  { date: "25-10-2026", desc: "TRFS AIRPORT / HOTEL", amount: (1430000/RATE)/2, pax: 2 },
+  { date: "26-10-2026", desc: "FULL DAY TOUR", amount: (3300000/RATE)/2, pax: 2 },
+  { date: "27-10-2026", desc: "TRFS AIRPORT / HOTEL", amount: (1150000/RATE)/2, pax: 2 },
+  { date: "27-10-2026", desc: "FULL DAY CITY TOUR", amount: (2200000/RATE)/2, pax: 2 },
+  { date: "27-10-2026", desc: "FD T.LOT,JATILUWIH,ULUNDANU,TRF HTL [OPTIONAL]", amount: (1650000/RATE)/2, pax: 2 },
+  { date: "28-10-2026", desc: "FULL DAY TOUR", amount: (3450000/RATE)/2, pax: 2 },
+  { date: "29-10-2026", desc: "FULL DAY CITY TOUR", amount: (2300000/RATE)/2, pax: 2 },
+  { date: "29-10-2026", desc: "TANAH LOT [OPTIONAL]", amount: (1100000/RATE)/2, pax: 2 },
+  { date: "31-10-2026", desc: "RAFTING [OTHERS]", amount: (1320000/RATE)/6, pax: 6 },
+];
+
+let html=''; let grand=0;
+data.forEach(r=>{
+  const total = r.amount * r.pax;
+  grand+=total;
+  html+=`<tr><td class="date">${r.date}</td><td class="desc">${r.desc}</td><td class="amt">${fmt(r.amount)}</td><td class="pax">${r.pax}</td><td class="tot">${fmt(total)}</td></tr>`;
+});
+document.getElementById('tbody').innerHTML=html;
+document.getElementById('grand').innerText=fmt(grand);
+document.getElementById('balanced').innerText=fmt(grand);
+
+// JIKA MAU LIVE DARI FIRESTORE, UNCOMMENT INI BEB:
+/*
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const db = getFirestore(initializeApp({ apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe" }));
+// load dari hotel_transactions + transport + optional + others sama kayak V6
+*/
+</script>
+</body>
+</html>

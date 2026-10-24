@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operation</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fff;font-family:Arial;font-size:12px}
+.topbar{background:#ff0000;color:#fff;display:flex;flex-wrap:wrap;gap:4px;padding:4px;align-items:center;font-weight:900}
+.topbar .box{background:#fff;color:#000;padding:2px 6px;border:1px solid #000;min-width:90px}
+.topbar input{background:#fff;border:none;font-weight:900;width:90px;outline:none}
+.topbar .yellow{background:#ffff00}
+.toolbar{display:flex;flex-wrap:wrap;gap:2px;padding:3px;background:#d9d9d9;border-bottom:2px solid #000}
+.toolbar button{padding:4px 10px;font-weight:900;border:1px solid #000;cursor:pointer;background:#e8e8e8}
+.toolbar button:disabled{opacity:.4;cursor:not-allowed}
+.toolbar input{font-weight:900;padding:3px;border:1px solid #000;width:150px}
+.tableWrap{overflow:auto;max-height:70vh;border:2px solid #000;background:#fff}
+.tableWrap table{width:100%;border-collapse:collapse;min-width:1400px}
+.tableWrap thead th{position:sticky;top:0;z-index:5;background:#fff}
+table{width:100%;border-collapse:collapse}
+th{background:#fff;border:1px solid #000;padding:4px;font-size:11px;font-weight:900;text-align:center;white-space:nowrap}
+td{border:1px solid #000;padding:4px 5px;font-size:11px;white-space:nowrap;cursor:pointer}
+td.ok{background:#00ff66;color:#000}
+td.wl{background:#ffff00;color:#000}
+td.cxl{background:#ff0000;color:#fff;font-weight:900}
+td:nth-child(2){font-weight:700}
+td:nth-child(4){white-space:normal;min-width:220px}
+.controls{padding:6px;background:#fff;display:flex;gap:8px;align-items:center;font-weight:900}
+.controls button{padding:6px 12px;font-weight:900;border:2px solid #000;cursor:pointer;background:#222;color:#fff}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;align-items:center;justify-content:center}
+.modal.open{display:flex}
+.modalBox{background:#fff;width:520px;max-width:95vw;max-height:92vh;overflow:auto;padding:14px;border:3px solid #000}
+.modalBox h3{margin:0 0 10px;background:#ff0000;color:#fff;padding:8px;text-align:center}
+.modalBox label{display:block;font-weight:900;margin:8px 0 2px}
+.modalBox input,.modalBox select{width:100%;padding:7px;border:1px solid #000;font-weight:700}
+.modalBox .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modalBox button{padding:8px 14px;font-weight:900;border:2px solid #000;cursor:pointer;margin-top:10px}
+.reportWrap{display:none;position:fixed;inset:0;background:#fff;z-index:200;overflow:auto;padding:10px 14px 30px}
+.reportWrap.open{display:block}
+.reportLogo{font-weight:900;font-size:28px;color:#1a3a8a;letter-spacing:1px;line-height:1}
+.reportLogo small{display:block;font-size:9px;color:#666;letter-spacing:2px;font-weight:700}
+.reportTitle{font-weight:900;font-size:22px;margin:22px 0 18px;text-decoration:underline}
+.reportTable{width:100%;border-collapse:collapse;font-size:11px}
+.reportTable th{border:1.5px solid #000;padding:5px 4px;background:#fff;text-align:left;font-size:11px}
+.reportTable td{border:1px solid #000;padding:6px 4px;background:#fff;color:#000;cursor:default;white-space:normal}
+.reportBtns{display:flex;gap:8px;margin-bottom:10px}
+.reportBtns button{padding:8px 16px;font-weight:900;border:2px solid #000;cursor:pointer}
+/* === GSO KAYAK SS BEB === */
+.gsoWrap{display:none;position:fixed;inset:0;background:#3a3a3a;z-index:210;overflow:auto;padding:14px}
+.gsoWrap.open{display:block}
+.gsoPaper{background:#fff;max-width:900px;margin:0 auto;padding:18px 22px 30px;font-family:Arial;font-size:13px}
+.gsoLogo{font-weight:900;font-size:26px;color:#1a3a8a;line-height:1}
+.gsoLogo small{display:block;font-size:8px;color:#666;letter-spacing:1.5px}
+.gsoTitle{text-align:center;font-weight:900;font-size:22px;letter-spacing:1px;border-top:3px solid #000;border-bottom:2px solid #000;padding:6px 0;margin:8px 0 10px}
+.gsoGrid{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px}
+.gsoGrid .lbl{text-align:right;font-weight:400}
+.gsoGrid .val{font-weight:900}
+.gsoGrid .val span{font-weight:400}
+.gsoLine{border-top:2px solid #000;margin:10px 0}
+.gsoItinHead{display:flex;justify-content:space-between;font-weight:900;font-size:18px;border-bottom:3px double #000;padding-bottom:4px;margin-top:18px}
+.gsoItinTable{width:100%;border-collapse:collapse;margin-top:6px}
+.gsoItinTable th{border-bottom:1.5px solid #000;padding:5px;font-size:12px;text-align:center}
+.gsoItinTable td{border:none;padding:3px 6px;font-size:12px}
+.gsoItinTable td:nth-child(1){text-align:right;width:170px}
+.gsoItinTable td:nth-child(2){text-align:center;width:70px}
+@media print{
+  body *{visibility:hidden}
+  .reportWrap.open, .reportWrap.open *, .gsoWrap.open, .gsoWrap.open *{visibility:visible}
+  .reportWrap.open, .gsoWrap.open{position:static;display:block!important;overflow:visible;padding:0;background:#fff}
+  .gsoWrap.open{background:#fff}
+  .reportBtns,.gsoBtns{display:none!important}
+  .controls,.toolbar,.topbar,.modal,.tableWrap,.totalBar,.infoBar{display:none!important}
+  @page{size:landscape;margin:10mm}
+}
+</style>
+</head>
+<body>
+<div class="controls"><button onclick="openPrevPrinter()">PREV / PRINTER</button><button onclick="openGSO()" style="background:#1a3a8a">G S O</button><span>Guest ID: <span id="gIdCtrl" style="background:yellow;padding:2px 6px"></span></span><span id="recordInfo">Record ke: 0</span><span id="lockInfo" style="color:#ff0000"></span></div>
+<div class="topbar">
+<span>Tour Price :</span><div class="box"><span id="tourPriceTop">0.00</span></div>
+<span>Cost Price :</span><div class="box"><span id="costPriceTop">0.00</span></div>
+<span>TOUR</span><div class="box yellow" id="clock">00:00:00</div>
+<span style="flex:1"></span><div class="box" id="guestIdTop">-</div>
+<span>DATA</span><div class="box" id="dataSrc">OPTIONAL</div>
+<span>Margin :</span><div class="box yellow"><input id="marginIn" value="10.00" onchange="render()"> </div>
+</div>
+<div class="toolbar">
+<button onclick="openAdd()">Add</button><button id="btnSave" onclick="doSave()">Save</button><button id="btnEdit" onclick="openEdit()">Edit</button><button id="btnDelete" onclick="doDelete()">Delete</button><button onclick="location.reload()">Refresh</button><button onclick="doCancel()">Cancel</button><button onclick="window.close()">Exit</button><button onclick="openPrevPrinter()" style="background:#ffff00">PREV / PRINTER</button><button onclick="openGSO()" style="background:#cfe2ff">G S O</button>
+<span style="margin-left:10px"><button onclick="filterPeriode()">Periode</button><button onclick="filterToday()">To Day</button><button onclick="filterDate()">Date</button><button onclick="filterMonth()">Month</button><input id="dateFilter" placeholder="20-10-2026"></span>
+<span style="margin-left:auto">Status : <input value="OK" style="width:60px"></span>
+</div>
+<div class="infoBar" style="padding:4px 8px;font-weight:900;font-size:11px">🟩 HIJAU = OK &nbsp; | &nbsp; 🟨 KUNING = WL &nbsp; | &nbsp; 🟥 MERAH = Cxl &nbsp; | &nbsp; 🟨 = MANUAL - Bisa Delete &nbsp; | &nbsp; 👇 Tabel bisa digulir, header tetap diem!</div>
+<div class="tableWrap">
+<table>
+<thead><tr><th>Date</th><th>Name Of Clients / Customer</th><th>Pax</th><th>Program / Service</th><th>Payment</th><th>Hotel</th><th>Guide</th><th>Supplier</th><th>Driver</th><th>SB Htl</th><th>SB Off</th><th>Agents</th><th>Status</th><th>Remarks</th></tr></thead>
+<tbody id="tbodyOp"></tbody>
+</table>
+</div>
+<div class="totalBar" style="padding:8px;font-weight:900;font-size:12px">Total Rows: <span id="totalRows">0</span> &nbsp; | &nbsp; Tour Price Total: Rp. <span id="tourTotal">0</span> &nbsp; | &nbsp; Cost Price Total: Rp. <span id="costTotal">0</span> &nbsp; | &nbsp; Nett: Rp. <span id="nettTotal">0</span></div>
+
+<!-- PREV / PRINTER - REPORT ON REGISTRASI -->
+<div class="reportWrap" id="reportWrap">
+<div class="reportBtns"><button style="background:#00ff66" onclick="window.print()">🖨️ PRINT</button><button style="background:#ccc" onclick="closeReport()">✖ TUTUP / KEMBALI</button></div>
+<div class="reportLogo">SMAILING TOUR<small>Travel Management Expert &nbsp; ✈️</small></div>
+<div class="reportTitle">REPORT ON REGISTRASI :</div>
+<table class="reportTable">
+<thead><tr><th style="width:70px">Date</th><th style="width:150px">Name</th><th style="width:35px">Pax</th><th>Programs</th><th style="width:55px">Payment</th><th style="width:130px">Hotels</th><th style="width:70px">Guide</th><th style="width:70px">Supplier</th><th style="width:70px">Driver</th><th style="width:35px">Htl</th><th style="width:35px">Off</th><th style="width:120px">AGENT</th><th style="width:110px">REMARKS</th></tr></thead>
+<tbody id="tbodyReport"></tbody>
+</table>
+<div style="margin-top:14px;font-size:11px">Guest ID: <b id="reportGuestId"></b> &nbsp; | &nbsp; Total: <b id="reportTotal"></b> rows</div>
+</div>
+
+<!-- GSO - GUIDE SERVICE ORDER KAYAK SS -->
+<div class="gsoWrap" id="gsoWrap">
+<div class="gsoBtns" style="max-width:900px;margin:0 auto 10px;display:flex;gap:8px"><button style="padding:8px 16px;font-weight:900;border:2px solid #000;cursor:pointer;background:#00ff66" onclick="window.print()">🖨️ PRINT GSO</button><button style="padding:8px 16px;font-weight:900;border:2px solid #000;cursor:pointer;background:#ccc" onclick="closeGSO()">✖ TUTUP / KEMBALI</button><span style="color:#fff;font-weight:900;align-self:center">Preview GSO - Persis kayak SS beb!</span></div>
+<div class="gsoPaper">
+<div class="gsoLogo">SMAILING TOUR<small>Travel Management Expert</small></div>
+<div class="gsoTitle">GUIDE SERVICE ORDER</div>
+<div class="gsoGrid">
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">Guide :</span><span class="val" id="gsoGuide">-</span></div>
+<div style="display:grid;grid-template-columns:80px 1fr"><span class="lbl">Date :</span><span class="val" id="gsoDate">-</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">Transport Supplier :</span><span class="val">SMAILING LOMBOK</span></div>
+<div style="display:grid;grid-template-columns:80px 1fr"><span class="lbl">Driver :</span><span class="val" id="gsoDriver">-</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">Program :</span><span class="val" id="gsoProgram">-</span></div>
+<div style="display:grid;grid-template-columns:80px 1fr"><span class="lbl">H P :</span><span class="val" id="gsoHP">-</span></div>
+</div>
+<div class="gsoLine"></div>
+<div class="gsoGrid">
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">Guest Name :</span><span class="val" id="gsoGuest">-</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">TOTAL PAX :</span><span class="val" id="gsoPax">-</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">Hotels :</span><span class="val" id="gsoHotels">-</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">Date In / Flight :</span><span class="val" id="gsoIn">-</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">Agents :</span><span class="val" id="gsoAgents">-</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">Date Out / Flight :</span><span class="val" id="gsoOut">-</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr"><span class="lbl">Remarks :</span><span class="val" id="gsoRemarks"></span></div>
+<div></div>
+</div>
+<div class="gsoItinHead"><span>Itinerary :</span><span>TC : &nbsp;<span id="gsoTC">PUTU</span></span></div>
+<table class="gsoItinTable">
+<thead><tr><th style="text-align:right">Tanggal</th><th>T.Pax</th><th style="text-align:left">Programs / Service</th></tr></thead>
+<tbody id="tbodyGSO"></tbody>
+</table>
+<div style="margin-top:20px;font-size:11px">Guest ID: <b id="gsoGuestId"></b></div>
+</div>
+</div>
+
+<div class="modal" id="modal"><div class="modalBox">
+<h3 id="modalTitle">ADD OPERATION</h3>
+<input type="hidden" id="fId">
+<div class="row"><div><label>Date</label><input id="fDate" type="date"></div><div><label>Pax</label><input id="fPax" type="number" value="2"></div></div>
+<label>Program / Service</label><input id="fService" placeholder="Contoh: EXTRA LUNCH / ...">
+<div class="row"><div><label>Cost Price / Nett (per pax)</label><input id="fNett" type="number" value="0"></div><div><label>Margin %</label><input id="fMargin" type="number" value="10"></div></div>
+<div class="row"><div><label>Payment</label><input id="fPayment"></div><div><label>Hotel</label><input id="fHotel"></div></div>
+<div class="row"><div><label>Guide</label><input id="fGuide"></div><div><label>Supplier</label><input id="fSupplier" value="SMAILING"></div></div>
+<div class="row"><div><label>Driver</label><input id="fDriver"></div><div><label>Agents</label><input id="fAgents"></div></div>
+<label>Status</label>
+<select id="fStatus"><option value="OK">OK - Hijau</option><option value="WL">WL - Kuning (Waitlist)</option><option value="Cxl">Cxl - Merah (Cancel)</option></select>
+<label>Remarks</label><input id="fRemarks" placeholder="MANUAL - OPERATION">
+<div style="display:flex;gap:8px"><button style="background:#00ff66;flex:1" onclick="doSave()">SAVE</button><button style="background:#ccc;flex:1" onclick="closeModal()">CANCEL</button></div>
+<div style="font-size:11px;margin-top:6px;color:#ff0000;font-weight:900">* MANUAL: bisa Edit semua + Delete. ITINERARY: cuma Cost Price yang bisa diedit, Delete TIDAK BISA.</div>
+</div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe" };
+const db = getFirestore(initializeApp(firebaseConfig));
+let activePNR = new URLSearchParams(window.location.search).get('guestId')||'SMLDMC-20OKT26-00001'; activePNR=activePNR.toUpperCase().trim();
+let clientName='-', agentName='-', tourMargin=10;
+let hotels=[], items=[], manualItems=[];
+let selectedIdx = -1;
+let costOverrides = {};
+let extraInfo = { flightIn:'', flightOut:'', tc:'PUTU', hp:'' };
+function parseNum(v){ if(v==null) return 0; return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }
+function parseDate(s){ if(!s) return new Date(9999,0,1); s=String(s).trim().replace(/\s+/g,''); const p=s.split(/[-/]/); if(p.length===3){ if(p[0].length===4) return new Date(+p[0],+p[1]-1,+p[2]); return new Date(+p[2],+p[1]-1,+p[0]); } const d=new Date(s); return isNaN(d)?new Date(9999,0,1):d; }
+function formatDateFromAny(val){ if(!val) return ''; try{ let d; if(val && typeof val.toDate==='function'){ d=val.toDate(); } else if(val && typeof val.seconds==='number'){ d=new Date(val.seconds*1000); } else if(val instanceof Date){ d=val; } else if(typeof val==='string'){ let s=val.trim().replaceAll('/','-').replace(/\s+/g,''); if(s.match(/^\d{2}-\d{2}-\d{4}$/)) return s; if(s.match(/^\d{4}-\d{2}-\d{2}/)){ const p=s.split('-'); return `${p[2].substring(0,2)}-${p[1]}-${p[0]}`; } d=new Date(s); } if(!d || isNaN(d.getTime())) return String(val).replaceAll('/','-'); const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0'); const yyyy=d.getFullYear(); return `${dd}-${mm}-${yyyy}`; }catch(e){ return String(val).replaceAll('/','-'); } }
+function getGuestId(obj){ for(let k in obj){ const lk=k.toLowerCase(); if(lk.includes('guest') && lk.includes('id') && obj[k]) return String(obj[k]).toUpperCase().trim(); } return (obj.guestId||obj.GuestID||'').toString().toUpperCase().trim(); }
+function getField(obj, includes){ const keys=Object.keys(obj); for(let k of keys){ const lk=k.toLowerCase().replace(/\s+/g,''); let ok=true; for(let inc of includes){ if(!lk.includes(inc)) { ok=false; break; } } if(ok) return obj[k]; } return ''; }
+function fmt(n){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtIDR(n){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function getStatus(d){ let s = String(d.Status||d.status||d.STS||d.sts||d.Remarks||d.remarks||'OK').toUpperCase().trim(); if(s.includes('CXL') || s.includes('CANCEL') || s.includes('CX')) return 'Cxl'; if(s.includes('WL') || s.includes('WAIT')) return 'WL'; return 'OK'; }
+function statusClass(st){ if(st==='Cxl') return 'cxl'; if(st==='WL') return 'wl'; return 'ok'; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+setInterval(()=>{ const d=new Date(); document.getElementById('clock').innerText = d.toLocaleTimeString('en-GB'); },1000);
+window.openPrevPrinter = function(){
+  const all = window._allRows || []; if(!all.length) return alert('Belum ada data beb!');
+  const tb=document.getElementById('tbodyReport'); tb.innerHTML='';
+  all.forEach(r=>{ tb.innerHTML+=`<tr><td>${formatDateFromAny(r.date)}</td><td>${esc(clientName)}</td><td style="text-align:center">${r.pax}</td><td>${esc(r.service)}</td><td>${esc(r.payment||'')}</td><td>${esc(r.hotel||'')}</td><td>${esc(r.guide||'')}</td><td>${esc(r.supplier||'SMAILING')}</td><td>${esc(r.driver||'')}</td><td></td><td></td><td>${esc(agentName)}</td><td>${esc(r.status==='OK'?'':r.status||'')}</td></tr>`; });
+  document.getElementById('reportGuestId').innerText=activePNR; document.getElementById('reportTotal').innerText=all.length;
+  document.getElementById('reportWrap').classList.add('open'); window.scrollTo(0,0);
+};
+window.closeReport = function(){ document.getElementById('reportWrap').classList.remove('open'); };
+// === GSO KAYAK SS BEB ===
+window.openGSO = function(){
+  const all = window._allRows || []; if(!all.length) return alert('Belum ada data beb!');
+  const sel = selectedIdx>=0 ? all[selectedIdx] : all[0];
+  const guide = sel.guide || all.find(x=>x.guide)?.guide || '';
+  const driver = sel.driver || all.find(x=>x.driver)?.driver || '';
+  const program = sel.service || all[0].service;
+  const dateStr = formatDateFromAny(sel.date || all[0].date);
+  const hotelNames = [...new Set([...hotels.map(h=>h.hotelName).filter(Boolean), ...all.map(x=>x.hotel).filter(Boolean)])];
+  const maxPax = Math.max(...all.map(x=>x.pax||2));
+  const sorted = [...all].sort((a,b)=>parseDate(a.date)-parseDate(b.date));
+  const dateIn = formatDateFromAny(sorted[0].date);
+  const dateOut = formatDateFromAny(sorted[sorted.length-1].date);
+  document.getElementById('gsoGuide').innerText = guide || '-';
+  document.getElementById('gsoDate').innerText = dateStr;
+  document.getElementById('gsoDriver').innerText = driver || '';
+  document.getElementById('gsoProgram').innerText = program;
+  document.getElementById('gsoHP').innerText = extraInfo.hp || '';
+  document.getElementById('gsoGuest').innerText = clientName;
+  document.getElementById('gsoPax').innerText = maxPax;
+  document.getElementById('gsoHotels').innerText = hotelNames.join(', ') || '-';
+  document.getElementById('gsoIn').innerText = extraInfo.flightIn ? dateIn+' / '+extraInfo.flightIn : dateIn;
+  document.getElementById('gsoAgents').innerText = agentName;
+  document.getElementById('gsoOut').innerText = extraInfo.flightOut ? dateOut+' / '+extraInfo.flightOut : dateOut;
+  document.getElementById('gsoRemarks').innerText = sel.remarks || '';
+  document.getElementById('gsoTC').innerText = extraInfo.tc || 'PUTU';
+  document.getElementById('gsoGuestId').innerText = activePNR;
+  const tb=document.getElementById('tbodyGSO'); tb.innerHTML='';
+  sorted.forEach(r=>{ tb.innerHTML+=`<tr><td>${formatDateFromAny(r.date)}</td><td>${(r.pax||2).toFixed(2)}</td><td>${esc(r.service)}</td></tr>`; });
+  document.getElementById('gsoWrap').classList.add('open'); window.scrollTo(0,0);
+};
+window.closeGSO = function(){ document.getElementById('gsoWrap').classList.remove('open'); };
+window.selectRow = function(idx){
+  selectedIdx = idx; const allRows = document.querySelectorAll('#tbodyOp tr'); allRows.forEach((tr,i)=>{ tr.style.outline = (i===idx) ? '3px solid #000' : 'none'; });
+  const r = window._allRows[idx]; if(!r) return;
+  const tourPerPax = r.nett * (1 + (r.margin||10)/100);
+  document.getElementById('tourPriceTop').innerText = fmt(tourPerPax); document.getElementById('costPriceTop').innerText = fmt(r.nett); document.getElementById('marginIn').value = (r.margin||10).toFixed(2); document.getElementById('dataSrc').innerText = r.source || 'OPTIONAL'; document.getElementById('guestIdTop').innerText = activePNR;
+  document.getElementById('recordInfo').innerText = 'Record ke: '+(idx+1)+' | '+formatDateFromAny(r.date)+' | '+r.service+' | '+r.source+' | Status: '+(r.status||'OK');
+  const isManual = r.source==='MANUAL'; document.getElementById('lockInfo').innerText = isManual ? '🟨 MANUAL - Bisa Edit Semua / Delete' : '🔒 ITINERARY - Cuma COST PRICE yang bisa diedit beb! Delete TIDAK BISA!';
+  document.getElementById('btnEdit').disabled = false; document.getElementById('btnDelete').disabled = !isManual; document.getElementById('btnSave').disabled = false;
+};
+window.doCancel = function(){ selectedIdx=-1; document.querySelectorAll('#tbodyOp tr').forEach(tr=>tr.style.outline='none'); document.getElementById('lockInfo').innerText=''; document.getElementById('btnEdit').disabled=false; document.getElementById('btnDelete').disabled=false; render(); };
+window.filterPeriode = function(){ const v=document.getElementById('dateFilter').value.trim(); if(!v) return alert('Isi Date dulu beb, contoh 20-10-2026'); render(v); };
+window.filterToday = function(){ const d=new Date(); const s=String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear(); document.getElementById('dateFilter').value=s; render(s); };
+window.filterDate = function(){ filterPeriode(); };
+window.filterMonth = function(){ const v=document.getElementById('dateFilter').value.trim(); if(!v) return alert('Isi Month dulu beb, contoh 10-2026'); const parts=v.split('-'); const mm=parts.length>=2?parts[1]:v; render('',mm); };
+window.render=function(filterDateStr='', filterMonthStr=''){
+  const margin = parseNum(document.getElementById('marginIn').value)||10; const tb=document.getElementById('tbodyOp'); tb.innerHTML='';
+  let all=[...items, ...manualItems];
+  hotels.forEach(h=>{ all.push({date:h.checkIn, service:(h.hotelName||'').toUpperCase()+' / '+(h.roomType||''), pax:2, nett:0, margin:margin, source:'HOTEL', status:getStatus(h), hotel:(h.hotelName||'').toUpperCase(), guide:'', supplier:'', driver:'', payment:'', isItin:true}); });
+  if(filterDateStr){ all=all.filter(r=> formatDateFromAny(r.date)===filterDateStr); }
+  if(filterMonthStr){ all=all.filter(r=> formatDateFromAny(r.date).includes(filterMonthStr)); }
+  all.sort((a,b)=> parseDate(a.date)-parseDate(b.date));
+  all.forEach(r=>{ if(r.source!=='MANUAL'){ const key = formatDateFromAny(r.date)+'|'+r.service+'|'+r.source; if(costOverrides[key]!==undefined){ r.nett = costOverrides[key]; r.costEdited = true; } } });
+  window._allRows = all; let totTour=0, totCost=0;
+  all.forEach((r, idx)=>{ const cost=r.nett*r.pax; const tour=cost*(1+(r.margin||margin)/100); totCost+=cost; totTour+=tour; const st = r.status || 'OK'; const cls = statusClass(st); const tag = r.source==='MANUAL' ? 'MANUAL' : r.source; const manualMark = r.source==='MANUAL' ? '🟨 ' : ''; tb.innerHTML+=`<tr onclick="selectRow(${idx})"><td class="${cls}">${formatDateFromAny(r.date)}</td><td class="${cls}">${clientName}</td><td class="${cls}" style="text-align:center">${r.pax}</td><td class="${cls}">${manualMark}${r.service}</td><td class="${cls}">${r.payment||''}</td><td class="${cls}">${r.hotel||''}</td><td class="${cls}">${r.guide||''}</td><td class="${cls}">${r.supplier||'SMAILING'}</td><td class="${cls}">${r.driver||''}</td><td class="${cls}"></td><td class="${cls}"></td><td class="${cls}">${agentName}</td><td class="${cls}" style="font-weight:900;text-align:center">${st}</td><td class="${cls}">${tag}${r.costEdited ? ' - COST DIEDIT' : ''}</td></tr>`; });
+  document.getElementById('totalRows').innerText=all.length; if(selectedIdx===-1){ document.getElementById('recordInfo').innerText='Record ke: '+all.length; }
+  document.getElementById('tourTotal').innerText=fmtIDR(totTour); document.getElementById('costTotal').innerText=fmtIDR(totCost); document.getElementById('nettTotal').innerText=fmtIDR(totTour-totCost);
+  if(selectedIdx===-1){ const paxTot = all.length? Math.max(...all.map(x=>x.pax)) : 2; document.getElementById('tourPriceTop').innerText = fmt(totTour/Math.max(paxTot,1)); document.getElementById('costPriceTop').innerText = fmt(totCost/Math.max(paxTot,1)); document.getElementById('dataSrc').innerText = 'OPTIONAL'; }
+};
+window.openAdd = function(){ document.getElementById('modalTitle').innerText='ADD OPERATION - MANUAL'; document.getElementById('fId').value=''; document.getElementById('fId').dataset.isItin='0'; document.getElementById('fDate').value=new Date().toISOString().slice(0,10); document.getElementById('fPax').value=2; document.getElementById('fService').value=''; document.getElementById('fNett').value=0; document.getElementById('fMargin').value=tourMargin; document.getElementById('fPayment').value=''; document.getElementById('fHotel').value=''; document.getElementById('fGuide').value=''; document.getElementById('fSupplier').value='SMAILING'; document.getElementById('fDriver').value=''; document.getElementById('fAgents').value=agentName; document.getElementById('fRemarks').value='MANUAL - OPERATION'; document.getElementById('fStatus').value='OK'; ['fDate','fPax','fService','fMargin','fPayment','fHotel','fGuide','fSupplier','fDriver','fAgents','fRemarks','fNett','fStatus'].forEach(id=>{ document.getElementById(id).disabled=false; document.getElementById(id).style.background='#fff'; document.getElementById(id).style.border='1px solid #000'; }); document.getElementById('modal').classList.add('open'); };
+window.openEdit = function(){ if(selectedIdx===-1) return alert('Klik baris dulu beb!'); const r = window._allRows[selectedIdx]; if(!r) return; const isManual = r.source==='MANUAL'; document.getElementById('modalTitle').innerText = isManual ? 'EDIT OPERATION - MANUAL (Semua bisa diedit)' : 'EDIT COST PRICE SAJA - ITINERARY ('+r.source+')'; document.getElementById('fId').value=r.docId||''; document.getElementById('fId').dataset.itinKey = isManual ? '' : (formatDateFromAny(r.date)+'|'+r.service+'|'+r.source); document.getElementById('fId').dataset.isItin = isManual ? '0' : '1'; document.getElementById('fId').dataset.origNett = r.nett; let dStr=''; try{ const d=parseDate(formatDateFromAny(r.date)); dStr=d.toISOString().slice(0,10); }catch(e){} document.getElementById('fDate').value=dStr; document.getElementById('fPax').value=r.pax; document.getElementById('fService').value=r.service; document.getElementById('fNett').value=r.nett; document.getElementById('fMargin').value=r.margin||10; document.getElementById('fPayment').value=r.payment||''; document.getElementById('fHotel').value=r.hotel||''; document.getElementById('fGuide').value=r.guide||''; document.getElementById('fSupplier').value=r.supplier||'SMAILING'; document.getElementById('fDriver').value=r.driver||''; document.getElementById('fAgents').value=agentName; document.getElementById('fRemarks').value=r.remarks||'MANUAL - OPERATION'; document.getElementById('fStatus').value=r.status||'OK'; const lock = !isManual; ['fDate','fPax','fService','fMargin','fPayment','fHotel','fGuide','fSupplier','fDriver','fAgents','fRemarks','fStatus'].forEach(id=>{ document.getElementById(id).disabled = lock; document.getElementById(id).style.background = lock ? '#ddd' : '#fff'; }); document.getElementById('fNett').disabled = false; document.getElementById('fNett').style.background = '#ffff00'; document.getElementById('fNett').style.border = '3px solid #ff0000'; document.getElementById('modal').classList.add('open'); if(lock) alert('Beb, data ini dari ITINERARY ('+r.source+')!\n\nYang bisa diedit CUMA COST PRICE nya aja beb!'); };
+window.closeModal = function(){ document.getElementById('modal').classList.remove('open'); };
+window.doSave = async function(){ const id=document.getElementById('fId').value; const isItin = document.getElementById('fId').dataset.isItin==='1'; const itinKey = document.getElementById('fId').dataset.itinKey||''; const newCost = parseNum(document.getElementById('fNett').value); if(isItin){ if(!confirm('Ubah COST PRICE jadi '+newCost.toLocaleString('en-US')+' beb?')) return; try{ const snap = await getDocs(collection(db,"operation_cost_override")); let foundId=null; snap.forEach(s=>{ const d=s.data(); if(String(d.GuestID||'').toUpperCase().trim()===activePNR && (d.itinKey||'')===itinKey) foundId=s.id; }); const data={ guestId:activePNR, GuestID:activePNR, itinKey:itinKey, newCost:newCost, origCost:parseNum(document.getElementById('fId').dataset.origNett||0), updatedAt:new Date().toISOString(), updatedBy:'OPERATION' }; if(foundId){ await updateDoc(doc(db,"operation_cost_override",foundId), data); } else{ await addDoc(collection(db,"operation_cost_override"), data); } alert('COST PRICE berhasil diubah beb!'); closeModal(); selectedIdx=-1; await loadCostOverrides(); render(); return; }catch(e){ alert('Gagal ubah Cost beb: '+e.message); return; } } const service=document.getElementById('fService').value.trim(); if(!service) return alert('Isi Program / Service dulu beb!'); const dateVal=document.getElementById('fDate').value; const d=new Date(dateVal); const dateStr=String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear(); const data={ guestId:activePNR, GuestID:activePNR, Date:dateStr, NameOfService:service, service:service, Status:document.getElementById('fStatus').value, Pax:parseInt(document.getElementById('fPax').value)||2, Price:newCost, Nett:newCost, Margin:parseNum(document.getElementById('fMargin').value), Payment:document.getElementById('fPayment').value, Hotel:document.getElementById('fHotel').value, Guide:document.getElementById('fGuide').value, Supplier:document.getElementById('fSupplier').value, Driver:document.getElementById('fDriver').value, Agents:document.getElementById('fAgents').value, Remarks:document.getElementById('fRemarks').value, source:'MANUAL', createdAt:new Date().toISOString() }; try{ if(id){ await updateDoc(doc(db,"operation_manual",id), data); alert('Berhasil di UPDATE beb!'); } else{ await addDoc(collection(db,"operation_manual"), data); alert('Berhasil di SAVE beb!'); } closeModal(); selectedIdx=-1; await loadManual(); render(); }catch(e){ alert('Gagal save beb: '+e.message); } };
+window.doDelete = async function(){ if(selectedIdx===-1) return alert('Klik baris dulu beb!'); const r = window._allRows[selectedIdx]; if(!r) return; if(r.source!=='MANUAL'){ alert('Beb, TIDAK BISA DIHAPUS!\n\nData ini dari ITINERARY ('+r.source+') beb!'); return; } if(!confirm('Hapus baris MANUAL ini beb?\n'+r.service+'\n'+formatDateFromAny(r.date))) return; try{ if(r.docId) await deleteDoc(doc(db,"operation_manual",r.docId)); alert('Berhasil dihapus beb!'); selectedIdx=-1; await loadManual(); render(); }catch(e){ alert('Gagal hapus beb: '+e.message); } };
+async function loadCostOverrides(){ costOverrides={}; try{ const snap=await getDocs(collection(db,"operation_cost_override")); snap.forEach(s=>{ const d=s.data(); if(String(d.GuestID||d.guestId||'').toUpperCase().trim()!==activePNR) return; if(d.itinKey) costOverrides[d.itinKey]=parseNum(d.newCost); }); }catch(e){} }
+async function loadManual(){ manualItems=[]; try{ const snap=await getDocs(collection(db,"operation_manual")); snap.forEach(s=>{ const d=s.data(); const g=String(d.GuestID||d.guestId||'').toUpperCase().trim(); if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return; manualItems.push({docId:s.id, date:d.Date||'', service:String(d.NameOfService||d.service||'').toUpperCase(), pax:parseInt(parseNum(d.Pax||2))||2, nett:parseNum(d.Nett||d.Price||0), margin:parseNum(d.Margin||tourMargin), source:'MANUAL', status:d.Status||d.status||'OK', hotel:d.Hotel||'', guide:d.Guide||'', supplier:d.Supplier||'SMAILING', driver:d.Driver||'', payment:d.Payment||'', remarks:d.Remarks||'MANUAL', isItin:false}); }); }catch(e){} }
+async function load(){
+  document.getElementById('gIdCtrl').innerText=activePNR; document.getElementById('guestIdTop').innerText=activePNR;
+  for(let colName of ["marketing","master","bookings"]){ try{ const snap=await getDocs(collection(db,colName)); snap.forEach(s=>{ const d=s.data(); const g=getGuestId(d); if(!g || (g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g))) return; clientName=String(d.guestName||d.clientName||d.bookingName||clientName).toUpperCase(); agentName=String(d.agent||d.agency||agentName).toUpperCase(); if(d.tourMargin) tourMargin=parseFloat(d.tourMargin)||tourMargin; if(d.profitMargin) tourMargin=parseFloat(d.profitMargin)||tourMargin; document.getElementById('marginIn').value=tourMargin.toFixed(2); if(d.flightIn||d.FlightIn) extraInfo.flightIn=d.flightIn||d.FlightIn; if(d.flightOut||d.FlightOut) extraInfo.flightOut=d.flightOut||d.FlightOut; if(d.tc||d.TC) extraInfo.tc=d.tc||d.TC; }); }catch(e){} }
+  const snapH = await getDocs(collection(db,"hotel_transactions")); snapH.forEach(s=>{ const d=s.data(); const g=getGuestId(d)||''; if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return; hotels.push(d); });
+  const colsTransport=["transp","transport","transport_transactions"];
+  for(let colName of colsTransport){ try{ const snap=await getDocs(collection(db,colName)); let found=0; snap.forEach(s=>{ const d=s.data(); const g=getGuestId(d)||''; if(!g || (g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g))) return; const dateVal=getField(d,['date','tour'])||getField(d,['date'])||''; const nameServ=getField(d,['name','service'])||getField(d,['name','transport'])||''; const price=parseNum(getField(d,['price','tour'])||getField(d,['price'])||0); const pax=parseInt(parseNum(getField(d,['pax'])||2))||2; const margin=parseNum(getField(d,['margin'])||tourMargin); if(!nameServ && price===0) return; if(price===750000 && !nameServ) return; items.push({date:dateVal, service:String(nameServ||'TRANSFER').toUpperCase(), pax:pax, nett:price, margin:margin, source:'TRANSPORT', status:getStatus(d), hotel:'', guide:String(getField(d,['guide'])||''), supplier:'SMAILING', driver:String(getField(d,['driver'])||''), payment:'', isItin:true}); found++; }); if(found>0) break; }catch(e){} }
+  const colsTour=["tour_transactions","tours"];
+  for(let colName of colsTour){ try{ const snap=await getDocs(collection(db,colName)); let found=0; snap.forEach(s=>{ const d=s.data(); const g=getGuestId(d)||''; if(!g || (g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g))) return; const dateVal=getField(d,['date','tour'])||getField(d,['date'])||''; const nameServ=getField(d,['name','service'])||getField(d,['name','tour'])||''; const price=parseNum(getField(d,['price','tour'])||getField(d,['price'])||0); const pax=parseInt(parseNum(getField(d,['pax'])||2))||2; const margin=parseNum(getField(d,['margin'])||tourMargin); if(!nameServ && price===0) return; items.push({date:dateVal, service:String(nameServ||'TOUR').toUpperCase(), pax:pax, nett:price, margin:margin, source:'TOUR', status:getStatus(d), hotel:'', guide:String(getField(d,['guide'])||''), supplier:'SMAILING', driver:'', payment:'', isItin:true}); found++; }); if(found>0) break; }catch(e){} }
+  try{ const snap=await getDocs(collection(db,"others")); snap.forEach(s=>{ const d=s.data(); const g=String(d.GuestID||d.guestId||'').toUpperCase().trim(); if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return; const nm=d.NameOfService||d.NameOfTour||''; if(!nm) return; const pax=(parseInt(parseNum(d.Adult||0))||0)+(parseInt(parseNum(d.Child||0))||0)||parseInt(parseNum(d.Pax||2))||2; items.push({date:d.Date||'', service:String(nm).toUpperCase(), pax:pax, nett:parseNum(d.Price||0), margin:parseNum(d.Margin||tourMargin), source:'OTHERS', status:getStatus(d), hotel:'', guide:'', supplier:'SMAILING', driver:'', payment:'', isItin:true}); }); }catch(e){}
+  try{ const snap=await getDocs(collection(db,"optional")); snap.forEach(s=>{ const d=s.data(); const g=String(d.GuestID||'').toUpperCase().trim(); if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return; if(!d.NameOfTour) return; const pax=parseInt(parseNum(d.TPax||2))||2; items.push({date:d.Date||'', service:String(d.NameOfTour||'').toUpperCase(), pax:pax, nett:parseNum(d.NetPrice||0), margin:parseNum(d.Margin||tourMargin), source:'OPTIONAL', status:getStatus(d), hotel:'', guide:'', supplier:'SMAILING', driver:'', payment:'', isItin:true}); }); }catch(e){}
+  await loadManual(); await loadCostOverrides();
+  const seen=new Set(); items=items.filter(r=>{ const key=`${formatDateFromAny(r.date)}|${r.service}|${r.nett}|${r.pax}|${r.source}`; if(seen.has(key)) return false; seen.add(key); return true; });
+  render();
+}
+load();
+</script>
+</body>
+</html>

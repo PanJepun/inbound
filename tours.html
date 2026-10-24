@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MENU MEMASUKKAN DATA PACKET TOUR - LIVE FROM FIREBASE</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Tahoma,Arial,sans-serif;font-size:12px}
+body{background:#d9ead3;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.titleBar{background:#b8d4ff;padding:6px 10px;font-weight:900;border-bottom:2px solid #000;font-size:13px}
+.fileBar{background:#e8e8e8;padding:5px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #000;font-size:12px}
+.fileBar b{font-weight:700}
+.actionBar{background:#e8e8e8;padding:6px 10px;display:flex;gap:5px;align-items:center;border-bottom:2px solid #000}
+.actionBar button{padding:5px 14px;font-weight:700;border:1px solid #000;height:26px;cursor:pointer;border-radius:2px;background:#ffff99}
+.actionBar button.voucher{background:#ffcc33!important;font-weight:900!important;border:2px solid #000!important}
+.actionBar .info{margin-left:12px;font-size:11px;font-weight:700;color:#000080}
+.inputGrid{display:grid;grid-template-columns:165px 100px 1fr 165px 55px 125px 125px 75px 65px 170px;gap:0;background:#fff;border-bottom:2px solid #000}
+.inputGrid input,.inputGrid select{border:1px solid #999;padding:4px 6px;height:28px;width:100%;font-weight:700}
+#inpGuestId{background:#ffffe0}
+#inpTourName{background:#ffffcc;cursor:pointer}
+#inpStatus{font-weight:900;text-align:center}
+#inpStatus.status-OK{background:#00ff99!important}
+#inpStatus.status-WL{background:#ffff00!important}
+#inpStatus.status-CXL{background:#ff4444!important;color:#fff}
+#inpRemarks{background:#ffff99}
+#inpSales,#inpCost{text-align:right;background:#fff;font-weight:900}
+.grid{flex:1;overflow:auto;background:#fff}
+table.list{width:100%;border-collapse:collapse;table-layout:fixed}
+table.list th{background:#e8e8e8;border:1px solid #000;padding:6px 4px;font-weight:900;text-align:center;font-size:11px;position:sticky;top:0;z-index:1}
+table.list td{border:1px solid #777;padding:5px 6px;font-size:11px;cursor:pointer;height:26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.list td.chk{text-align:center}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);display:none;justify-content:center;align-items:center;z-index:9999}
+.modal.show{display:flex}
+.modalBox{background:#d4d0c8;border:2px solid #000;width:950px;max-width:96%;height:560px;display:flex;flex-direction:column}
+.modalTitle{background:#000080;color:#fff;padding:5px 10px;font-weight:900;display:flex;justify-content:space-between}
+.modalTitle button{background:#d4d0c8;border:1px solid #000;width:24px;height:22px;font-weight:900;cursor:pointer}
+.modalTableWrap{flex:1;overflow:auto;background:#ffffe0}
+table.popup{width:100%;border-collapse:collapse;table-layout:fixed}
+table.popup th{background:#e8e8e8;border:1px solid #999;padding:5px 4px;font-weight:900;text-align:center;position:sticky;top:0}
+table.popup td{border:1px solid #999;padding:4px 6px;font-size:11px;background:#ffffe0;cursor:pointer;color:#006600}
+table.popup tr:hover td{background:#000080!important;color:#fff!important}
+.modalFooter{background:#d4d0c8;padding:8px 10px;display:flex;gap:8px;align-items:center;border-top:2px solid #000}
+.modalFooter input{border:1px solid #000;padding:4px 6px;height:24px}
+.modalFooter .newData{background:#ffff99;border:1px solid #000;padding:4px 15px;font-weight:900;cursor:pointer;margin-left:auto}
+.statusBar{font-size:10px;padding:3px 8px;background:#e8e8e8;border-top:1px solid #999}
+table.list tr.row-OK td{background:#b6ffb6!important;color:#000!important}
+table.list tr.row-WL td{background:#ffff99!important;color:#000!important}
+table.list tr.row-CXL td{background:#ff9999!important;color:#000!important}
+table.list tr.row-OK td.status-OK{background:#00ff99!important;font-weight:900!important;text-align:center}
+table.list tr.row-WL td.status-WL{background:#ffff00!important;font-weight:900!important;text-align:center}
+table.list tr.row-CXL td.status-CXL{background:#ff0000!important;color:#fff!important;font-weight:900!important;text-align:center}
+table.list tr.sel td{background:#3d3d9d!important;color:#fff!important}
+table.list tr.vsel td{background:#a0d0ff!important}
+</style>
+</head>
+<body>
+<div class="titleBar">MENU MEMASUKKAN DATA PACKET TOUR - LIVE FROM FIREBASE</div>
+<div class="fileBar">🕒 File &nbsp;<b id="filePath">F:/TRAVELWEB/tours.html?guestId=SMLDMC-20OKT26-00001</b></div>
+<div class="actionBar">
+<button onclick="addNew()">Add</button>
+<button id="btnSave" onclick="saveData()">Save</button>
+<button onclick="editData()">Edit</button>
+<button onclick="deleteData()">Delete</button>
+<button class="voucher" onclick="openVoucher()">Voucher</button>
+<span class="info" id="selInfo">✔️ Check tour yang mau di-print! (beda supplier = beda voucher)</span>
+</div>
+<div class="inputGrid">
+<input id="inpGuestId" readonly>
+<input id="inpDate" type="date">
+<input id="inpTourName" placeholder="KETIK / DBL KLIK UNTUK PILIH TOUR DARI FIREBASE" ondblclick="openTourPopup()" onkeydown="if(event.key==='Enter'&&!this.value.trim()){event.preventDefault();openTourPopup();}">
+<input id="inpSupplier" value="SMAILING DMC">
+<input id="inpPax" type="number" value="2" style="text-align:center">
+<input id="inpSales" type="text" placeholder="0.00" onfocus="unformat(this)" onblur="formatAndCalc(this)">
+<input id="inpCost" type="text" placeholder="0.00" onfocus="unformat(this)" onblur="formatAndCalc(this)">
+<select id="inpStatus" class="status-OK" onchange="updateStatusColor()"><option selected>OK</option><option>WL</option><option>CXL</option></select>
+<input id="inpMargin" value="10.00" style="text-align:right">
+<input id="inpRemarks" placeholder="Remarks" onkeydown="if(event.key==='Enter')saveData()">
+</div>
+<div class="grid">
+<table class="list">
+<thead><tr><th style="width:35px">✔️</th><th style="width:165px">Guest ID :</th><th style="width:100px">Date</th><th>Name of Tour</th><th style="width:165px">Supplier / Vendor</th><th style="width:55px">Tot.Pax</th><th style="width:125px">Sales Price</th><th style="width:125px">Cost Sales</th><th style="width:75px">Status</th><th style="width:65px">Margin</th><th style="width:170px">Remarks</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+<div class="statusBar" id="statusBar">Siap - Check yang mau di voucher! OK=HIJAU WL=KUNING CXL=MERAH</div>
+<div id="tourModal" class="modal" onclick="if(event.target==this)closeTourPopup()">
+<div class="modalBox">
+<div class="modalTitle"><span id="modalTitleText">TABEL DONATION - LIVE FROM FIREBASE packet_tour</span><button onclick="closeTourPopup()">X</button></div>
+<div class="modalTableWrap"><table class="popup"><thead><tr><th style="width:8%">📷</th><th style="width:32%">Name of Tour</th><th style="width:18%">Supplier</th><th style="width:8%">T.Pax</th><th style="width:17%">Tour Price</th><th style="width:17%">HPP</th></tr></thead><tbody id="popupBody"><tr><td colspan=6 style="text-align:center;padding:20px">Loading...</td></tr></tbody></table></div>
+<div class="modalFooter"><span>Tour :</span><input id="popSearchTour" style="width:220px" oninput="filterPopup()"><span>Supplier :</span><input id="popSearchSupp" style="width:160px" oninput="filterPopup()"><span id="popupInfo" style="font-size:10px;font-weight:700;margin-left:10px"></span><button class="newData" onclick="closeTourPopup()">Tutup</button></div>
+</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+let masterTours=[];
+function formatRupiah(num){if(num===''||num==null||isNaN(num))return'0.00';return Number(num).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function parseRupiah(str){if(!str)return 0;return parseFloat(String(str).replace(/,/g,''))||0;}
+function formatTglIndo(s){if(!s)return'';const p=s.split('-');if(p.length!==3)return s;return p[2]+'-'+p[1]+'-'+p[0];}
+window.formatAndCalc=function(el){let v=parseRupiah(el.value);if(v>0)el.value=formatRupiah(v);else el.value='0.00';calcMargin();}
+window.unformat=function(el){let v=parseRupiah(el.value);if(v>0)el.value=v;else el.value='';el.select();}
+function updateStatusColor(){const sel=document.getElementById('inpStatus');sel.classList.remove('status-OK','status-WL','status-CXL');const v=sel.value;if(v==='OK')sel.classList.add('status-OK');else if(v==='WL')sel.classList.add('status-WL');else sel.classList.add('status-CXL');}
+window.updateStatusColor=updateStatusColor;
+let data=[];let selIdx=-1;let isEditMode=false;let voucherSel=new Set();
+const urlParams=new URLSearchParams(window.location.search);
+const guestId=urlParams.get('guestId')||localStorage.getItem('lastGuestId')||'SMLDMC-20KT26-00001';
+document.getElementById('inpGuestId').value=guestId;
+document.getElementById('filePath').innerText='F:/TRAVELWEB/tours.html?guestId='+guestId;
+function getKey(){return 'tours_'+guestId}
+function getSelKey(){return 'voucher_sel_'+guestId}
+function loadSel(){try{const r=localStorage.getItem(getSelKey());if(r)voucherSel=new Set(JSON.parse(r));}catch(e){voucherSel=new Set();}}
+function saveSel(){localStorage.setItem(getSelKey(),JSON.stringify([...voucherSel]));updateSelInfo();}
+function updateSelInfo(){const n=voucherSel.size;const el=document.getElementById('selInfo');if(n===0){el.innerText='✔️ Check tour yang mau di-print! (beda supplier = beda voucher)';document.getElementById('statusBar').innerText='Siap - Check yang mau di voucher! OK=HIJAU WL=KUNING CXL=MERAH';}else{let pax=0;voucherSel.forEach(i=>{if(data[i])pax+=Number(data[i].pax||0);});el.innerText=`✔️ ${n} tour dipilih (${pax} Pax) untuk voucher - Klik Voucher!`;document.getElementById('statusBar').innerText=`${n} tour dipilih (${pax} Pax) untuk voucher - OK=HIJAU WL=KUNING CXL=MERAH`;}}
+window.toggleVoucherSel=function(idx,ev){if(ev)ev.stopPropagation();if(voucherSel.has(idx))voucherSel.delete(idx);else{if(data[idx].status==='CXL'){alert('CXL tidak bisa ikut voucher beb!');return;}voucherSel.add(idx);}saveSel();render();}
+
+window.openVoucher=function(){
+  if(voucherSel.size===0){alert('Check dulu beb!');return;}
+  const selStr=[...voucherSel].join(',');
+  alert('Yang akan di-print: index '+selStr+' = '+[...voucherSel].map(i=>data[i]?.tourName).join(', '));
+  window.open('voucher.html?guestId='+guestId+'&sel='+selStr,'_blank');
+}
+window.loadData=function(){const raw=localStorage.getItem(getKey());if(raw){try{data=JSON.parse(raw);}catch(e){data=[];}}else{data=[];}loadSel();render();}
+function saveLS(){localStorage.setItem(getKey(),JSON.stringify(data));let all=JSON.parse(localStorage.getItem('tours')||'{}');all[guestId]=data;localStorage.setItem('tours',JSON.stringify(all));}
+function render(){const tb=document.getElementById('tbody');tb.innerHTML='';data.forEach((r,i)=>{const checked=voucherSel.has(i);const tr=document.createElement('tr');tr.className='row-'+r.status;if(i===selIdx)tr.className+=' sel';if(checked)tr.className+=' vsel';tr.innerHTML=`<td class="chk"><input type="checkbox" ${checked?'checked':''} onchange="toggleVoucherSel(${i},event)" onclick="event.stopPropagation()"></td><td>${r.guestId}</td><td>${formatTglIndo(r.date)}</td><td>${r.tourName}</td><td>${r.supplier}</td><td style="text-align:center">${r.pax}</td><td style="text-align:right">${formatRupiah(r.sales)}</td><td style="text-align:right">${formatRupiah(r.cost)}</td><td class="status-${r.status}">${r.status}</td><td style="text-align:right">${Number(r.margin).toFixed(2)}</td><td>${r.remarks||''}</td>`;tr.onclick=()=>selectRow(i);tb.appendChild(tr);});updateSelInfo();}
+window.selectRow=function(i){selIdx=i;isEditMode=false;document.getElementById('btnSave').textContent='Save';const r=data[i];document.getElementById('inpDate').value=r.date;document.getElementById('inpTourName').value=r.tourName;document.getElementById('inpSupplier').value=r.supplier;document.getElementById('inpPax').value=r.pax;document.getElementById('inpSales').value=formatRupiah(r.sales);document.getElementById('inpCost').value=formatRupiah(r.cost);document.getElementById('inpStatus').value=r.status;updateStatusColor();document.getElementById('inpMargin').value=Number(r.margin).toFixed(2);document.getElementById('inpRemarks').value=r.remarks;render();}
+window.addNew=function(){clearForm();document.getElementById('inpDate').value=new Date().toISOString().slice(0,10);setTimeout(()=>document.getElementById('inpTourName').focus(),100);}
+window.clearForm=function(){selIdx=-1;isEditMode=false;document.getElementById('btnSave').textContent='Save';document.getElementById('inpTourName').value='';document.getElementById('inpSales').value='';document.getElementById('inpCost').value='';document.getElementById('inpRemarks').value='';document.getElementById('inpStatus').value='OK';updateStatusColor();document.getElementById('inpMargin').value='10.00';render();}
+function calcMargin(){const s=parseRupiah(document.getElementById('inpSales').value);const c=parseRupiah(document.getElementById('inpCost').value);if(s>0&&c>0)document.getElementById('inpMargin').value=((s-c)/c*100).toFixed(2);}
+window.saveData=function(){const tn=document.getElementById('inpTourName').value.trim();if(!tn){openTourPopup();return;}const rec={guestId:document.getElementById('inpGuestId').value,date:document.getElementById('inpDate').value,tourName:tn,supplier:document.getElementById('inpSupplier').value,pax:parseInt(document.getElementById('inpPax').value)||2,sales:parseRupiah(document.getElementById('inpSales').value),cost:parseRupiah(document.getElementById('inpCost').value),status:document.getElementById('inpStatus').value,margin:parseFloat(document.getElementById('inpMargin').value)||10,remarks:document.getElementById('inpRemarks').value};if(isEditMode&&selIdx>=0){data[selIdx]=rec;isEditMode=false;}else{data.push(rec);}saveLS();clearForm();addNew();render();}
+window.editData=function(){if(selIdx<0){alert('Pilih data dulu! Klik baris!');return;}isEditMode=true;document.getElementById('btnSave').textContent='Update';document.getElementById('inpTourName').focus();}
+window.deleteData=function(){if(selIdx<0){alert('Pilih data dulu!');return;}if(confirm('Hapus '+data[selIdx].tourName+' ?')){const del=selIdx;data.splice(del,1);let ns=new Set();voucherSel.forEach(i=>{if(i<del)ns.add(i);else if(i>del)ns.add(i-1);});voucherSel=ns;saveSel();saveLS();clearForm();render();}}
+window.openTourPopup=function(){document.getElementById('tourModal').classList.add('show');renderPopup(masterTours);document.getElementById('popSearchTour').focus();}
+window.closeTourPopup=function(){document.getElementById('tourModal').classList.remove('show');document.getElementById('inpTourName').focus();}
+window.renderPopup=function(list){const tb=document.getElementById('popupBody');tb.innerHTML='';if(!list||list.length===0){tb.innerHTML='<tr><td colspan=6 style="text-align:center;padding:15px;color:red;font-weight:900">Belum ada data Firebase!</td></tr>';return;}document.getElementById('popupInfo').innerText=list.length+' tours LIVE';list.forEach((t)=>{const tr=document.createElement('tr');const img=t.imgData?`<span style="width:20px;height:14px;display:inline-block;overflow:hidden;border:1px solid #999"><img src="${t.imgData}" style="width:100%;height:100%;object-fit:cover"></span>`:`<span style="width:20px;height:14px;display:inline-block;background:#ddd;border:1px solid #999"></span>`;tr.innerHTML=`<td style="text-align:center">${img}</td><td>${t.name}</td><td>${t.supplier}</td><td style="text-align:center">${t.pax}</td><td style="text-align:right">${formatRupiah(t.price)}</td><td style="text-align:right">${formatRupiah(t.sgl)}</td>`;tr.onclick=()=>pickTour(t);tb.appendChild(tr);});}
+window.filterPopup=function(){const q1=document.getElementById('popSearchTour').value.toLowerCase();const q2=document.getElementById('popSearchSupp').value.toLowerCase();const f=masterTours.filter(t=>t.name.toLowerCase().includes(q1)&&t.supplier.toLowerCase().includes(q2));renderPopup(f);}
+window.pickTour=function(t){document.getElementById('inpTourName').value=t.name;document.getElementById('inpSupplier').value=t.supplier;document.getElementById('inpPax').value=t.pax;document.getElementById('inpSales').value=formatRupiah(t.price);document.getElementById('inpCost').value=formatRupiah(t.sgl>0?t.sgl:t.price*0.9);calcMargin();closeTourPopup();document.getElementById('inpSales').focus();}
+document.getElementById('inpDate').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();document.getElementById('inpTourName').focus();}});
+loadData();updateStatusColor();
+const q = query(collection(db, "packet_tour"), orderBy("tc","asc"));
+onSnapshot(q, (snap)=>{
+  masterTours=[];
+  snap.forEach(docSnap=>{
+    const d=docSnap.data();
+    let p=parseRupiah(d.price||'0');let h=parseRupiah(d.hpp||'0');
+    if(p===0&&d.price)p=Number(String(d.price).replace(/,/g,''))||0;
+    if(h===0&&d.hpp)h=Number(String(d.hpp).replace(/,/g,''))||0;
+    masterTours.push({name:(d.desc||'').toUpperCase(),supplier:(d.supp||'SMAILING DMC').toUpperCase(),pax:parseInt(d.pax)||2,price:p,sgl:h,imgData:d.imgData||''});
+  });
+  document.getElementById('modalTitleText').innerText='TABEL DONATION - LIVE FROM FIREBASE ('+masterTours.length+' DATA)';
+  if(document.getElementById('tourModal').classList.contains('show'))renderPopup(masterTours);
+});
+</script>
+</body>
+</html>

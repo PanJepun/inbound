@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOTEL - CODE + - AREA + - PRINT BW</title>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0; overflow:hidden}
+.top-bar{background:#e0e0e0; padding:5px 8px; display:flex; gap:4px; align-items:center; border-bottom:2px solid #999; flex-wrap:wrap}
+.top-bar button{padding:4px 10px; font-size:11px; font-weight:700; border:1px solid #777; cursor:pointer; border-radius:2px; background:linear-gradient(180deg,#fff,#d0d0d0)}
+.top-bar button.add{background:#a8e6a8; border:2px solid #2e8b57}
+.top-bar button.exit{background:#ffff99; border:2px solid #000}
+.top-bar button.print{background:linear-gradient(180deg,#a8cfff,#5f8fbf); border:2px solid #000; font-weight:900}
+.top-bar button.sort-up{background:#b3ffb3; border:2px solid #2e8b57; min-width:90px}
+.top-bar button.sort-down{background:#ffb8b8; border:2px solid #8b0000; min-width:90px}
+.top-bar button.fix-date{background:linear-gradient(180deg,#ffff99,#ffcc00); border:2px solid #000; font-weight:900}
+.top-bar button.active{border:3px solid #000!important}
+.top-bar label{font-size:11px; font-weight:700; margin-left:4px}
+.top-bar input.search{height:23px; border:1px solid #666; padding:2px 6px; font-size:11px; background:white; border-radius:3px}
+.top-bar input#searchHotel{width:200px}
+.top-bar input#searchMarket{width:130px; background:#fff0ff; font-weight:700}
+.top-bar input#searchArea{width:130px; background:#e0f0ff; font-weight:700}
+.table-wrap{background:white; overflow:auto; height:calc(100vh - 72px); border:1px solid #999}
+table.main-table{width:100%; border-collapse:collapse; font-size:11px}
+.main-table th{background:#f0f0f0; border:1px solid #999; padding:4px; font-size:10px; position:sticky; top:0; text-align:center; font-weight:700; cursor:pointer}
+.main-table th.price-header{background:#fff0b3}
+.main-table th.date-header{background:#b3d9ff}
+.main-table td{border:1px solid #8a4a4a; padding:3px 5px; white-space:nowrap; cursor:pointer}
+.main-table tr.selected td{background:#00ff7f!important; font-weight:700}
+.main-table tr:hover td{background:#b3ffda}
+td.price-cell{text-align:right; font-weight:700; background:#fff0ff}
+td.date-cell{color:#cc0000; font-weight:700; text-align:center; background:#fff0f0}
+td.date-cell2{color:#0000cc; font-weight:700; text-align:center; background:#f0f0ff}
+.bottom-bar{background:#e0f0d0; padding:5px 10px; display:flex; gap:6px; align-items:center; border-top:2px solid #999; font-size:11px; flex-wrap:wrap}
+.search-wrap{position:relative; display:inline-flex; align-items:center}
+.search-list{position:absolute; top:24px; left:0; width:160px; background:white; border:1px solid #666; max-height:150px; overflow:auto; z-index:2000; display:none; box-shadow:0 4px 10px rgba(0,0,0,0.3)}
+.search-list.active{display:block}
+.search-list div{padding:4px 6px; font-size:11px; cursor:pointer; border-bottom:1px solid #eee}
+.search-list div:hover{background:#b3d9ff}
+.price-info{margin-left:auto; background:#e0ffe0; border:1px solid #999; padding:3px 10px; font-size:10px; font-weight:700; border-radius:3px}
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.25); display:none; justify-content:center; align-items:center; z-index:1000; padding:12px}
+.modal-overlay.active{display:flex}
+.modal-popup{background:#7CFF7C; border:2px solid #2e8b57; width:760px; max-width:98vw; padding:14px; box-shadow:0 8px 28px rgba(0,0,0,0.35); border-radius:4px; max-height:95vh; overflow:auto}
+.modal-header{font-size:12px; font-weight:900; text-align:center; margin-bottom:10px; background:#2e8b57; color:white; padding:6px; border-radius:2px}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:8px 18px}
+.form-group{display:flex; align-items:center; gap:6px; margin-bottom:6px}
+.form-group label{font-size:11px; width:110px; text-align:right; font-weight:700; flex:none}
+.form-group input{height:22px; border:1px solid #666; padding:2px 6px; font-size:11px; background:#ffe0ff; border-radius:2px}
+.form-group input.code{width:120px; background:#fff0ff; font-weight:bold; border:2px solid #666}
+.form-group input.city,.form-group input.area,.form-group input.market{width:150px; font-weight:bold}
+.form-group input.hotel-name{width:100%; background:#fff; font-weight:bold; border:2px solid #666}
+.form-group.full{grid-column:span 2}
+.form-group input.type-input{width:150px; background:#00ff7f; font-weight:900; border:2px solid #000}
+.form-group input.category{width:160px; background:#fff; font-weight:700}
+.form-group input.rate{width:90px; text-align:right; font-weight:700}
+.form-group input.coa{width:110px; background:#00ff00; font-weight:900; border:2px solid #000}
+.btn-plus,.btn-minus{width:22px; height:22px; font-weight:900; font-size:12px; border:1px solid #555; cursor:pointer; border-radius:3px; display:inline-flex; align-items:center; justify-content:center; flex:none}
+.btn-plus{background:linear-gradient(180deg,#a8e6a8,#5fbf5f)}
+.btn-minus{background:linear-gradient(180deg,#ffb8b8,#ff6a6a)}
+.searchable-wrap{position:relative; display:flex; align-items:center; gap:4px; flex:1}
+.searchable-list{position:absolute; top:24px; left:0; right:30px; background:white; border:1px solid #666; max-height:150px; overflow:auto; z-index:2000; display:none; box-shadow:0 4px 10px rgba(0,0,0,0.3)}
+.searchable-list.active{display:block}
+.searchable-list div{padding:5px 8px; font-size:11px; cursor:pointer; border-bottom:1px solid #eee}
+.searchable-list div:hover{background:#b3d9ff}
+.validity-box{background:linear-gradient(90deg,#ff7f00,#ff9f33); padding:8px 12px; border:2px solid #000; margin:10px 0; display:flex; align-items:center; gap:10px; border-radius:3px; color:white}
+.validity-box span.title{font-size:16px; font-weight:900}
+.validity-box span.label{font-size:11px; font-weight:700; color:black}
+.validity-box input{width:110px; height:22px; border:1px solid #666; background:white; font-size:11px; font-weight:700}
+.high-season{border:1.5px solid #000; padding:10px 12px; margin-top:8px; background:#8cff8c; border-radius:3px}
+.meals-box{border:1.5px solid #000; padding:10px 12px; margin-top:8px; background:#8cff8c; border-radius:3px; display:flex; justify-content:space-between}
+.meals-row{display:flex; align-items:center; margin-bottom:6px; gap:6px}
+.meals-row label{width:36px; font-size:11px; font-weight:900}
+.meals-row input{width:90px; height:22px; text-align:right; border:1px solid #666; background:#ffe0ff; font-weight:700}
+.modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:14px; padding-top:10px; border-top:1px solid #2e8b57}
+.modal-actions button{padding:6px 18px; font-size:11px; font-weight:900; border:1px solid #555; cursor:pointer; border-radius:4px; min-width:70px}
+.modal-actions button.save{background:#a8e6a8}
+.modal-actions button.cancel{background:#b8b8ff}
+</style>
+</head>
+<body>
+<div class="top-bar">
+<button class="add" onclick="openModal()">Add</button>
+<button class="save" onclick="saveFromModal()">Save</button>
+<button class="edit" onclick="editSelected()">Edit</button>
+<button class="delete" onclick="deleteSelected()">Delete</button>
+<button class="print" onclick="printNice()">🖨 Print BW</button>
+<button class="cancel" onclick="closeModal()">Cancel</button>
+<button class="exit" onclick="location.href='index.html'">Exit</button>
+<button class="refresh" onclick="location.reload()">Refresh</button>
+<label>Hotels:</label><input class="search" id="searchHotel" placeholder="Nama Hotel..." oninput="applyFilter()">
+<label>Market:</label><div class="search-wrap"><input class="search" id="searchMarket" placeholder="ALL MARKET" oninput="filterTopList('market'); applyFilter()" onfocus="showTopList('market')"><div class="search-list" id="top-list-market"></div></div>
+<label>Area:</label><div class="search-wrap"><input class="search" id="searchArea" placeholder="Area Hotel..." oninput="filterTopList('area'); applyFilter()" onfocus="showTopList('area')"><div class="search-list" id="top-list-area"></div></div>
+<button class="sort-up" id="btnSortUp" onclick="sortByPrice('asc')">▲ Murah</button>
+<button class="sort-down" id="btnSortDown" onclick="sortByPrice('desc')">▼ Mahal</button>
+<button class="fix-date" onclick="fixAllDates()">🔧 Fix Tanggal Indo</button>
+</div>
+<div class="table-wrap">
+<table class="main-table"><thead><tr>
+<th>Market</th><th>Hotel Area</th><th>Hotel Name</th><th>Type Of Room</th><th>Category</th>
+<th class="price-header" onclick="toggleSort()" id="priceHeader">Price ▲▼</th>
+<th class="date-header">Validity 1<br><span style="font-size:8px">DD-MM-YYYY</span></th>
+<th class="date-header" style="background:#ffcc99">Validity 2<br><span style="font-size:8px">DD-MM-YYYY</span></th>
+<th>X Bed</th><th>ABF</th><th>HB</th><th>FB</th>
+</tr></thead><tbody id="tbody"></tbody></table>
+</div>
+<div class="bottom-bar">
+<button onclick="scrollTopTable()">Top</button>
+<button onclick="scrollNext()">Next</button>
+<button onclick="scrollPrev()">Prev</button>
+<button onclick="scrollBottom()">Bott</button>
+<button onclick="sortByPrice('asc')" style="background:#b3ffb3; font-weight:700; border:2px solid #2e8b57">▲ Murah→Mahal</button>
+<button onclick="sortByPrice('desc')" style="background:#ffb8b8; font-weight:700; border:2px solid #8b0000">▼ Mahal→Murah</button>
+<button onclick="clearSort()" style="background:#e0e0e0; font-weight:700">Normal</button>
+<button onclick="clearFilters()" style="background:#ffff99; font-weight:700; border:2px solid #000">Clear Filter</button>
+<button onclick="printNice()" style="background:#fff; font-weight:900; border:2px solid #000">🖨 PRINT BW - IRIT TINTA</button>
+<div class="price-info" id="priceInfo">Total: 0 Hotel | CTRL+Klik = pilih banyak | SHIFT+Klik = block | Drag = block cepat</div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+<div class="modal-popup">
+<div class="modal-header">Hotel - Code & Area Ada + - | Format Indo DD-MM-YYYY</div>
+<div class="grid-2">
+<div class="form-group"><label>Code Of Hotel :</label><div class="searchable-wrap"><input id="codeHotel" class="code" placeholder="HTL-001" autocomplete="off" oninput="filterList('code')" onfocus="showList('code')"><div class="searchable-list" id="list-code"></div><button class="btn-plus" onclick="addOption('code')" type="button">+</button><button class="btn-minus" onclick="delOption('code')" type="button">-</button></div></div>
+<div class="form-group"><label>City :</label><div class="searchable-wrap"><input id="city" class="city" placeholder="BALI..." autocomplete="off" oninput="filterList('city')" onfocus="showList('city')"><div class="searchable-list" id="list-city"></div><button class="btn-plus" onclick="addOption('city')" type="button">+</button><button class="btn-minus" onclick="delOption('city')" type="button">-</button></div></div>
+<div class="form-group"><label>Area Hotel :</label><div class="searchable-wrap"><input id="areaHotel" class="area" placeholder="NUSA DUA..." autocomplete="off" oninput="filterList('area')" onfocus="showList('area')"><div class="searchable-list" id="list-area"></div><button class="btn-plus" onclick="addOption('area')" type="button">+</button><button class="btn-minus" onclick="delOption('area')" type="button">-</button></div></div>
+<div class="form-group"><label>Market :</label><div class="searchable-wrap"><input id="market" class="market" value="ALL MARKET" autocomplete="off" oninput="filterList('market')" onfocus="showList('market')"><div class="searchable-list" id="list-market"></div><button class="btn-plus" onclick="addOption('market')" type="button">+</button><button class="btn-minus" onclick="delOption('market')" type="button">-</button></div></div>
+<div class="form-group full"><label>Name Of Hotel :</label><div class="searchable-wrap"><input id="nameHotel" class="hotel-name" placeholder="KETIK NAMA HOTEL..." autocomplete="off" oninput="filterList('hotel')" onfocus="showList('hotel')"><div class="searchable-list" id="list-hotel"></div><button class="btn-plus" onclick="addOption('hotel')" type="button">+</button><button class="btn-minus" onclick="delOption('hotel')" type="button">-</button></div></div>
+<div class="form-group"><label>Type Of Room :</label><div class="searchable-wrap"><input id="typeRoom" class="type-input" placeholder="SINGLE, DOUBLE..." autocomplete="off" oninput="filterList('typeroom')" onfocus="showList('typeroom')"><div class="searchable-list" id="list-typeroom"></div><button class="btn-plus" onclick="addOption('typeroom')" type="button">+</button><button class="btn-minus" onclick="delOption('typeroom')" type="button">-</button></div></div>
+<div class="form-group"><label>Category :</label><div class="searchable-wrap"><input id="category" class="category" placeholder="5 STAR..." autocomplete="off" oninput="filterList('category')" onfocus="showList('category')"><div class="searchable-list" id="list-category"></div><button class="btn-plus" onclick="addOption('category')" type="button">+</button><button class="btn-minus" onclick="delOption('category')" type="button">-</button></div></div>
+<div class="form-group"><label>Room Rate :</label><input id="roomRate" class="rate" value="0.00"></div>
+<div class="form-group"><label>X-Bed Rate :</label><input id="xBedRate" class="rate" value="0.00"></div>
+<div class="form-group full"><label>Single Suplemen :</label><input id="singleSup" class="rate" value="0.00" style="width:120px"></div>
+</div>
+<div class="validity-box"><span class="title">Validity :</span><span class="label">From Date :</span><input id="validFrom" type="date" value="2023-04-01"><span class="label">To</span><input id="validTo" type="date" value="2024-03-31"><span style="font-size:10px; color:black; font-weight:700; margin-left:8px" id="validDisplay"></span></div>
+<div class="high-season"><div class="title">High Season Surcharge</div><div class="grid-2"><div class="form-group"><label>From Date :</label><input id="hsFrom" type="date" value="2023-04-01"></div><div class="form-group"><label>Until Date :</label><input id="hsTo" type="date" value="2024-03-31"></div><div class="form-group"><label>Rate HSS :</label><input id="rateHSS" class="rate" value="0.00"></div><div class="form-group"><label>Remarks :</label><input id="remarks" style="width:220px" class="category"></div><div class="form-group"><label>Chart Of Account :</label><input id="coa" class="coa"></div></div></div>
+<div class="meals-box"><div class="meals-col"><div style="font-weight:900; font-size:11px; margin-bottom:6px; background:#2e8b57; color:white; padding:2px 8px; display:inline-block">MEALS :</div><div class="meals-row"><label>ABF :</label><input id="abf" class="rate" value="0.00"></div><div class="meals-row"><label>HB :</label><input id="hb" class="rate" value="0.00"></div><div class="meals-row"><label>FB :</label><input id="fb" class="rate" value="0.00"></div></div></div>
+<div class="modal-actions"><button class="cancel" onclick="closeModal()">Cancel</button><button class="save" onclick="saveFromModal()">Save</button></div>
+</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, setDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "hotel");
+let hotels = []; let filteredHotels = []; let selectedIndex = -1; let selectedFirebaseId = null; let selectedFirebaseIds = new Set(); let lastSelectedIndex = -1; let currentSort = 'normal'; let isDragging = false;
+let codeOptions = ["HTL-001","HTL-002","HTL-003","AB","AB21","AB22","AB23","AW82","AB81","HTL-0124","HTL-0091","HTL-0061","HTL-001","HTL-0053","HTL-0080","HTL-0093","HTL-0037","HTL-0065","HTL-0092","HTL-0161","HTL-0066"];
+let areaOptions = ["NUSA PENIDA","UBUD","KUTA","CANDI DASA","NUSA DUA","SEMINYAK","SANUR","JIMBARAN","LEGIAN","CANGGU","LOVINA","AMED","SIDEMEN","KINTAMANI","BEDUGUL","BALI","NUSA DUA","NUSA PENIDA","UBUD / BALI","BALI / BALI","CANDI DASA / BALI"];
+let hotelNameOptions = ["A&T HOLIDAY","ABIAN HARMONY HOTEL","ADHI JAYA SUNSET BALI","ADI DHARMA COTTAGES","ADIWANA","ADIWANA BISMA NUSA PENIDA","ADIWANA BISMA UBUD","ALAYA UBUD","ALILA MANGGIS CANDI DASA"];
+let cityOptions = ["BALI","DENPASAR","UBUD","KUTA","NUSA DUA","SEMINYAK","SANUR","JIMBARAN","CANGGU","LOVINA","CANDI DASA","SIDEMEN"];
+let marketOptions = ["ALL MARKET","ASIA","EUROPE","AUSTRALIA","USA","JAPAN","KOREA","CHINA","MIDDLE EAST","DOMESTIC","INDIA","RUSSIA"];
+let typeRoomOptions = ["SINGLE","DOUBLE","TWIN","DOUBLE/TWIN","TRIPLE","QUAD","SUITE","DELUXE","STANDARD","SUPERIOR","FAMILY","VILLA","POOL VILLA","OCEAN VIEW","PRESIDENT SUITE","DELUXE ROOM","DIWANA RICE FIELD","GRAND DELUXE","BISMA ROOM","BISMA JUNGLE VIEW"];
+let categoryOptions = ["5 STAR","4 STAR","3 STAR","2 STAR","BOUTIQUE","VILLA","RESORT","HOMESTAY","GUEST HOUSE","LUXURY","BUDGET","DELUXE","SUPERIOR ROOM","PRESIDENT SUITE"];
+const optionMap = {
+  code: {options: ()=>codeOptions, set: v=>codeOptions=v, col:"hotel_code_options", input:"codeHotel"},
+  area: {options: ()=>areaOptions, set: v=>areaOptions=v, col:"hotel_area_options", input:"areaHotel"},
+  hotel: {options: ()=>hotelNameOptions, set: v=>hotelNameOptions=v, col:"hotel_name_options", input:"nameHotel"},
+  city: {options: ()=>cityOptions, set: v=>cityOptions=v, col:"hotel_city_options", input:"city"},
+  market: {options: ()=>marketOptions, set: v=>marketOptions=v, col:"hotel_market_options", input:"market"},
+  typeroom: {options: ()=>typeRoomOptions, set: v=>typeRoomOptions=v, col:"hotel_typeroom_options", input:"typeRoom"},
+  category: {options: ()=>categoryOptions, set: v=>categoryOptions=v, col:"hotel_category_options", input:"category"}
+};
+function formatTanggalIndonesia(dateStr){
+  if(!dateStr) return '';
+  let s = String(dateStr).trim(); if(s==='') return '';
+  let m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if(m){ return `${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}-${m[3]}`; }
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m){ return `${m[3].padStart(2,'0')}-${m[2].padStart(2,'0')}-${m[1]}`; }
+  try{ let dt = new Date(s); if(!isNaN(dt)){ let d=String(dt.getDate()).padStart(2,'0'); let mo=String(dt.getMonth()+1).padStart(2,'0'); let y=dt.getFullYear(); return `${d}-${mo}-${y}`; } }catch(e){}
+  return s;
+}
+function toISOForInput(dateStr){
+  if(!dateStr) return '';
+  let s = String(dateStr).trim();
+  let m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if(m){ return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; }
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m){ return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`; }
+  return s;
+}
+function updateValidDisplay(){
+  const from=document.getElementById('validFrom').value;
+  const to=document.getElementById('validTo').value;
+  if(from && to){ document.getElementById('validDisplay').innerText=`(${formatTanggalIndonesia(from)} s/d ${formatTanggalIndonesia(to)})`; }
+}
+['validFrom','validTo','hsFrom','hsTo'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', updateValidDisplay); });
+window.filterTopList=(type)=>{
+  const inputId = type==='market'? 'searchMarket' : 'searchArea';
+  const listId = type==='market'? 'top-list-market' : 'top-list-area';
+  const input=document.getElementById(inputId);
+  const listDiv=document.getElementById(listId);
+  const f=input.value.toUpperCase();
+  let opts = type==='market'? marketOptions : areaOptions;
+  if(f) opts=opts.filter(o=> o.includes(f));
+  listDiv.innerHTML=''; opts.slice(0,30).forEach(opt=>{ const div=document.createElement('div'); div.textContent=opt; div.onclick=()=>{ input.value=opt; listDiv.classList.remove('active'); applyFilter(); }; listDiv.appendChild(div); });
+  if(opts.length>0 && f!=='') listDiv.classList.add('active'); else if(f==='') listDiv.classList.remove('active');
+};
+window.showTopList=(type)=>{
+  const listId = type==='market'? 'top-list-market' : 'top-list-area';
+  const listDiv=document.getElementById(listId);
+  let opts = type==='market'? marketOptions : areaOptions;
+  listDiv.innerHTML=''; opts.slice(0,30).forEach(opt=>{ const div=document.createElement('div'); div.textContent=opt; div.onclick=()=>{ const inputId = type==='market'? 'searchMarket' : 'searchArea'; document.getElementById(inputId).value=opt; listDiv.classList.remove('active'); applyFilter(); }; listDiv.appendChild(div); });
+  listDiv.classList.add('active');
+};
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.search-wrap')){ document.querySelectorAll('.search-list').forEach(l=> l.classList.remove('active')); }
+  if(!e.target.closest('.searchable-wrap')){ document.querySelectorAll('.searchable-list').forEach(l=> l.classList.remove('active')); }
+});
+window.clearFilters=()=>{
+  document.getElementById('searchHotel').value='';
+  document.getElementById('searchMarket').value='';
+  document.getElementById('searchArea').value='';
+  applyFilter();
+};
+window.printNice=()=>{
+  const list = (document.getElementById('searchHotel').value || document.getElementById('searchMarket').value || document.getElementById('searchArea').value)? filteredHotels : (filteredHotels.length>0? filteredHotels : hotels);
+  const data = list.length>0? list : hotels;
+  if(data.length===0){ alert('Tidak ada data!'); return; }
+  const now = new Date();
+  const tglCetak = formatTanggalIndonesia(now.toISOString().split('T')[0]) + ' ' + now.toLocaleTimeString('id-ID');
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Print Hotel BW - ${data.length}</title><style>@page {size: landscape; margin:8mm} *{font-family: Tahoma, Arial, sans-serif; font-size:8.5px; color:#000!important; background:#fff!important} body{margin:0; padding:8px} .header{text-align:center; margin-bottom:8px; border-bottom:2px solid #000; padding-bottom:6px} .header h1{margin:0; font-size:14px; font-weight:900} table{width:100%; border-collapse:collapse; border:1.5px solid #000} th{border:1px solid #000!important; padding:4px 3px; font-size:7.5px; text-align:center; font-weight:900} td{border:1px solid #000!important; padding:3px 4px} </style></head><body><div class="header"><h1>PT. SMAILING TOUR DMC - DATA HARGA HOTEL</h1><div>Dicetak: ${tglCetak} | Total: ${data.length}</div></div><table><thead><tr><th>No</th><th>Market</th><th>Area</th><th>Hotel Name</th><th>Type</th><th>Category</th><th>Price</th><th>Validity</th><th>X Bed</th></tr></thead><tbody>`;
+  data.forEach((h,i)=>{
+    html += `<tr><td>${i+1}</td><td>${h.market}</td><td>${h.areaHotel}</td><td>${h.nameHotel}</td><td>${h.typeRoom}</td><td>${h.category}</td><td>${formatRupiah(h.roomRate)}</td><td>${formatTanggalIndonesia(h.validFrom)} s/d ${formatTanggalIndonesia(h.validTo)}</td><td>${formatRupiah(h.xBedRate)}</td></tr>`;
+  });
+  html += `</tbody></table></body></html>`;
+  const win = window.open('', '_blank', 'width=1200,height=800');
+  win.document.write(html); win.document.close();
+};
+function openModal(isEdit=false){
+  if(!isEdit){ 
+    selectedIndex=-1; selectedFirebaseId=null; 
+    document.getElementById('codeHotel').value='HTL-'+String(hotels.length+1).padStart(3,'0'); 
+    document.getElementById('nameHotel').value=''; 
+    document.getElementById('typeRoom').value='SINGLE'; 
+    document.getElementById('category').value=''; 
+    ['city','areaHotel','roomRate','xBedRate','singleSup','remarks','coa','abf','hb','fb','rateHSS'].forEach(id=>{ 
+      const el=document.getElementById(id); if(!el) return; 
+      if(id.includes('Rate')||id==='abf'||id==='hb'||id==='fb'||id==='rateHSS'||id==='singleSup') el.value='0.00'; 
+      else if(id!=='market') el.value=''; 
+    }); 
+    document.getElementById('market').value='ALL MARKET'; 
+  }
+  updateValidDisplay(); document.getElementById('modalOverlay').classList.add('active');
+}
+window.openModal=openModal;
+window.closeModal=()=>{ document.getElementById('modalOverlay').classList.remove('active'); };
+window.filterList=(type)=>{ const cfg=optionMap[type]; if(!cfg) return; const input=document.getElementById(cfg.input); const f=input.value.toUpperCase(); let opts=cfg.options(); if(f) opts=opts.filter(o=> o.includes(f)); const listDiv=document.getElementById('list-'+type); if(!listDiv) return; listDiv.innerHTML=''; opts.slice(0,60).forEach(opt=>{ const div=document.createElement('div'); div.textContent=opt; div.onclick=()=>{ input.value=opt; listDiv.classList.remove('active'); }; listDiv.appendChild(div); }); if(opts.length>0) listDiv.classList.add('active'); else listDiv.classList.remove('active'); };
+window.showList=(type)=>{ const cfg=optionMap[type]; if(!cfg) return; const listDiv=document.getElementById('list-'+type); const opts=cfg.options(); listDiv.innerHTML=''; opts.slice(0,60).forEach(opt=>{ const div=document.createElement('div'); div.textContent=opt; div.onclick=()=>{ document.getElementById(cfg.input).value=opt; listDiv.classList.remove('active'); }; listDiv.appendChild(div); }); listDiv.classList.add('active'); };
+window.addOption=async(type)=>{ const cfg=optionMap[type]; if(!cfg) return; const input=document.getElementById(cfg.input); let v=prompt(`Tambah ${type.toUpperCase()} baru:`, input.value); if(!v) return; const up=v.trim().toUpperCase(); if(!up) return; let opts=cfg.options(); if(opts.includes(up)){ input.value=up; return; } opts.push(up); opts.sort(); cfg.set(opts); input.value=up; try{ await setDoc(doc(db, cfg.col, up), {name:up, createdAt:new Date()}); }catch(e){} };
+window.delOption=async(type)=>{ const cfg=optionMap[type]; if(!cfg) return; const input=document.getElementById(cfg.input); const val=input.value.trim(); if(!val){ alert('Pilih dulu beb!'); return; } if(!confirm(`Hapus ${type} "${val}"?`)) return; let opts=cfg.options().filter(o=>o!==val.toUpperCase() && o!==val); cfg.set(opts); input.value=opts[0]||''; try{ await deleteDoc(doc(db, cfg.col, val)); }catch(e){} };
+function formatRupiah(num){ if(num===null||num===undefined||num==='') return '0.00'; const n=parseFloat(String(num).replace(/,/g,''))||0; return n.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+function parsePrice(p){ if(!p) return 0; return parseFloat(String(p).replace(/,/g,''))||0; }
+window.sortByPrice=(direction)=>{ currentSort=direction; document.getElementById('btnSortUp').classList.remove('active'); document.getElementById('btnSortDown').classList.remove('active'); if(direction==='asc'){ document.getElementById('btnSortUp').classList.add('active'); filteredHotels.sort((a,b)=> parsePrice(a.roomRate) - parsePrice(b.roomRate)); } else if(direction==='desc'){ document.getElementById('btnSortDown').classList.add('active'); filteredHotels.sort((a,b)=> parsePrice(b.roomRate) - parsePrice(a.roomRate)); } updatePriceInfo(); render(); };
+window.toggleSort=()=>{ if(currentSort==='normal' || currentSort==='desc'){ sortByPrice('asc'); } else{ sortByPrice('desc'); } };
+window.clearSort=()=>{ currentSort='normal'; document.getElementById('btnSortUp').classList.remove('active'); document.getElementById('btnSortDown').classList.remove('active'); filteredHotels=[...hotels].sort((a,b)=> a.nameHotel.localeCompare(b.nameHotel)); updatePriceInfo(); render(); };
+function updatePriceInfo(){ const total=filteredHotels.length; let min=0, max=0; if(total>0){ const prices=filteredHotels.map(h=> parsePrice(h.roomRate)); min=Math.min(...prices); max=Math.max(...prices); } let txt=''; if(currentSort==='asc') txt=`▲ Murah→Mahal | Min: ${formatRupiah(min)} | Max: ${formatRupiah(max)} | Tampil: ${total}`; else if(currentSort==='desc') txt=`▼ Mahal→Murah | Max: ${formatRupiah(max)} | Min: ${formatRupiah(min)} | Tampil: ${total}`; else txt=`Total Tampil: ${total} dari ${hotels.length} Hotel`; document.getElementById('priceInfo').innerText=txt; }
+window.saveFromModal=async()=>{
+  const code=document.getElementById('codeHotel').value.trim(); if(!code){ alert('Code kosong!'); return; }
+  const nameHotel=document.getElementById('nameHotel').value.trim(); if(!nameHotel){ alert('Name wajib!'); return; }
+  const payload={
+    codeHotel: code.toUpperCase(), city: document.getElementById('city').value.toUpperCase(),
+    areaHotel: document.getElementById('areaHotel').value.toUpperCase(), market: document.getElementById('market').value.toUpperCase() || 'ALL MARKET',
+    nameHotel: nameHotel.toUpperCase(), typeRoom: document.getElementById('typeRoom').value.toUpperCase(),
+    category: document.getElementById('category').value.toUpperCase(), roomRate: document.getElementById('roomRate').value.replace(/,/g,''),
+    xBedRate: document.getElementById('xBedRate').value.replace(/,/g,''), singleSup: document.getElementById('singleSup').value.replace(/,/g,''),
+    validFrom: formatTanggalIndonesia(document.getElementById('validFrom').value),
+    validTo: formatTanggalIndonesia(document.getElementById('validTo').value),
+    hsFrom: formatTanggalIndonesia(document.getElementById('hsFrom').value),
+    hsTo: formatTanggalIndonesia(document.getElementById('hsTo').value),
+    rateHSS: document.getElementById('rateHSS').value.replace(/,/g,''), remarks: document.getElementById('remarks').value,
+    coa: document.getElementById('coa').value, abf: document.getElementById('abf').value.replace(/,/g,''),
+    hb: document.getElementById('hb').value.replace(/,/g,''), fb: document.getElementById('fb').value.replace(/,/g,''),
+    updatedAt: new Date()
+  };
+  try{
+    if(selectedFirebaseId){ await updateDoc(doc(db,"hotel",selectedFirebaseId), payload); }
+    else{ payload.createdAt=new Date(); await addDoc(colRef, payload); }
+    closeModal();
+  }catch(e){ alert('Error: '+e.message); }
+};
+
+window.editSelected=()=>{
+  if(!selectedFirebaseId){ alert('Klik data dulu beb!'); return; }
+  const h = hotels.find(x=> x.firebaseId === selectedFirebaseId);
+  if(!h) return;
+  document.getElementById('codeHotel').value = h.codeHotel;
+  document.getElementById('city').value = h.city;
+  document.getElementById('areaHotel').value = h.areaHotel;
+  document.getElementById('market').value = h.market;
+  document.getElementById('nameHotel').value = h.nameHotel;
+  document.getElementById('typeRoom').value = h.typeRoom;
+  document.getElementById('category').value = h.category;
+  document.getElementById('roomRate').value = h.roomRate;
+  document.getElementById('xBedRate').value = h.xBedRate;
+  document.getElementById('singleSup').value = h.singleSup;
+  document.getElementById('validFrom').value = toISOForInput(h.validFrom);
+  document.getElementById('validTo').value = toISOForInput(h.validTo);
+  document.getElementById('hsFrom').value = toISOForInput(h.hsFrom);
+  document.getElementById('hsTo').value = toISOForInput(h.hsTo);
+  document.getElementById('rateHSS').value = h.rateHSS;
+  document.getElementById('remarks').value = h.remarks;
+  document.getElementById('coa').value = h.coa;
+  document.getElementById('abf').value = h.abf;
+  document.getElementById('hb').value = h.hb;
+  document.getElementById('fb').value = h.fb;
+  openModal(true);
+};
+
+window.deleteSelected = async () => {
+  if(selectedFirebaseIds.size===0){
+    alert('Block dulu beb! Caranya:\n- CTRL+KLIK untuk pilih banyak\n- SHIFT+KLIK untuk block dari atas ke bawah\n- DRAG mouse untuk block cepat');
+    return;
+  }
+  const ids = Array.from(selectedFirebaseIds);
+  if(ids.length===1){
+    const dataHapus = hotels.find(h=> h.firebaseId === ids[0]);
+    if(!confirm(`🗑 HAPUS 1 hotel "${dataHapus?.nameHotel}"?`)) return;
+  } else {
+    if(!confirm(`🗑 HAPUS ${ids.length} HOTEL SEKALIGUS?\n\nIni akan hapus ${ids.length} data yang kamu block warna hijau!`)) return;
+    if(!confirm(`Yakin beb? ${ids.length} hotel akan hilang permanen!`)) return;
+  }
+  try{
+    let batch = writeBatch(db); let count=0;
+    for(const fid of ids){
+      batch.delete(doc(db, "hotel", fid));
+      count++; if(count>=400){ await batch.commit(); batch=writeBatch(db); count=0; }
+    }
+    if(count>0) await batch.commit();
+    alert(`✅ Berhasil hapus ${ids.length} hotel`);
+    selectedFirebaseIds.clear(); selectedIndex=-1; selectedFirebaseId=null; lastSelectedIndex=-1;
+  }catch(e){
+    alert(`❌ Gagal: ${e.message}`);
+    console.error(e);
+  }
+};
+
+window.deleteAllHotels = async () => {
+  if(hotels.length===0){ alert('Sudah kosong beb!'); return; }
+  if(!confirm(`⚠️ YAKIN HAPUS SEMUA? Total ${hotels.length} hotel akan hilang!`)) return;
+  if(!confirm(`Konfirmasi kedua beb, beneran mau hapus semua ${hotels.length} data?`)) return;
+  const snap = await getDocs(colRef);
+  let batch = writeBatch(db); let count = 0;
+  for(const d of snap.docs){
+    batch.delete(doc(db, "hotel", d.id));
+    count++; if(count>=400){ await batch.commit(); batch=writeBatch(db); count=0; }
+  }
+  if(count>0) await batch.commit();
+  alert(`✅ Selesai hapus ${snap.size} hotel`);
+  selectedFirebaseId=null; selectedIndex=-1;
+};
+
+window.applyFilter=()=>{
+  const sHotel=document.getElementById('searchHotel').value.toUpperCase();
+  const sMarket=document.getElementById('searchMarket').value.toUpperCase();
+  const sArea=document.getElementById('searchArea').value.toUpperCase();
+  filteredHotels=hotels.filter(h=>{
+    const matchHotel =!sHotel || (h.nameHotel||'').includes(sHotel) || (h.codeHotel||'').includes(sHotel);
+    const matchMarket =!sMarket || (h.market||'').includes(sMarket);
+    const matchArea =!sArea || (h.areaHotel||'').includes(sArea) || (h.city||'').includes(sArea);
+    return matchHotel && matchMarket && matchArea;
+  });
+  if(currentSort==='asc') filteredHotels.sort((a,b)=> parsePrice(a.roomRate)-parsePrice(b.roomRate));
+  else if(currentSort==='desc') filteredHotels.sort((a,b)=> parsePrice(b.roomRate)-parsePrice(a.roomRate));
+  updatePriceInfo(); render();
+};
+
+function render(){
+  const tbody=document.getElementById('tbody'); tbody.innerHTML='';
+  let finalList;
+  const hasFilter = document.getElementById('searchHotel').value || document.getElementById('searchMarket').value || document.getElementById('searchArea').value;
+  finalList = hasFilter? filteredHotels : hotels;
+  if(finalList.length===0 && hotels.length>0 && hasFilter) finalList = filteredHotels;
+  if(finalList.length===0 && !hasFilter) finalList = hotels;
+  
+  finalList.forEach((h, idx)=>{
+    const tr=document.createElement('tr'); 
+    tr.dataset.firebaseId = h.firebaseId;
+    tr.dataset.code = h.codeHotel;
+    tr.dataset.listIndex = idx;
+    const isSelected = selectedFirebaseIds.has(h.firebaseId);
+    tr.className = isSelected? 'selected' : '';
+    const priceNum=parsePrice(h.roomRate); let priceColor= priceNum>1000000? '#ffaaaa' : priceNum>500000? '#ffe0a0' : '#e0ffe0';
+    const v1=formatTanggalIndonesia(h.validFrom); const v2=formatTanggalIndonesia(h.validTo);
+    tr.innerHTML=`<td style="color:orange">${h.market}</td><td style="color:blue">${h.areaHotel}</td><td style="color:blue; font-weight:bold">${h.nameHotel}</td><td>${h.typeRoom}</td><td>${h.category}</td><td class="price-cell" style="background:${priceColor}">${formatRupiah(h.roomRate)}</td><td class="date-cell">${v1}</td><td class="date-cell2">${v2}</td><td style="text-align:right">${formatRupiah(h.xBedRate)}</td><td style="text-align:right">${formatRupiah(h.abf)}</td><td style="text-align:right">${formatRupiah(h.hb)}</td><td style="text-align:right">${formatRupiah(h.fb)}</td>`;
+    tbody.appendChild(tr);
+  });
+  updatePriceInfo();
+}
+
+function updateSelectionInfo(){
+  const count = selectedFirebaseIds.size;
+  if(count>1){
+    document.getElementById('priceInfo').innerText = `🔵 TERBLOK: ${count} Hotel dipilih - Klik Delete untuk hapus semua | Total: ${hotels.length}`;
+    document.getElementById('priceInfo').style.background = '#00ff7f';
+    document.getElementById('priceInfo').style.border = '2px solid #000';
+  }
+}
+
+function toggleSelectOne(firebaseId, listIdx, e){
+  const hasCtrl = e.ctrlKey || e.metaKey;
+  const hasShift = e.shiftKey;
+  
+  if(hasShift && lastSelectedIndex !== -1){
+    // BLOCK SELECT: dari lastSelectedIndex sampai sekarang
+    let finalList;
+    const hasFilter = document.getElementById('searchHotel').value || document.getElementById('searchMarket').value || document.getElementById('searchArea').value;
+    finalList = hasFilter? filteredHotels : hotels;
+    if(finalList.length===0 && !hasFilter) finalList = hotels;
+    const start = Math.min(lastSelectedIndex, listIdx);
+    const end = Math.max(lastSelectedIndex, listIdx);
+    for(let i=start;i<=end;i++){
+      if(finalList[i]) selectedFirebaseIds.add(finalList[i].firebaseId);
+    }
+  } else if(hasCtrl){
+    // CTRL+KLIK: tambah / lepas satu
+    if(selectedFirebaseIds.has(firebaseId)){
+      selectedFirebaseIds.delete(firebaseId);
+    } else {
+      selectedFirebaseIds.add(firebaseId);
+    }
+    lastSelectedIndex = listIdx;
+  } else {
+    // KLIK BIASA: ganti jadi 1 aja
+    selectedFirebaseIds.clear();
+    selectedFirebaseIds.add(firebaseId);
+    lastSelectedIndex = listIdx;
+  }
+  selectedFirebaseId = firebaseId;
+  selectedIndex = hotels.findIndex(x=> x.firebaseId === firebaseId);
+}
+
+// MULTI SELECT LOGIC - BLOCK & CTRL
+document.getElementById('tbody').addEventListener('click',(e)=>{
+  const tr=e.target.closest('tr'); if(!tr||!tr.dataset.firebaseId) return;
+  const firebaseId = tr.dataset.firebaseId;
+  const listIdx = parseInt(tr.dataset.listIndex);
+  toggleSelectOne(firebaseId, listIdx, e);
+  render();
+  updateSelectionInfo();
+});
+
+document.getElementById('tbody').addEventListener('mousedown',(e)=>{
+  const tr=e.target.closest('tr'); if(!tr) return;
+  isDragging = true;
+  if(!e.ctrlKey && !e.shiftKey){
+    // kalau drag mulai, clear dulu biar block baru
+    const tr2 = e.target.closest('tr');
+    if(tr2 && !selectedFirebaseIds.has(tr2.dataset.firebaseId)){
+      // jangan clear kalau klik di yang sudah terpilih (biar bisa drag tambah)
+    }
+  }
+});
+
+document.getElementById('tbody').addEventListener('mouseover',(e)=>{
+  if(!isDragging) return;
+  const tr=e.target.closest('tr'); if(!tr||!tr.dataset.firebaseId) return;
+  const firebaseId = tr.dataset.firebaseId;
+  selectedFirebaseIds.add(firebaseId);
+  render();
+});
+
+document.addEventListener('mouseup',()=>{ 
+  isDragging = false; 
+  updateSelectionInfo();
+});
+
+// Prevent text selection saat drag
+document.querySelector('.table-wrap').addEventListener('selectstart', e=>{ if(isDragging) e.preventDefault(); });
+
+window.scrollTopTable=()=>{ document.querySelector('.table-wrap').scrollTop=0; };
+window.scrollBottom=()=>{ const w=document.querySelector('.table-wrap'); w.scrollTop=w.scrollHeight; };
+window.scrollNext=()=>{ const w=document.querySelector('.table-wrap'); w.scrollTop+=200; };
+window.scrollPrev=()=>{ const w=document.querySelector('.table-wrap'); w.scrollTop-=200; };
+window.fixAllDates=async()=>{
+  if(!confirm('Fix semua tanggal jadi format Indonesia DD-MM-YYYY?')) return;
+  const btn=document.querySelector('.fix-date'); btn.disabled=true; btn.innerText='⏳ Fixing...';
+  try{
+    const snap=await getDocs(colRef); let fixed=0; let batch=writeBatch(db); let batchCount=0;
+    for(const d of snap.docs){
+      const data=d.data();
+      const newV1=formatTanggalIndonesia(data.validFrom||'');
+      const newV2=formatTanggalIndonesia(data.validTo||'');
+      const newHs1=formatTanggalIndonesia(data.hsFrom||'');
+      const newHs2=formatTanggalIndonesia(data.hsTo||'');
+      if(newV1!==data.validFrom || newV2!==data.validTo){ batch.update(doc(db, "hotel", d.id), { validFrom: newV1, validTo: newV2, hsFrom: newHs1, hsTo: newHs2 }); fixed++; batchCount++; }
+      if(batchCount>=400){ await batch.commit(); batch=writeBatch(db); batchCount=0; }
+    }
+    if(batchCount>0) await batch.commit();
+    alert(`✅ Selesai fix ${fixed} data!`);
+    btn.innerText='🔧 Fix Tanggal Indo'; btn.disabled=false;
+  }catch(e){ alert('Error: '+e.message); btn.disabled=false; btn.innerText='🔧 Fix Tanggal Indo'; }
+};
+onSnapshot(colRef, snap=>{
+  const keepId = selectedFirebaseId;
+  hotels=[]; snap.forEach(d=>{ const data=d.data(); hotels.push({ firebaseId:d.id, codeHotel:data.codeHotel||'', city:data.city||'', areaHotel:data.areaHotel||'', market:data.market||'ALL MARKET', nameHotel:data.nameHotel||'', typeRoom:data.typeRoom||'SINGLE', category:data.category||'', roomRate:data.roomRate||'0', xBedRate:data.xBedRate||'0', singleSup:data.singleSup||'0', validFrom:data.validFrom||'01-04-2023', validTo:data.validTo||'31-03-2024', hsFrom:data.hsFrom||'01-04-2023', hsTo:data.hsTo||'31-03-2024', rateHSS:data.rateHSS||'0', remarks:data.remarks||'', coa:data.coa||'', abf:data.abf||'0', hb:data.hb||'0', fb:data.fb||'0' }); });
+  hotels.sort((a,b)=> a.nameHotel.localeCompare(b.nameHotel)); filteredHotels=[...hotels];
+  if(currentSort==='asc') filteredHotels.sort((a,b)=> parsePrice(a.roomRate)-parsePrice(b.roomRate));
+  else if(currentSort==='desc') filteredHotels.sort((a,b)=> parsePrice(b.roomRate)-parsePrice(a.roomRate));
+  if(keepId && hotels.find(h=> h.firebaseId===keepId)){ selectedFirebaseId = keepId; selectedIndex = hotels.findIndex(h=> h.firebaseId===keepId); } else if(selectedFirebaseIds.size===0){ selectedFirebaseId=null; selectedIndex=-1; }
+  updatePriceInfo(); render();
+  const areas=[...new Set(hotels.map(h=> h.areaHotel).filter(a=>a))].sort();
+  const markets=[...new Set(hotels.map(h=> h.market).filter(a=>a))].sort();
+  const codes=[...new Set(hotels.map(h=> h.codeHotel).filter(a=>a))].sort();
+  if(areas.length>0){ areaOptions=[...new Set([...areaOptions,...areas])].sort(); }
+  if(markets.length>0){ marketOptions=[...new Set([...marketOptions,...markets])].sort(); }
+  if(codes.length>0){ codeOptions=[...new Set([...codeOptions,...codes])].sort(); }
+});
+document.getElementById('modalOverlay').addEventListener('click',(e)=>{ if(e.target.id==='modalOverlay') closeModal(); });
+Object.values(optionMap).forEach(cfg=>{ const colRefOpt=collection(db, cfg.col); onSnapshot(colRefOpt, snap=>{ if(snap.size>0){ const arr=[]; snap.forEach(d=> arr.push(d.data().name)); if(arr.length>0) cfg.set(arr.sort()); }}); });
+</script>
+</body>
+</html>

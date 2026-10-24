@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MENU MARKETING - V31 CRONO FILE + QUOTATION FINAL</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#c6e8c6;font-family:Tahoma,Arial;font-size:11px;overflow:hidden}
+.win{border:2px solid #000;background:#c6e8c6;width:100vw;height:100vh;display:flex;flex-direction:column}
+.titleBar{background:#d4d0c8;border-bottom:2px solid #000;padding:2px 6px;font-weight:700;font-size:11px;color:#006600;display:flex;justify-content:space-between}
+.formArea{background:#c6e8c6;padding:6px 8px;border-bottom:2px solid #000;position:relative}
+table.f{border-collapse:collapse;width:82%} table.f td{padding:2px 4px;font-weight:700;white-space:nowrap;height:22px;font-size:11px;vertical-align:middle}
+.in{height:20px;border:1.5px solid #000;background:#fff;font-weight:700;padding:0 6px;font-size:11px;border-radius:2px}
+.inDate{width:130px!important;text-align:center;background:#ffffcc!important;border:2px solid #0000cc!important;font-weight:900!important;cursor:pointer}
+.inGuest{width:230px;background:#ffffcc;border:2px solid #0000cc;font-weight:900;font-size:10px}
+.inSmall{width:65px;text-align:center;background:#fff}
+.inAgent{width:105px;background:#fff}
+.inRate{width:75px;text-align:center;background:#ffffcc}
+.inUSD{width:85px;text-align:right;background:#ffffcc}
+.inIDR{width:115px;text-align:right;background:#ffffcc;font-weight:900!important}
+.inPacket{width:85px;background:#ffffcc}
+.inMargin{width:55px;text-align:center;background:#ffffcc}
+textarea.guest{width:200px;height:36px;border:1.5px solid #000;font-weight:700;padding:2px 5px;resize:none;background:#ffffcc;font-size:10px}
+.btnPlus{width:20px;height:20px;border:1.5px solid #000;background:#e8f3ed;font-weight:900;font-size:12px;cursor:pointer;border-radius:3px;margin-left:2px}
+.btnMin{width:20px;height:20px;border:1.5px solid #000;background:#ff9999;font-weight:900;font-size:12px;cursor:pointer;border-radius:3px;margin-left:1px}
+.rightOps{position:absolute;right:6px;top:2px;width:175px;display:flex;flex-direction:column;gap:3px;align-items:flex-end}
+.timeRed{color:#ff0000;font-size:22px;font-weight:900;font-family:Arial Black;line-height:22px}
+.btnOp{width:125px;height:21px;border:2px solid #000;background:#d4d0c8;font-weight:900;font-size:11px;cursor:pointer;text-align:center;border-radius:3px}
+.btnOp.profit{background:#c6e8ff;color:#0000ff;text-decoration:underline;font-size:10px}
+.itinBar{background:#ffff00;border-bottom:3px solid #000;border-top:2px solid #000;padding:4px 10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.itin-radio{display:flex;align-items:center;gap:4px;font-weight:900;font-size:11px;cursor:pointer;padding:4px 10px;border:2px solid #000;background:#ffcc00;border-radius:4px}
+.itin-radio.crono{background:#00ffcc!important;border:2px solid #000!important;color:#000!important}
+.actionBar{background:#c6e8c6;border-bottom:3px solid #000;padding:5px 8px;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.actionBar button{height:24px;padding:0 14px;font-size:11px;font-weight:900;border:1.5px solid #000;background:#d4d0c8;cursor:pointer;border-radius:3px}
+.actionBar button#btnSave{background:#a8ffb0;border:2px solid #000}
+.actionBar button.del{background:#ffb0b0;border:2px solid #000;color:#ff0000}
+.actionBar button.refresh{background:#afebc7;border:2px solid #000}
+.btn-quotation{background:#a8a8ff!important;border:2px solid #000!important}
+.btn-crono{background:#00ffcc!important;border:2px solid #000!important;color:#000!important;cursor:pointer!important}
+.salesPriceBox{margin-left:auto;display:flex;align-items:center;gap:6px;font-weight:900;font-size:12px;color:#0000cc}
+.salesPriceBox input{width:115px;height:24px;text-align:right;font-weight:900;background:#d4d0c8;border:2px solid #000;font-size:12px}
+.salesPriceBox input#nettSalesId{background:#ffffcc!important;color:#cc0000!important;border:2px solid #ff0000!important}
+.salesPriceBox input#salesPriceId{background:#ccffcc!important;color:#0000cc!important;border:2px solid #0000cc!important}
+.grid{flex:1;background:#b0ffb0;overflow:auto;border-top:2px solid #000}
+table.list{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+table.list th{background:#d8e8d0;border:1px solid #000;padding:6px 4px;text-align:center;font-weight:900;position:sticky;top:0;font-size:10px}
+table.list td{border:1px solid #666;padding:5px 5px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;background:#b0ffb0}
+tr.sel td{background:#d3e2d9!important;font-weight:900!important;border:2px solid #0000cc!important;color:#000}
+tr.status-OK td{background:#b0ffb0!important;color:#006600!important}
+tr.status-WL td{background:#ffff99!important;color:#996600!important}
+tr.status-CXL td{background:#ff9999!important;color:#990000!important}
+td.status-cell-OK{background:#00cc00!important;color:#fff!important;font-weight:900!important;text-align:center!important}
+td.status-cell-WL{background:#ffcc00!important;color:#000!important;font-weight:900!important;text-align:center!important}
+td.status-cell-CXL{background:#ff0000!important;color:#fff!important;font-weight:900!important;text-align:center!important}
+.status-OK-select{background:#00ff66!important;color:#006600!important;font-weight:900!important;border:2px solid #00aa00!important}
+.status-WL-select{background:#ffff00!important;color:#996600!important;font-weight:900!important;border:2px solid #cc9900!important}
+.status-CXL-select{background:#ff0000!important;color:#fff!important;font-weight:900!important;border:2px solid #990000!important}
+#dateWarningMaster{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);width:520px;background:#ffcc00;border:4px solid #ff0000;z-index:99999;display:none;flex-direction:column;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,0.7)}
+#dateWarningMaster.active{display:flex}
+.warnHeaderMaster{background:#ff0000;color:#fff;padding:10px 12px;font-weight:900;font-size:15px;text-align:center}
+.warnBodyMaster{background:#ffff99;padding:18px 15px;font-size:12px;font-weight:700;line-height:22px;text-align:center}
+.warnBodyMaster span.red{color:#ff0000;font-weight:900;background:#fff;padding:1px 4px;border:1px solid #ff0000}
+.warnFooterMaster{background:#d4d0c8;padding:10px;display:flex;justify-content:center;gap:12px;border-top:2px solid #000}
+.warnFooterMaster button{padding:7px 22px;font-weight:900;border:2px solid #000;cursor:pointer;border-radius:5px;background:#00ff66}
+#invoiceModal{position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;display:none;justify-content:center;align-items:flex-start;overflow:auto;padding:20px}
+#invoiceModal.active{display:flex}
+.invPaper{width:860px;background:#fff;padding:25px;border:3px solid #000;min-height:600px}
+.invHeader{display:flex;justify-content:space-between}
+.invLogo{font-size:26px;font-weight:900;color:#000080;line-height:20px}
+.invLogo span{color:#6699cc;font-weight:400}
+.invLogo small{font-size:10px;color:#000;display:block;font-weight:700;margin-top:2px}
+.invTitle{font-size:20px;font-weight:900;color:#0000cc;text-align:center;flex:1;margin-top:10px;letter-spacing:1px}
+.invInfo{display:flex;justify-content:space-between;margin-top:20px;font-weight:700;font-size:12px}
+table.inv{width:100%;border-collapse:collapse;margin-top:15px;border:2px solid #000}
+table.inv th{border:1px solid #000;padding:7px;font-weight:900;font-size:11px;background:#fff;text-align:center}
+table.inv td{border:1px solid #000;padding:5px 7px;font-size:11px}
+table.inv td.num{text-align:right;font-weight:700}
+.invTotalBox{width:340px;margin-left:auto;margin-top:8px;font-size:11px;font-weight:700}
+.invTotalBox div{display:flex;justify-content:space-between;padding:2px 0}
+.invTotalBox div.balDue{font-weight:900;font-size:14px;border-top:2px double #000;border-bottom:2px double #000;padding:5px 0;margin-top:5px}
+.invBtns{display:flex;gap:10px;justify-content:center;margin-top:15px}
+.invBtns button{padding:8px 20px;font-weight:900;border:2px solid #000;cursor:pointer;border-radius:5px}
+.loadingInv{text-align:center;padding:20px;font-weight:900;color:#0000cc}
+</style>
+</head>
+<body>
+<div class="win">
+<div class="titleBar"><span>≡ MENU MARKETING - V31 CRONO FILE + QUOTATION FINAL</span><span id="jamTop" style="color:#000;font-weight:900">--:--:--</span></div>
+<div class="formArea">
+<div class="rightOps">
+<div class="timeRed" id="jamBig">18:33:28</div>
+<button class="btnOp">Operation</button>
+<button class="btnOp profit">PROFIT N LOSS</button>
+<button class="btnOp" style="background:#ffff00;color:#000;border:2px solid #ff0000;font-weight:900" onclick="openInvoice()">INVOICE</button>
+<button class="btnOp" style="background:#c6e8ff;color:#0000ff">COG</button>
+</div>
+<table class="f">
+<tr><td>Reservation Date :</td><td><input class="in inDate" id="resDate" type="date"></td><td>Arrival Date</td><td><input class="in inDate" id="arrDate" type="date" onchange="validateDepArr()"></td><td>Flight No. :</td><td><input class="in" id="flight1" style="width:70px"></td><td>Status :</td><td><select class="in status-OK-select" id="status" onchange="updateStatusColor()" style="width:75px;font-weight:900"><option value="OK">OK</option><option value="WL">WL</option><option value="CXL">CXL</option></select></td></tr>
+<tr><td>Guest ID :</td><td><input class="in inGuest" id="guestId" readonly></td><td>Departure Date</td><td><input class="in inDate" id="depDate" type="date" onchange="validateDepArr()"></td><td>Flight No. :</td><td><input class="in" id="flight2" style="width:70px"></td><td>T. Margin</td><td><input class="in inMargin" id="tMargin" value="10.00"></td></tr>
+<tr><td>Travel Consultant :</td><td><input class="in" id="travelCons" value="HILARIUS" style="width:130px;background:#ffffcc"></td><td>Total Adult</td><td><input class="in inSmall" id="totalAdl" value="2"></td><td>AGENT :</td><td style="display:flex;align-items:center"><input class="in inAgent" id="agent" list="agentList" value="AURORA"><datalist id="agentList"></datalist><button class="btnPlus" onclick="addAgent()">+</button><button class="btnMin" onclick="delAgent()">-</button></td><td>Name of Packet</td><td><input class="in inPacket" id="packetName" value="Package"></td></tr>
+<tr><td>Name of Guest :</td><td><textarea id="guestName" class="guest" placeholder="Ketik nama tamu disini beb..."></textarea></td><td>Total Child</td><td><input class="in inSmall" id="totalChd" value="0"></td><td>Nationality :</td><td style="display:flex;align-items:center"><input class="in inAgent" id="nationality" list="natList" value="SPAIN"><datalist id="natList"></datalist><button class="btnPlus" onclick="addNat()">+</button><button class="btnMin" onclick="delNat()">-</button></td><td>Tour Price USD</td><td><input class="in inUSD" id="tourUSD" value="0" oninput="calcIDR()"></td></tr>
+<tr><td></td><td></td><td>Rate :</td><td><input class="in inRate" id="rate" value="14,300.00" oninput="calcIDR()"></td><td>Agents Lock :</td><td><input class="in" id="agentsLock" style="width:110px"></td><td>Tour Price IDR</td><td><input class="in inIDR" id="tourIDR" value="0" readonly></td></tr>
+</table>
+</div>
+<div class="itinBar">
+<label class="itin-radio" onclick="openItin('hotels')"><input type="radio" name="itin" checked> Hotels</label>
+<label class="itin-radio crono" onclick="openCrono()"><input type="radio" name="itin"> 📅 Crono File</label>
+<label class="itin-radio" onclick="openItin('tours')"><input type="radio" name="itin"> Tours</label>
+<label class="itin-radio" onclick="openItin('meals')"><input type="radio" name="itin"> Meals</label>
+<label class="itin-radio" onclick="openItin('guide')"><input type="radio" name="itin"> Guide Fee</label>
+<label class="itin-radio" onclick="openItin('others')"><input type="radio" name="itin"> Others</label>
+<label class="itin-radio" onclick="openItin('optional')"><input type="radio" name="itin"> Optional</label>
+</div>
+<div class="actionBar">
+<button onclick="modeAdd()">Add</button><button id="btnSave" onclick="modeSave()">Save</button><button onclick="modeEdit()">Edit</button><button class="del" onclick="modeDelete()">Delete</button><button onclick="modeCancel()">Cancel</button><button onclick="modeCancel()">Exit</button><button class="refresh" onclick="location.reload()">Refresh</button>
+<button class="btn-quotation" onclick="openQuotation()">QUOTATION</button>
+<button class="btn-crono" onclick="openCrono()">📅 CRONO FILE (Itinerary Urut Tgl)</button>
+<div class="salesPriceBox">
+<span>Nett Sales / ID :</span><input id="nettSalesId" value="0" readonly>
+<span>Sales Price / ID :</span><input id="salesPriceId" value="0" readonly>
+</div>
+</div>
+<div class="grid" id="masterGrid">
+<table class="list">
+<thead><tr>
+  <th style="width:80px">Date</th>
+  <th style="width:160px">Guest ID:</th>
+  <th style="width:250px">Name of Guest</th>
+  <th style="width:200px">Agents</th>
+  <th style="width:80px">Date Of Arr.</th>
+  <th style="width:60px">Flight No.</th>
+  <th style="width:80px">Date Of Dep.</th>
+  <th style="width:60px">Flight</th>
+  <th style="width:40px">Adl</th>
+  <th style="width:40px">Chd</th>
+  <th style="width:50px">Status</th>
+  <th>Nationality</th></tr></thead>
+<tbody id="tbodyMaster"><tr><td colspan="12" style="text-align:center;padding:10px">Loading data...</td></tr></tbody>
+</table>
+</div>
+</div>
+<div id="dateWarningMaster">
+<div class="warnHeaderMaster">⚠️ WARNING - TGL DEP SALAH! ⚠️</div>
+<div class="warnBodyMaster">Departure HARUS lebih besar dari Arrival!<br><br>Arrival: <span class="red" id="warnArrDate"></span><br>Departure: <span class="red" id="warnDepDate"></span><br><br>DEP tidak boleh ≤ ARR! Auto betulin ARR+4 hari!</div>
+<div class="warnFooterMaster"><button onclick="closeDateWarnMaster()">OK - Perbaiki DEP</button></div>
+</div>
+<div id="invoiceModal">
+<div class="invPaper">
+<div class="invHeader">
+<div class="invLogo">SMAILING <span>TOUR</span><small>Travel Management Expert</small></div>
+<div class="invTitle">INVOICE</div>
+<div style="width:140px"></div>
+</div>
+<div class="invInfo">
+<div>
+<div>Agen Names : <b id="invAgent">AURORA</b></div>
+<div style="display:flex;gap:6px;margin-top:4px"><div>Client(s) :</div><div><b id="invClient">-</b></div></div>
+</div>
+<div style="text-align:right">
+<div>Date : <b id="invDate">-</b></div>
+<div>Cust Reference : <b id="invRef">-</b></div>
+<div>Printed By : <b>SMAILING DMC BALI</b></div>
+</div>
+</div>
+<div id="invLoading" class="loadingInv">Loading real itinerary data...</div>
+<table class="inv" id="invTable" style="display:none">
+<thead><tr><th style="width:95px">Date</th><th>Description LAND SERVICES</th><th style="width:85px">Amount USD</th><th style="width:55px">T.Pax</th><th style="width:95px">TOTAL USD</th></tr></thead>
+<tbody id="invBody"></tbody>
+</table>
+<div class="invTotalBox">
+<div><span>GRAND TOTAL USD :</span><span id="invGrand">0.00</span></div>
+<div class="balDue"><span>Total Balanced Due :</span><span id="invBal">0.00</span></div>
+</div>
+<div class="invBtns">
+<button style="background:#00ff66" onclick="window.print()">PRINT INVOICE</button>
+<button style="background:#ffcc00" onclick="closeInvoice()">CLOSE</button>
+<button style="background:#c6e8ff" onclick="loadInvoiceData()">RELOAD REAL DATA</button>
+</div>
+</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe", storageBucket: "inbound2026-12ffe.firebasestorage.app", messagingSenderId: "368642042481", appId: "1:368642042481:web:0da95081f2039b357089d0" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+function getTodayISOInput(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function toDisplay(iso){ if(!iso) return ''; if(iso.includes('-') && iso.length===10 && iso[2]==='-') return iso; if(!iso.includes('-')) return iso; const [y,m,d]=iso.split('-'); return `${d}-${m}-${y}`; }
+function toInput(s){ if(!s) return getTodayISOInput(); s=String(s).trim(); let m=s.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(m) return `${m[3]}-${m[2]}-${m[1]}`; return s; }
+function formatDatePartForId(){ const now=new Date(); const dd=String(now.getDate()).padStart(2,'0'); const months=["jan","feb","mar","apr","mei","jun","jul","agu","sep","okt","nov","des"]; return `${dd}${months[now.getMonth()]}${String(now.getFullYear()).slice(-2)}`; }
+function addDaysISO(iso, days){ const d=new Date(iso); d.setDate(d.getDate()+days); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function getStatusClass(status){ let s=(status||'').toString().trim().toUpperCase(); if(s.includes('CXL')||s.includes('CANCEL')||s.includes('BATAL')) return 'CXL'; if(s.includes('WL')||s.includes('WAIT')) return 'WL'; return 'OK'; }
+window.updateStatusColor=()=>{ const st=(document.getElementById('status').value||'OK').toUpperCase(); const sel=document.getElementById('status'); sel.className='in status-'+getStatusClass(st)+'-select'; };
+function parseUSD(v){ if(!v) return 0; return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }
+function getNights(cin, cout){ try{ if(!cin||!cout) return 1; const parse = (s)=>{ s=String(s).trim(); if(s.includes('T')) s=s.split('T')[0]; if(s.includes(' ')) s=s.split(' ')[0]; let d,m,y; if(s.includes('-')){ const p=s.split('-'); if(p[0].length===4){ y=parseInt(p[0]); m=parseInt(p[1]); d=parseInt(p[2]); } else { d=parseInt(p[0]); m=parseInt(p[1]); y=parseInt(p[2]); } }else if(s.includes('/')){ const p=s.split('/'); if(p[0].length===4){ y=parseInt(p[0]); m=parseInt(p[1]); d=parseInt(p[2]); } else { d=parseInt(p[0]); m=parseInt(p[1]); y=parseInt(p[2]); } }else return new Date(s); return new Date(y,m-1,d); }; const d1=parse(cin); const d2=parse(cout); const diff=Math.round((d2-d1)/(1000*60*60*24)); return diff>0?diff:1; }catch(e){ return 1; } }
+window.calcIDR=()=>{ const r=parseFloat(document.getElementById('rate').value.replace(/[^0-9.]/g,''))||14300; const u=parseFloat(document.getElementById('tourUSD').value.replace(/[^0-9.]/g,''))||0; const idr=r*u; const idrStr=idr.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); document.getElementById('tourIDR').value=idrStr; document.getElementById('salesPriceId').value=idrStr; };
+async function loadNettSales(gid){ if(!gid){ document.getElementById('nettSalesId').value='0'; return; } document.getElementById('nettSalesId').value='Loading...'; let grandTotal=0; const cols=['hotels','transport','tours','meals','guide','guideFee','others','optional','hotel_transactions']; for(const col of cols){ try{ const snap=await getDocs(collection(db, col)); snap.forEach(docSnap=>{ const d=docSnap.data(); const docGuestId=d.guestId||d.GuestID||''; if(docGuestId===gid || docGuestId.toUpperCase()===gid.toUpperCase()){ let total=0; if(col==='hotels' || col==='hotel_transactions'){ const cin=d.ChekIn||d.checkIn||d.CheckIn||d['Chek In']||d.date||''; const cout=d.ChekOut||d.checkOut||d.CheckOut||d['Chek Out']||''; const rate=parseUSD(d.RateRoom||d.rateRoom||d['Rate Room']||d.rate||d.price||0); const troom=parseInt(d.TRoom||d.tRoom||d['TRoom']||1)||1; const xbed=parseUSD(d.XBed||d['X-Bed']||d.xbed||0); const nights=getNights(cin, cout); total=(rate*troom + xbed) * nights; }else{ total=parseUSD(d.total||d.totalUSD||d.totalCost||d.carCost||0) || parseUSD(d.price||d.amount||d.rate||d.cost||0) * (parseInt(d.pax)||1); } grandTotal+=total; } }); }catch(e){} } document.getElementById('nettSalesId').value=grandTotal.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+window.validateDepArr=()=>{ const arrVal=document.getElementById('arrDate').value; const depVal=document.getElementById('depDate').value; if(!arrVal||!depVal) return true; const arr=new Date(arrVal); const dep=new Date(depVal); if(dep <= arr){ document.getElementById('warnArrDate').innerText=toDisplay(arrVal); document.getElementById('warnDepDate').innerText=toDisplay(depVal); document.getElementById('dateWarningMaster').classList.add('active'); document.getElementById('dateWarningMaster').style.display='flex'; document.getElementById('depDate').value=addDaysISO(arrVal, 4); return false; } return true; };
+window.closeDateWarnMaster=()=>{ document.getElementById('dateWarningMaster').classList.remove('active'); document.getElementById('dateWarningMaster').style.display='none'; document.getElementById('depDate').focus(); };
+window.openInvoice=()=>{ const gid=document.getElementById('guestId').value; if(!gid){ alert('Klik baris bawah dulu beb!'); return; } document.getElementById('invoiceModal').classList.add('active'); loadInvoiceData(); };
+window.closeInvoice=()=>{ document.getElementById('invoiceModal').classList.remove('active'); };
+window.loadInvoiceData=async()=>{
+  const gid=document.getElementById('guestId').value;
+  const adl=parseInt(document.getElementById('totalAdl').value)||2;
+  document.getElementById('invAgent').innerText=document.getElementById('agent').value||'AURORA';
+  document.getElementById('invClient').innerText=document.getElementById('guestName').value||'-';
+  document.getElementById('invRef').innerText=document.getElementById('travelCons').value||'HILARIUS';
+  document.getElementById('invDate').innerText=toDisplay(document.getElementById('resDate').value)||toDisplay(getTodayISOInput());
+  document.getElementById('invLoading').style.display='block'; document.getElementById('invTable').style.display='none'; document.getElementById('invBody').innerHTML='';
+  let allRows=[]; let grandTotal=0;
+  const cols=['hotels','transport','tours','meals','guide','guideFee','others','optional','hotel_transactions'];
+  for(const col of cols){
+    try{
+      const snap=await getDocs(collection(db, col));
+      snap.forEach(docSnap=>{
+        const d=docSnap.data();
+        const docGuestId=d.guestId||d.GuestID||'';
+        if(docGuestId===gid || docGuestId.toUpperCase()===gid.toUpperCase()){
+          const dateVal=d.date||d.ChekIn||d.checkIn||d.tourDate||'';
+          const desc=d.hotel||d.NameOfHotel||d.description||d.transport||d.tour||d.meal||d.guide||d.service||d.item||d.name||d.hotelName||d.nameOfTransport||'';
+          const room=d.TypeOfRoom||d.roomType||d.vehicle||d.type||'';
+          const fullDesc=desc + (room? ' / '+room : '');
+          let amount=0, total=0;
+          if(col==='hotels'){
+            const cin=d.ChekIn||d.checkIn||''; const cout=d.ChekOut||d.checkOut||'';
+            const nights=getNights(cin, cout);
+            const rate=parseUSD(d.RateRoom||d.rateRoom||0);
+            const troom=parseInt(d.TRoom||1)||1;
+            amount=rate; total=rate*troom*nights; const pax=troom;
+            allRows.push({date:cin+' - '+cout+' ('+nights+' malam)', desc:fullDesc.toUpperCase(), amount:amount, pax:pax, total:total});
+            grandTotal+=total;
+          }else{
+            amount=parseUSD(d.price||d.amount||d.rate||d.cost||d.carCost||0);
+            total=parseUSD(d.total||d.totalUSD||0) || (amount*(parseInt(d.pax)||1));
+            const pax=d.pax||adl;
+            if(fullDesc){ allRows.push({date:dateVal, desc:fullDesc.toUpperCase(), amount:amount, pax:pax, total:total}); grandTotal+=total; }
+          }
+        }
+      });
+    }catch(e){}
+  }
+  if(allRows.length===0){
+    const tourUSD=parseUSD(document.getElementById('tourUSD').value);
+    if(tourUSD>0){
+      allRows.push({date: toDisplay(document.getElementById('arrDate').value)+' - '+toDisplay(document.getElementById('depDate').value), desc: (document.getElementById('packetName').value||'Package')+' - LAND SERVICES', amount:tourUSD/adl, pax:adl, total:tourUSD});
+      grandTotal=tourUSD;
+    } else {
+      allRows.push({date:'', desc:'Belum ada itinerary untuk Guest ID ini.', amount:0, pax:adl, total:0});
+    }
+  }
+  let html=''; allRows.forEach(r=>{ html+=`<tr><td>${r.date||''}</td><td>${r.desc}</td><td class="num">${r.amount.toLocaleString('en-US',{minimumFractionDigits:2})}</td><td class="num">${r.pax}</td><td class="num">${r.total.toLocaleString('en-US',{minimumFractionDigits:2})}</td></tr>`; });
+  document.getElementById('invBody').innerHTML=html;
+  document.getElementById('invGrand').innerText=grandTotal.toLocaleString('en-US',{minimumFractionDigits:2});
+  document.getElementById('invBal').innerText=grandTotal.toLocaleString('en-US',{minimumFractionDigits:2});
+  document.getElementById('invLoading').style.display='none'; document.getElementById('invTable').style.display='table';
+  document.getElementById('nettSalesId').value=grandTotal.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+};
+let currentDocId=null; let isEdit=false; let selectedRow=null;
+let agentListData=JSON.parse(localStorage.getItem('agents')||'["AURORA","BALI BEST","EXPEDIA","TOUR MUNDIAL"]');
+let natListData=JSON.parse(localStorage.getItem('nats')||'["SPAIN","USA","AUSTRALIA","GERMANY","RUSIA"]');
+function refreshDatalist(){ const dlA=document.getElementById('agentList'); dlA.innerHTML=''; agentListData.forEach(a=>{ const o=document.createElement('option'); o.value=a; dlA.appendChild(o); }); const dlN=document.getElementById('natList'); dlN.innerHTML=''; natListData.forEach(n=>{ const o=document.createElement('option'); o.value=n; dlN.appendChild(o); }); }
+window.addAgent=()=>{ const v=prompt('Tambah AGENT baru:'); if(!v) return; const up=v.toUpperCase(); if(!agentListData.includes(up)){ agentListData.push(up); localStorage.setItem('agents', JSON.stringify(agentListData)); refreshDatalist(); } document.getElementById('agent').value=up; };
+window.delAgent=()=>{ const cur=document.getElementById('agent').value; if(!cur) return; if(!confirm('Hapus AGENT '+cur+'?')) return; agentListData=agentListData.filter(a=>a!==cur); localStorage.setItem('agents', JSON.stringify(agentListData)); refreshDatalist(); document.getElementById('agent').value=''; };
+window.addNat=()=>{ const v=prompt('Tambah Nationality baru:'); if(!v) return; const up=v.toUpperCase(); if(!natListData.includes(up)){ natListData.push(up); localStorage.setItem('nats', JSON.stringify(natListData)); refreshDatalist(); } document.getElementById('nationality').value=up; };
+window.delNat=()=>{ const cur=document.getElementById('nationality').value; if(!cur) return; if(!confirm('Hapus Nationality '+cur+'?')) return; natListData=natListData.filter(a=>a!==cur); localStorage.setItem('nats', JSON.stringify(natListData)); refreshDatalist(); document.getElementById('nationality').value=''; };
+async function generateGuestId(){ const datePart=formatDatePartForId().toUpperCase(); const snap=await getDocs(collection(db, "marketing")); const count=snap.size+1; const newId=`SMLDMC-${datePart}-${String(count).padStart(5,'0')}`; document.getElementById('guestId').value=newId; return newId; }
+window.modeAdd=async()=>{
+  isEdit=false; currentDocId=null; selectedRow=null;
+  document.getElementById('btnSave').innerText='Save';
+  document.getElementById('guestName').value='';
+  document.getElementById('totalAdl').value='2'; document.getElementById('totalChd').value='0';
+  document.getElementById('agent').value='AURORA'; document.getElementById('nationality').value='SPAIN';
+  document.getElementById('flight1').value=''; document.getElementById('flight2').value='';
+  document.getElementById('resDate').value=getTodayISOInput(); document.getElementById('arrDate').value=getTodayISOInput(); document.getElementById('depDate').value=addDaysISO(getTodayISOInput(),4);
+  document.getElementById('status').value='OK'; updateStatusColor();
+  document.getElementById('nettSalesId').value='0'; document.getElementById('salesPriceId').value='0';
+  document.getElementById('tourUSD').value='0'; document.getElementById('tourIDR').value='0';
+  await generateGuestId();
+  document.querySelectorAll('#tbodyMaster tr').forEach(r=>r.classList.remove('sel'));
+  document.getElementById('guestName').focus();
+};
+window.modeEdit=()=>{
+  if(!currentDocId||!selectedRow){ alert('KLIK BARIS BAWAH DULU BEB!'); return; }
+  if(!validateDepArr()) return;
+  isEdit=true;
+  document.getElementById('btnSave').innerText='Update';
+};
+window.modeCancel=()=>{ isEdit=false; currentDocId=null; selectedRow=null; document.getElementById('btnSave').innerText='Save'; document.querySelectorAll('#tbodyMaster tr').forEach(r=>r.classList.remove('sel')); };
+window.modeSave=async()=>{
+  if(!validateDepArr()){ alert('DEP harus > ARR!'); return; }
+  const btn=document.getElementById('btnSave'); const guestName=document.getElementById('guestName').value.trim(); if(!guestName){ alert('Name of Guest wajib diisi beb!'); document.getElementById('guestName').focus(); return; }
+  btn.innerText='SAVING...'; btn.disabled=true;
+  try{
+    let gid=document.getElementById('guestId').value; if(!gid) gid=await generateGuestId();
+    const payload={ guestId: gid, resDate: toDisplay(document.getElementById('resDate').value), arrDate: toDisplay(document.getElementById('arrDate').value), depDate: toDisplay(document.getElementById('depDate').value), flightNo1: document.getElementById('flight1').value, flightNo2: document.getElementById('flight2').value, status: document.getElementById('status').value, tMargin: document.getElementById('tMargin').value, travelConsultant: document.getElementById('travelCons').value, totalAdult: document.getElementById('totalAdl').value, totalChild: document.getElementById('totalChd').value, agent: document.getElementById('agent').value.toUpperCase(), packetName: document.getElementById('packetName').value, guestName: guestName.toUpperCase(), nationality: document.getElementById('nationality').value.toUpperCase(), rate: document.getElementById('rate').value, agentsLock: document.getElementById('agentsLock').value, tourPriceUSD: document.getElementById('tourUSD').value, tourPriceIDR: document.getElementById('tourIDR').value, salesPrice: document.getElementById('salesPriceId').value, nettSales: document.getElementById('nettSalesId').value, updatedAt: new Date().toISOString() };
+    if(isEdit&&currentDocId){ await updateDoc(doc(db, "marketing", currentDocId), payload); alert('UPDATE SUKSES! Nett: '+payload.nettSales+' Sales: '+payload.salesPrice); }else{ const ref=await addDoc(collection(db, "marketing"), {...payload, createdAt: new Date().toISOString()}); currentDocId=ref.id; alert('ADD SUKSES! Guest ID: '+gid); await generateGuestId(); document.getElementById('guestName').value=''; }
+    isEdit=false; btn.innerText='Save'; modeCancel();
+  }catch(e){ alert('Gagal Save: '+e.message); }finally{ btn.disabled=false; btn.innerText='Save'; }
+};
+window.modeDelete=async()=>{ if(!currentDocId){ alert('KLIK BARIS BAWAH DULU BEB!'); return; } if(!confirm('HAPUS DATA '+document.getElementById('guestId').value+' ?')) return; try{ await deleteDoc(doc(db, "marketing", currentDocId)); alert('DELETE SUKSES!'); modeCancel(); }catch(e){ alert('Gagal delete:'+e.message); } };
+
+// ===== INI KUNCINYA BEB - QUOTATION + CRONO FILE - PASTI BISA KLIK =====
+window.openCrono=()=>{
+  const gid=document.getElementById('guestId').value.trim();
+  if(!gid){ alert('Pilih / Save Guest dulu beb! Klik baris AURORA bawah!'); return; }
+  localStorage.setItem('lastGuestId',gid);
+  window.open('crono_file.html?guestId='+encodeURIComponent(gid), '_blank', 'width=1200,height=800,scrollbars=yes');
+};
+window.openQuotation=()=>{
+  const gid=document.getElementById('guestId').value;
+  if(!gid){ alert('Pilih / Save Guest dulu beb! Klik baris bawah!'); return; }
+  window.open('penawaran.html?guestId='+encodeURIComponent(gid), '_blank', 'width=1200,height=800,scrollbars=yes');
+};
+window.openItin=(type)=>{
+  if(type !== 'transp' && type !== 'transport'){ if(!validateDepArr()) return; }
+  const gid=document.getElementById('guestId').value.trim();
+  if(!gid){ alert('Pilih / Save Guest dulu beb! Klik baris AURORA bawah!'); return; }
+  let fileName = type + '.html';
+  if(type === 'transport' || type === 'transp') fileName = 'crono_file.html';
+  if(type === 'hotels') fileName = 'hotels.html';
+  if(type === 'tours') fileName = 'tours.html';
+  if(type === 'guide') fileName = 'guide.html';
+  if(type === 'meals') fileName = 'meals.html';
+  if(type === 'others') fileName = 'others.html';
+  if(type === 'optional') fileName = 'optional.html';
+  const url=fileName+'?guestId='+encodeURIComponent(gid);
+  window.open(url, '_blank', 'width=1400,height=750,scrollbars=yes');
+};
+
+onSnapshot(collection(db, "marketing"), (snap)=>{
+  const tbody=document.getElementById('tbodyMaster'); tbody.innerHTML='';
+  if(snap.empty){ tbody.innerHTML='<tr><td colspan="12" style="text-align:center;padding:10px;background:#ffffcc">Belum ada data - Klik Add</td></tr>'; return; }
+  snap.forEach(s=>{
+    const d=s.data();
+    const stClass=getStatusClass(d.status);
+    const stText=(d.status||'OK').toUpperCase();
+    const displayStatus=stText.includes('CANCEL')?'CXL':stText;
+    const tr=document.createElement('tr');
+    tr.className='status-'+stClass;
+    tr.innerHTML=`<td>${d.resDate||''}</td><td style="font-weight:900">${d.guestId||''}</td><td style="font-weight:900;color:#0000cc">${d.guestName||''}</td><td>${d.agent||''}</td><td>${d.arrDate||''}</td><td>${d.flightNo1||''}</td><td>${d.depDate||''}</td><td>${d.flightNo2||''}</td><td style="text-align:center">${d.totalAdult||''}</td><td style="text-align:center">${d.totalChild||''}</td><td class="status-cell-${stClass}">${displayStatus}</td><td>${d.nationality||''}</td>`;
+    tr.onclick=()=>{
+      document.querySelectorAll('#tbodyMaster tr').forEach(r=>r.classList.remove('sel')); tr.classList.add('sel'); selectedRow=tr; currentDocId=s.id; isEdit=false; document.getElementById('btnSave').innerText='Save';
+      document.getElementById('guestId').value=d.guestId||''; document.getElementById('resDate').value=toInput(d.resDate||''); document.getElementById('arrDate').value=toInput(d.arrDate||''); document.getElementById('depDate').value=toInput(d.depDate||''); document.getElementById('flight1').value=d.flightNo1||''; document.getElementById('flight2').value=d.flightNo2||''; 
+      let stVal=(d.status||'OK').toUpperCase(); if(stVal.includes('CANCEL')) stVal='CXL'; if(stVal==='OKAY') stVal='OK';
+      document.getElementById('status').value=stVal; 
+      document.getElementById('tMargin').value=d.tMargin||'10.00'; document.getElementById('travelCons').value=d.travelConsultant||''; document.getElementById('totalAdl').value=d.totalAdult||'2'; document.getElementById('totalChd').value=d.totalChild||'0'; document.getElementById('agent').value=d.agent||''; document.getElementById('packetName').value=d.packetName||'Package'; document.getElementById('guestName').value=d.guestName||''; document.getElementById('nationality').value=d.nationality||''; document.getElementById('rate').value=d.rate||'14,300.00'; document.getElementById('agentsLock').value=d.agentsLock||''; 
+      document.getElementById('tourUSD').value=d.tourPriceUSD||'0'; document.getElementById('tourIDR').value=d.tourPriceIDR||'0'; 
+      document.getElementById('salesPriceId').value=d.salesPrice||d.tourPriceIDR||'0'; 
+      document.getElementById('nettSalesId').value=d.nettSales||'0';
+      updateStatusColor(); validateDepArr();
+      loadNettSales(d.guestId||'');
+      if((!d.salesPrice || d.salesPrice=='0') && d.tourPriceIDR){ document.getElementById('salesPriceId').value=d.tourPriceIDR; }
+    }; tbody.appendChild(tr);
+  });
+});
+function tick(){ const now=new Date(); const h=String(now.getHours()).padStart(2,'0'); const m=String(now.getMinutes()).padStart(2,'0'); const s=String(now.getSeconds()).padStart(2,'0'); const txt=`${h}:${m}:${s}`; const el1=document.getElementById('jamBig'); if(el1) el1.innerText=txt; const el2=document.getElementById('jamTop'); if(el2) el2.innerText=txt; }
+setInterval(tick,1000);
+window.addEventListener('load', ()=>{ refreshDatalist(); calcIDR(); tick(); generateGuestId(); document.getElementById('resDate').value=getTodayISOInput(); document.getElementById('arrDate').value=getTodayISOInput(); document.getElementById('depDate').value=addDaysISO(getTodayISOInput(),4); updateStatusColor(); });
+</script>
+</body>
+</html>

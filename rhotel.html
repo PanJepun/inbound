@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MENU MEMASUKKAN DATA HOTEL - BY GUEST ID</title>
+<style>
+html,body{margin:0;padding:0;background:#d0e8c8;font-family:Tahoma,Arial;font-size:11px;overflow:hidden}
+.header{background:#d0e8c8;border:2px solid #000;padding:4px;display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:12px}
+.box{background:#d0e8c8;border:2px solid #000;padding:3px}
+.action{height:28px;background:#d0e8c8;border-bottom:2px solid #666;display:flex;align-items:center;gap:3px;padding:0 4px}
+.action button{height:21px;padding:0 8px;font-size:11px;font-weight:700;border:1px solid #666;background:linear-gradient(180deg,#fff,#d0d0d0);cursor:pointer}
+.action button.add{background:#a8e6a8;border:2px solid #2e8b57;font-weight:900}
+.info-bar{background:#d0e8c8;padding:3px;display:flex;gap:8px;align-items:center;border-bottom:2px solid #666;flex-wrap:wrap}
+.info-bar input{height:18px;border:1px solid #000;font-size:11px;padding:0 3px}
+.total-box{background:#0000cc;color:#fff;padding:3px 6px;font-weight:900;display:flex;gap:4px;align-items:center}
+.total-box input{width:80px;text-align:right;background:#c8e8ff;color:#000;font-weight:900}
+.form-hotel{background:#ffffcc;padding:4px;border-bottom:2px solid #000;display:flex;gap:3px;flex-wrap:wrap}
+.form-hotel input,.form-hotel select{height:19px;border:1px solid #000;font-size:11px;padding:0 3px}
+.grid{background:#e0ffff;border:2px solid #000;height:calc(100vh - 200px);overflow:auto}
+table.list{width:100%;border-collapse:collapse;font-size:10px}
+table.list th{background:#d0e8c8;border:1px solid #666;padding:4px;position:sticky;top:0;font-weight:900}
+table.list td{border:1px solid #999;padding:3px 4px;white-space:nowrap;cursor:pointer}
+tr.sel td{background:#00ff66!important}
+</style>
+</head>
+<body>
+<div class="header">
+<span>MENU MEMASUKKAN DATA HOTEL</span>
+<span>Guest ID: <span id="guestIdLabel" style="color:#0000cc;background:#ffee99;padding:2px 8px;border:1.5px solid #000"></span> <span id="guestNameLabel" style="color:#0000cc"></span></span>
+<span style="color:red;font-size:14px" id="clock">14:08:36</span>
+<button onclick="window.close()" style="background:red;color:#fff;font-weight:900;padding:3px 10px;border:2px solid #000">X CLOSE</button>
+</div>
+
+<div class="box">
+<div class="action">
+<button class="add" onclick="addNew()">Add</button><button onclick="saveData()">Save</button><button onclick="editData()">Edit</button><button onclick="deleteData()">Delete</button><button>Print</button><button onclick="addNew()">Cancel</button><button onclick="window.close()">Exit</button><button onclick="loadHotels()">Refresh</button><button style="background:#a8a8ff;border:2px solid #0000cc;font-weight:900">Voucher</button>
+<span style="margin-left:10px">Filter By Guest ID: <input id="filterGuestId" style="width:200px;background:#ffee99;font-weight:900;border:2px solid #000" readonly></span>
+</div>
+
+<div class="info-bar">
+<div class="total-box">TOTAL SALES: <input id="totalSales" readonly></div>
+<div class="total-box">NETT SALES: <input id="nettSales" readonly></div>
+<div class="total-box">SALES USD: <input id="salesUsd" readonly></div>
+<div class="total-box">Nett Profit: <input id="nettProfit" readonly></div>
+<label>Room Category: <input id="roomCat" style="width:120px"></label>
+</div>
+
+<div class="info-bar">
+<label>Early Bird: <input id="earlyBird" style="width:50px" value="0.00"> %</label>
+<label>Discount Nite(s): <input id="discNite" style="width:30px" value="0"></label>
+<label>Nite(s) <input id="nite" style="width:30px"></label>
+<label>Limit Deposit: <input id="limitDep" style="width:80px" value="--"></label>
+</div>
+
+<div class="form-hotel">
+<input id="h_GuestId" placeholder="Guest ID" style="width:140px;background:#c8e8ff;color:#0000cc;font-weight:900;border:2px solid #0066cc" readonly>
+<input id="h_Hotel" list="listHotels" placeholder="Name of Hotel" style="width:150px;font-weight:700;background:#fff">
+<input id="h_CheckIn" placeholder="Chek In DD-MM-YYYY" style="width:90px;background:#ffee99;text-align:center;font-weight:900">
+<input id="h_CheckOut" placeholder="Chek Out DD-MM-YYYY" style="width:90px;background:#ffee99;text-align:center;font-weight:900">
+<input id="h_Type" placeholder="Type Of Room" style="width:90px">
+<input id="h_Rate" placeholder="Rate Room" style="width:70px;text-align:right">
+<input id="h_XBed" placeholder="X-Bed" style="width:40px;text-align:center">
+<input id="h_TRoom" placeholder="TRoom" style="width:40px;text-align:center">
+<input id="h_ABF" placeholder="ABF" style="width:35px;text-align:center">
+<input id="h_HB" placeholder="HB" style="width:35px;text-align:center">
+<input id="h_FB" placeholder="FB" style="width:35px;text-align:center">
+<input id="h_SglSup" placeholder="Sgl Sup" style="width:55px;text-align:right">
+<input id="h_Margin" placeholder="Margin" style="width:45px;background:#ffee99;text-align:center;font-weight:900" value="10.00">
+<select id="h_Status" style="width:65px;font-weight:900"><option>OK</option><option selected>WL</option><option>CANCEL</option></select>
+<input id="h_Remarks" placeholder="Remarks" style="width:120px">
+</div>
+</div>
+
+<div class="grid">
+<table class="list">
+<thead><tr><th>Guest ID:</th><th>Name of Hotel</th><th>Chek In</th><th>Chek Out</th><th>Type Of Room</th><th>Rate Room</th><th>X-Bed</th><th>TRoom</th><th>ABF</th><th>HB</th><th>FB</th><th>Sgl Sup</th><th>Margin</th><th>Status</th><th>Remarks</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+<div style="background:#d0e8c8;padding:4px;display:flex;gap:4px;border-top:2px solid #000">
+<button style="background:#ffee99;border:1px solid #000;font-size:10px;padding:3px 8px">Search Limit Deposit</button>
+<button style="background:#ffee99;border:1px solid #000;font-size:10px;padding:3px 8px">Search Chek Out</button>
+<button style="background:#ffee99;border:1px solid #000;font-size:10px;padding:3px 8px">Search Chek In</button>
+<button style="background:#d0d0d0;border:1px solid #000;font-size:10px;padding:3px 8px">Room Nites</button>
+</div>
+
+<datalist id="listHotels"></datalist>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe", storageBucket: "inbound2026-12ffe.firebasestorage.app", messagingSenderId: "368642042481", appId: "1:368642042481:web:0da95081f2039b357089d0" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colHotels = collection(db, "hotel_bookings");
+const colHotelsMaster = collection(db, "hotels");
+
+let currentGuestId = new URLSearchParams(window.location.search).get('guestId') || '';
+let datas=[]; let selIdx=-1; let selId=null;
+
+function getSystemDate(){ const now=new Date(); return `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}-${now.getFullYear()}`; }
+
+document.getElementById('filterGuestId').value = currentGuestId;
+document.getElementById('h_GuestId').value = currentGuestId;
+document.getElementById('guestIdLabel').innerText = currentGuestId;
+document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+setInterval(()=> document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
+
+// Load master hotel 218
+onSnapshot(colHotelsMaster, snap=>{
+  const list=document.getElementById('listHotels'); list.innerHTML='';
+  snap.forEach(d=>{ const o=document.createElement('option'); o.value=d.data().name; list.appendChild(o); });
+});
+
+function loadHotels(){
+  if(!currentGuestId){ alert('Guest ID kosong beb! Buka dari marketing.html?guestId=...'); return; }
+  const q = query(colHotels, where("guestId","==",currentGuestId));
+  onSnapshot(q, snap=>{
+    datas=[]; snap.forEach(s=> datas.push({firebaseId:s.id,...s.data()}));
+    render();
+  });
+}
+window.loadHotels = loadHotels;
+
+function render(){
+  const tbody=document.getElementById('tbody'); tbody.innerHTML='';
+  let total=0;
+  datas.forEach((d,i)=>{
+    const tr=document.createElement('tr'); tr.dataset.idx=i; if(i===selIdx) tr.className='sel';
+    const sc=d.status==='OK'?'#00ff66':d.status==='CANCEL'?'#ff6666':'#ffcc00';
+    tr.innerHTML=`<td style="color:#0000cc;font-weight:900">${d.guestId}</td><td style="font-weight:700">${d.name}</td><td style="text-align:center;background:#ffee99">${d.checkIn}</td><td style="text-align:center;background:#ffee99">${d.checkOut}</td><td>${d.type}</td><td style="text-align:right">${d.rate}</td><td style="text-align:center">${d.xbed}</td><td style="text-align:center">${d.troom}</td><td>${d.abf}</td><td>${d.hb}</td><td>${d.fb}</td><td style="text-align:right">${d.sglSup}</td><td style="text-align:center">${d.margin}</td><td style="background:${sc};font-weight:900;text-align:center">${d.status}</td><td>${d.remarks}</td>`;
+    tbody.appendChild(tr);
+    total += parseFloat(String(d.rate||0).replace(/,/g,''))||0;
+  });
+  document.getElementById('totalSales').value=total.toFixed(2);
+  document.getElementById('nettSales').value=total.toFixed(2);
+  document.getElementById('salesUsd').value=(total/14300).toFixed(2);
+  document.getElementById('nettProfit').value=(total*0.1).toFixed(2);
+}
+document.getElementById('tbody').addEventListener('click',(e)=>{
+  const tr=e.target.closest('tr'); if(!tr) return;
+  selIdx=parseInt(tr.dataset.idx); selId=datas[selIdx].firebaseId; render();
+  const d=datas[selIdx];
+  document.getElementById('h_GuestId').value=d.guestId;
+  document.getElementById('h_Hotel').value=d.name;
+  document.getElementById('h_CheckIn').value=d.checkIn;
+  document.getElementById('h_CheckOut').value=d.checkOut;
+  document.getElementById('h_Type').value=d.type;
+  document.getElementById('h_Rate').value=d.rate;
+  document.getElementById('h_XBed').value=d.xbed;
+  document.getElementById('h_TRoom').value=d.troom;
+  document.getElementById('h_ABF').value=d.abf;
+  document.getElementById('h_HB').value=d.hb;
+  document.getElementById('h_FB').value=d.fb;
+  document.getElementById('h_SglSup').value=d.sglSup;
+  document.getElementById('h_Margin').value=d.margin;
+  document.getElementById('h_Status').value=d.status;
+  document.getElementById('h_Remarks').value=d.remarks;
+});
+
+window.addNew=()=>{
+  selIdx=-1; selId=null;
+  document.getElementById('h_GuestId').value=currentGuestId;
+  document.getElementById('h_Hotel').value='';
+  document.getElementById('h_CheckIn').value=getSystemDate();
+  const dep=new Date(); dep.setDate(dep.getDate()+10);
+  document.getElementById('h_CheckOut').value=`${String(dep.getDate()).padStart(2,'0')}-${String(dep.getMonth()+1).padStart(2,'0')}-${dep.getFullYear()}`;
+  document.getElementById('h_Hotel').focus();
+};
+window.saveData=async()=>{
+  const payload={
+    guestId:document.getElementById('h_GuestId').value,
+    name:document.getElementById('h_Hotel').value.toUpperCase(),
+    checkIn:document.getElementById('h_CheckIn').value,
+    checkOut:document.getElementById('h_CheckOut').value,
+    type:document.getElementById('h_Type').value,
+    rate:document.getElementById('h_Rate').value,
+    xbed:document.getElementById('h_XBed').value,
+    troom:document.getElementById('h_TRoom').value,
+    abf:document.getElementById('h_ABF').value,
+    hb:document.getElementById('h_HB').value,
+    fb:document.getElementById('h_FB').value,
+    sglSup:document.getElementById('h_SglSup').value,
+    margin:document.getElementById('h_Margin').value,
+    status:document.getElementById('h_Status').value,
+    remarks:document.getElementById('h_Remarks').value,
+    createdAt:new Date()
+  };
+  if(!payload.guestId||!payload.name){ alert('Guest ID & Name of Hotel wajib isi beb!'); return; }
+  if(selId){ await updateDoc(doc(db,"hotel_bookings",selId), {...payload, updatedAt:new Date()}); alert('✅ Updated hotel untuk '+payload.guestId); }
+  else { await addDoc(colHotels, payload); alert('✅ Hotel ditambahkan untuk '+payload.guestId+' - gak mungkin salah ke depan!'); }
+  addNew();
+};
+window.editData=()=>{ if(selIdx===-1) alert('Klik tabel dulu beb!'); };
+window.deleteData=async()=>{ if(selIdx===-1||!selId) return alert('Klik tabel dulu!'); if(confirm('Hapus hotel '+datas[selIdx].name+' untuk '+currentGuestId+'?')){ await deleteDoc(doc(db,"hotel_bookings",selId)); selIdx=-1; selId=null; addNew(); } };
+
+if(currentGuestId) loadHotels();
+else { const gid=prompt('Masukkan Guest ID beb (contoh SMLDMC-16OCT2026-00001):',''); if(gid){ currentGuestId=gid; document.getElementById('filterGuestId').value=gid; document.getElementById('h_GuestId').value=gid; document.getElementById('guestIdLabel').innerText=gid; loadHotels(); } }
+</script>
+</body>
+</html>

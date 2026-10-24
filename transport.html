@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRANSPORT COST - TOMBOL DIBAWAH SERVICE</title>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0; user-select:none}
+.top-title{background:linear-gradient(180deg, #e0eeff, #c0d8ff); border-bottom:2px solid #5a7fb5; padding:6px 10px; font-weight:700; font-size:12px; color:#0a1931; display:flex; justify-content:space-between}
+.form-top{background:#e8e8f0; padding:10px; display:grid; grid-template-columns: 480px 1fr 300px; gap:12px; border-bottom:2px solid #999; align-items:start}
+.form-col{padding:4px}
+.row{display:flex; align-items:center; margin-bottom:6px; gap:4px}
+.row label{font-size:11px; font-weight:700; width:105px; flex:none; text-align:right; margin-right:6px}
+.row input,.row textarea,.row select{font-size:11px; padding:3px 6px; border:1px solid #666; background:white}
+.row input{height:23px}
+.row input:disabled,.row textarea:disabled,.row select:disabled{background:#e5e5e5; color:#555; cursor:not-allowed}
+.row input.car{width:100px; font-weight:bold}
+.row input.supplier{width:160px}
+.row input.type{width:160px}
+.row input.police{width:110px}
+.row input.service{width:340px; font-weight:bold; border:2px solid #666; background:#fff}
+.row input.driver{width:160px}
+.row input.handphone{width:160px}
+.row input.cost{width:100px; text-align:right; background:#e0f0ff; font-weight:bold}
+.row input.coa{width:130px}
+.row textarea.remarks{width:220px; height:42px; resize:none}
+.searchable-wrap{position:relative; display:flex; align-items:center}
+.searchable-wrap input{width:160px}
+.searchable-list{position:absolute; top:24px; left:0; width:200px; background:white; border:1px solid #666; max-height:140px; overflow-y:auto; z-index:100; display:none; box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.searchable-list.active{display:block}
+.searchable-list div{padding:4px 6px; font-size:11px; cursor:pointer; border-bottom:1px solid #eee}
+.searchable-list div:hover{background:#b3d9ff}
+.btn-plus,.btn-minus{width:26px; height:23px; font-weight:900; font-size:14px; border:1px solid #555; cursor:pointer; border-radius:2px}
+.btn-plus{background:linear-gradient(180deg, #a8e6a8, #5fbf5f)}
+.btn-minus{background:linear-gradient(180deg, #ffb8b8, #ff6a6a)}
+.btn-plus:disabled,.btn-minus:disabled{opacity:0.4}
+.toolbar-below-service{margin-left:115px; margin-top:8px; display:flex; flex-wrap:wrap; gap:4px; width:360px}
+.toolbar-below-service button{padding:4px 0; width:62px; font-size:11px; font-weight:700; border:1px solid #777; cursor:pointer; border-radius:2px; background:linear-gradient(180deg, #fff, #d0d0d0)}
+.toolbar-below-service button.add{background:#a8e6a8; border:1px solid #555}
+.toolbar-below-service button.save:disabled{opacity:0.5; background:#e8e8e8}
+.toolbar-below-service button.edit{background:#e8e8e8}
+.toolbar-below-service button.delete{background:#e8e8e8}
+.toolbar-below-service button.cancel:disabled{opacity:0.5}
+.toolbar-below-service button.print{background:#e8e8e8}
+.toolbar-below-service button.refresh{background:#a8e6a8}
+.toolbar-below-service button.exit{background:#ffb8b8}
+.toolbar-below-service button.update-mode{background:linear-gradient(180deg, #fff7cc, #ff9900)!important}
+.search-bar{background:#d0e0ff; padding:5px 10px; display:flex; gap:12px; align-items:center; border-bottom:1px solid #888; font-size:11px; font-weight:700}
+.search-bar input{height:23px; padding:3px 8px; border:1px solid #666; font-size:11px; width:200px; background:white}
+.table-wrap{background:white; overflow:auto; height:calc(100vh - 250px); border-top:2px solid #00cc99}
+table{width:100%; border-collapse:collapse; font-size:11px}
+th{background:#e8e8e8; border:1px solid #8a4a4a; padding:4px 4px; font-size:10px; position:sticky; top:0; text-align:center; white-space:nowrap; font-weight:700}
+td{border:1px solid #8a4a4a; padding:3px 5px; white-space:nowrap; cursor:pointer; background:#e8fffe}
+tr:nth-child(even) td{background:#d0f0ef}
+tr.selected td{background:#00ff7f!important; font-weight:700}
+tr:hover td{background:#b3ffda!important}
+</style>
+</head>
+<body>
+<div class="top-title"><span>TRANSPORT COST - PT SMAILING TOUR DMC - TOMBOL DIBAWAH SERVICE</span><span id="clock">11:32:55</span><span id="fbStatus" style="font-size:11px; color:green; font-weight:bold">● Firebase: inbound2026-12ffe</span></div>
+
+<div class="form-top">
+<div class="form-col">
+<div class="row"><label>Car Code :</label><input id="carCode" class="car" disabled></div>
+<div class="row">
+<label>Supplier name :</label>
+<div class="searchable-wrap">
+<input id="supplierName" class="supplier" disabled placeholder="KETIK / PILIH..." autocomplete="off" oninput="filterSupplier()" onfocus="showSupplierList()">
+<div class="searchable-list" id="list-supplier"></div>
+</div>
+<button class="btn-plus" id="btnAddSup" onclick="addSupplier()" disabled>+</button>
+<button class="btn-minus" id="btnDelSup" onclick="delSupplier()" disabled>-</button>
+</div>
+<div class="row"><label>Type Of Car :</label><input id="typeOfCar" class="type" disabled placeholder="HIACE, ALPHARD, INOVA..."></div>
+<div class="row"><label>Police No. (DK) :</label><input id="policeNo" class="police" disabled></div>
+<div class="row"><label>Service :</label><input id="service" class="service" disabled placeholder="TRANSFER AIRPORT / HOTEL"></div>
+
+<div class="toolbar-below-service">
+<button id="btnAdd" class="add" onclick="doAdd()">Add</button>
+<button id="btnSave" class="save" onclick="doSave()" disabled>Save</button>
+<button id="btnEdit" class="edit" onclick="doEdit()">Edit</button>
+<button id="btnDelete" class="delete" onclick="doDelete()">Delete</button>
+<button id="btnCancel" class="cancel" onclick="doCancel()">Cancel</button>
+<button class="print" onclick="doPrint()">Print</button>
+<button class="refresh" onclick="location.reload()">Refresh</button>
+<button class="exit" onclick="location.href='index.html'">Exit</button>
+</div>
+
+</div>
+
+<div class="form-col">
+<div class="row"><label>Driver Name :</label><input id="driverName" class="driver" disabled></div>
+<div class="row"><label>HandPhone :</label><input id="handPhone" class="handphone" disabled></div>
+<div class="row"><label>Remarks :</label><textarea id="remarks" class="remarks" disabled></textarea></div>
+<div class="row"><label>Cost Price :</label><input id="costPrice" class="cost" disabled value="0.00"></div>
+<div class="row"><label>COA :</label><input id="coa" class="coa" disabled></div>
+<div style="font-size:10px; margin-top:8px; margin-left:115px; line-height:1.4">
+</div>
+</div>
+
+<div class="form-col">
+<div style="font-size:11px; font-weight:700">
+🔍 Search Supplier / Car / Service<br>
+<input id="searchSupplier" placeholder="SMAILING, A1, TRANSFER..." oninput="applyFilter()" style="width:100%; height:26px; border:1px solid #666; padding:4px 6px; font-size:11px; margin-top:6px"><br>
+<div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap">
+<input id="searchSupQuick" placeholder="Supplier..." oninput="quickFilter()" style="width:90px; height:22px; border:1px solid #666; padding:2px 4px; font-size:10px">
+<input id="searchTypeQuick" placeholder="Type..." oninput="quickFilter()" style="width:80px; height:22px; border:1px solid #666; padding:2px 4px; font-size:10px">
+<input id="searchServiceQuick" placeholder="Service..." oninput="quickFilter()" style="width:90px; height:22px; border:1px solid #666; padding:2px 4px; font-size:10px">
+</div>
+<button onclick="clearFilter()" style="margin-top:6px; padding:3px 8px; font-size:10px; border:1px solid #666; cursor:pointer">Clear Filter</button>
+<div style="margin-top:6px; font-size:10px; font-weight:400" id="filterInfo">Menampilkan semua data</div>
+</div>
+</div>
+</div>
+
+<div class="search-bar">
+<span>Quick Filter:</span>
+<span id="filterStatus" style="font-weight:400">Menampilkan semua</span>
+</div>
+
+<div class="table-wrap">
+<table id="transportTable">
+<thead>
+<tr>
+<th>Car Code</th><th>Supplier Name</th><th>Type Of Car</th><th>Service</th><th>Driver Name</th><th>Cars Cost</th><th>Hand Phone</th><th>REMARKS</th><th>COA</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0",
+  measurementId: "G-Q61303QL6F"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "transport");
+const colSupplier = collection(db, "transport_supplier_options");
+let transports = [];
+let filteredTransports = [];
+let supplierOptions = ["SMAILING","SMAILING TOUR","OKE JAR","PANORAMA","BALI CEMERLANG","A&T HOLIDAY","BLUE WATER SAFARIS","PUTU SUARDIKA","SMAL JOGJA","SML JOGJA","KENDANG JAYA"];
+let selectedIndex = -1;
+let selectedFirebaseId = null;
+function setFormEnabled(enabled){
+  ['carCode','supplierName','typeOfCar','policeNo','service','driverName','handPhone','remarks','costPrice','coa'].forEach(id=>{ document.getElementById(id).disabled=!enabled; });
+  document.getElementById('btnAddSup').disabled=!enabled;
+  document.getElementById('btnDelSup').disabled=!enabled;
+  document.getElementById('btnSave').disabled=!enabled;
+  document.getElementById('btnCancel').disabled=!enabled;
+}
+function formatRupiah(num){
+  if(num===null||num===undefined||num==='') return '0.00';
+  const n=parseFloat(String(num).replace(/,/g,''))||0;
+  return n.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function buildSupplierList(filterText){
+  let opts = supplierOptions;
+  if(filterText){
+    const f=filterText.toUpperCase();
+    opts=opts.filter(o=> o.includes(f));
+  }
+  const listDiv=document.getElementById('list-supplier');
+  listDiv.innerHTML='';
+  opts.slice(0,40).forEach(opt=>{
+    const div=document.createElement('div');
+    div.textContent=opt;
+    div.onclick=()=>{
+      document.getElementById('supplierName').value=opt;
+      listDiv.classList.remove('active');
+    };
+    listDiv.appendChild(div);
+  });
+  if(opts.length>0) listDiv.classList.add('active');
+  else listDiv.classList.remove('active');
+}
+window.filterSupplier=()=>{ buildSupplierList(document.getElementById('supplierName').value); };
+window.showSupplierList=()=>{ buildSupplierList(''); };
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.searchable-wrap')){
+    document.getElementById('list-supplier').classList.remove('active');
+  }
+});
+window.addSupplier=async()=>{
+  const v=prompt('Tambah Supplier Name baru:');
+  if(!v) return;
+  const up=v.trim().toUpperCase();
+  if(!up) return;
+  if(supplierOptions.includes(up)){ document.getElementById('supplierName').value=up; return; }
+  supplierOptions.push(up); supplierOptions.sort();
+  document.getElementById('supplierName').value=up;
+  try{ await setDoc(doc(db,"transport_supplier_options", up), {name:up, createdAt:new Date()}); }catch(e){}
+};
+window.delSupplier=async()=>{
+  const val=document.getElementById('supplierName').value; if(!val) return;
+  if(!confirm(`Hapus Supplier "${val}"?`)) return;
+  supplierOptions=supplierOptions.filter(v=>v!==val);
+  document.getElementById('supplierName').value=supplierOptions[0]||'';
+  try{ await deleteDoc(doc(db,"transport_supplier_options", val)); }catch(e){}
+};
+window.applyFilter=()=>{
+  const s=document.getElementById('searchSupplier').value.toUpperCase();
+  if(!s){ filteredTransports=transports; }
+  else{
+    filteredTransports=transports.filter(t=> (t.supplierName||'').includes(s) || (t.carCode||'').includes(s) || (t.service||'').includes(s));
+  }
+  document.getElementById('filterInfo').innerText=`Menampilkan ${filteredTransports.length} dari ${transports.length}`;
+  document.getElementById('filterStatus').innerText=`Menampilkan ${filteredTransports.length} dari ${transports.length}`;
+  render();
+};
+window.quickFilter=()=>{
+  const sup=document.getElementById('searchSupQuick').value.toUpperCase();
+  const typ=document.getElementById('searchTypeQuick').value.toUpperCase();
+  const serv=document.getElementById('searchServiceQuick').value.toUpperCase();
+  filteredTransports=transports.filter(t=>{
+    const mSup=!sup||t.supplierName.includes(sup);
+    const mTyp=!typ||t.typeOfCar.includes(typ);
+    const mServ=!serv||t.service.includes(serv);
+    return mSup&&mTyp&&mServ;
+  });
+  render();
+};
+window.clearFilter=()=>{
+  document.getElementById('searchSupplier').value='';
+  document.getElementById('searchSupQuick').value='';
+  document.getElementById('searchTypeQuick').value='';
+  document.getElementById('searchServiceQuick').value='';
+  filteredTransports=transports;
+  render();
+};
+function render(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  const list = filteredTransports.length>0 || document.getElementById('searchSupplier').value || document.getElementById('searchSupQuick').value? filteredTransports : transports;
+  list.forEach((t)=>{
+    const originalIdx=transports.findIndex(x=> x.firebaseId===t.firebaseId);
+    const tr=document.createElement('tr');
+    tr.dataset.index=originalIdx;
+    tr.className = originalIdx===selectedIndex? 'selected' : '';
+    tr.innerHTML=`<td>${t.carCode}</td><td>${t.supplierName}</td><td>${t.typeOfCar}</td><td style="max-width:300px; white-space:normal; word-break:break-word; font-weight:bold">${t.service}</td><td>${t.driverName}</td><td style="text-align:right">${formatRupiah(t.carsCost)}</td><td>${t.handPhone}</td><td>${t.remarks||''}</td><td>${t.coa||''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById('tbody').addEventListener('click',(e)=>{
+  const tr=e.target.closest('tr');
+  if(!tr||tr.dataset.index===undefined) return;
+  const idx=parseInt(tr.dataset.index);
+  if(isNaN(idx)||idx>=transports.length) return;
+  selectedIndex=idx;
+  const s=transports[idx];
+  selectedFirebaseId=s.firebaseId;
+  if(s.supplierName &&!supplierOptions.includes(s.supplierName)){ supplierOptions.push(s.supplierName); supplierOptions.sort(); }
+  document.getElementById('carCode').value=s.carCode;
+  document.getElementById('supplierName').value=s.supplierName;
+  document.getElementById('typeOfCar').value=s.typeOfCar;
+  document.getElementById('policeNo').value=s.policeNo||'';
+  document.getElementById('service').value=s.service;
+  document.getElementById('driverName').value=s.driverName;
+  document.getElementById('handPhone').value=s.handPhone;
+  document.getElementById('remarks').value=s.remarks||'';
+  document.getElementById('costPrice').value=formatRupiah(s.carsCost);
+  document.getElementById('coa').value=s.coa||'';
+  setFormEnabled(false);
+  const b=document.getElementById('btnAdd'); b.innerText='Update'; b.classList.add('update-mode');
+  render();
+});
+window.doAdd=()=>{
+  const b=document.getElementById('btnAdd');
+  if(b.innerText==='Update'){ doSave(); return; }
+  selectedIndex=-1; selectedFirebaseId=null;
+  const next = transports.length+1;
+  document.getElementById('carCode').value='A'+next;
+  ['supplierName','typeOfCar','policeNo','service','driverName','handPhone','remarks','coa'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('costPrice').value='0.00';
+  document.getElementById('supplierName').value=supplierOptions[0]||'SMAILING';
+  setFormEnabled(true);
+};
+window.doEdit=()=>{
+  if(selectedIndex===-1 &&!document.getElementById('carCode').value){ alert('Klik data di tabel bawah dulu beb!'); return; }
+  setFormEnabled(true);
+};
+window.doSave=async()=>{
+  const carCode=document.getElementById('carCode').value.trim();
+  if(!carCode){ alert('Car Code kosong beb!'); return; }
+  const supplierName=document.getElementById('supplierName').value.trim();
+  if(!supplierName){ alert('Supplier Name wajib isi beb!'); return; }
+  const payload={
+    carCode: carCode.toUpperCase(),
+    supplierName: supplierName.toUpperCase(),
+    typeOfCar: document.getElementById('typeOfCar').value.toUpperCase(),
+    policeNo: document.getElementById('policeNo').value.toUpperCase(),
+    service: document.getElementById('service').value.toUpperCase(),
+    driverName: document.getElementById('driverName').value.toUpperCase(),
+    handPhone: document.getElementById('handPhone').value,
+    remarks: document.getElementById('remarks').value,
+    carsCost: document.getElementById('costPrice').value.replace(/,/g,''),
+    coa: document.getElementById('coa').value,
+    updatedAt: new Date()
+  };
+  try{
+    if(selectedFirebaseId){
+      await updateDoc(doc(db,"transport",selectedFirebaseId), payload);
+    }else{
+      payload.createdAt=new Date();
+      await addDoc(colRef, payload);
+    }
+    setFormEnabled(false);
+    document.getElementById('btnAdd').innerText='Add'; document.getElementById('btnAdd').classList.remove('update-mode');
+  }catch(e){ alert('Error: '+e.message); }
+};
+window.doDelete=async()=>{
+  if(selectedIndex===-1 ||!selectedFirebaseId){ alert('Klik data di tabel bawah dulu beb!'); return; }
+  if(confirm('Hapus '+document.getElementById('carCode').value+'?')){
+    await deleteDoc(doc(db,"transport",selectedFirebaseId));
+    doCancel();
+  }
+};
+window.doCancel=()=>{
+  selectedIndex=-1; selectedFirebaseId=null;
+  ['carCode','supplierName','typeOfCar','policeNo','service','driverName','handPhone','remarks','costPrice','coa'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('costPrice').value='0.00';
+  document.getElementById('btnAdd').innerText='Add'; document.getElementById('btnAdd').classList.remove('update-mode');
+  setFormEnabled(false); render();
+};
+window.doPrint=()=>{ window.print(); };
+setInterval(()=>{ document.getElementById('clock').innerText=new Date().toTimeString().split(' ')[0]; },1000);
+onSnapshot(colSupplier, snap=>{
+  if(snap.size>0){
+    const arr=[]; snap.forEach(d=> arr.push(d.data().name));
+    if(arr.length>0) supplierOptions=arr.sort();
+  }
+});
+onSnapshot(colRef, snap=>{
+  const oldCode=selectedIndex>=0? transports[selectedIndex]?.carCode : null;
+  transports=[];
+  snap.forEach(d=>{
+    const data=d.data();
+    transports.push({
+      firebaseId:d.id,
+      carCode:data.carCode||'',
+      supplierName:data.supplierName||'',
+      typeOfCar:data.typeOfCar||'',
+      policeNo:data.policeNo||'',
+      service:data.service||'',
+      driverName:data.driverName||'',
+      handPhone:data.handPhone||'',
+      remarks:data.remarks||'',
+      carsCost:data.carsCost||'0',
+      coa:data.coa||''
+    });
+  });
+  transports.sort((a,b)=> a.carCode.localeCompare(b.carCode));
+  filteredTransports=transports;
+  if(oldCode){
+    const idx=transports.findIndex(c=>c.carCode===oldCode);
+    if(idx>=0) selectedIndex=idx;
+  }
+  render();
+  document.getElementById('fbStatus').innerText=`● Firebase: ${transports.length} data`;
+});
+setFormEnabled(false);
+</script>
+</body>
+</html>

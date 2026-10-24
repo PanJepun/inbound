@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEALS - RESTAURANT - PT SMAILING TOUR DMC</title>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0; overflow:hidden}
+.top-bar{background:#e0e0e0; padding:5px 8px; display:flex; gap:4px; align-items:center; border-bottom:2px solid #999; flex-wrap:wrap}
+.top-bar button{padding:4px 10px; font-size:11px; font-weight:700; border:1px solid #777; cursor:pointer; border-radius:2px; background:linear-gradient(180deg,#fff,#d0d0d0)}
+.top-bar button.add{background:#a8e6a8; border:2px solid #2e8b57}
+.top-bar button.exit{background:#ffff99; border:2px solid #000; font-weight:900}
+.top-bar button.print{background:linear-gradient(180deg,#a8cfff,#5f8fbf); border:2px solid #000; font-weight:900}
+.top-bar button.sort-up{background:#b3ffb3; border:2px solid #2e8b57; min-width:90px}
+.top-bar button.sort-down{background:#ffb8b8; border:2px solid #8b0000; min-width:90px}
+.top-bar button.fix-date{background:linear-gradient(180deg,#ffff99,#ffcc00); border:2px solid #000; font-weight:900}
+.top-bar button.active{border:3px solid #000!important}
+.top-bar label{font-size:11px; font-weight:700; margin-left:4px}
+.top-bar input.search{height:23px; border:1px solid #666; padding:2px 6px; font-size:11px; background:white; border-radius:3px}
+.top-bar input#searchRest{width:180px}
+.top-bar input#searchArea{width:120px; background:#e0f0ff; font-weight:700}
+.top-bar input#searchMenu{width:140px; background:#fff0ff; font-weight:700}
+.table-wrap{background:white; overflow:auto; height:calc(100vh - 72px); border:1px solid #999}
+table.main-table{width:100%; border-collapse:collapse; font-size:11px}
+.main-table th{background:#f0f0f0; border:1px solid #999; padding:4px; font-size:10px; position:sticky; top:0; text-align:center; font-weight:700; cursor:pointer}
+.main-table th.price-header{background:#fff0b3}
+.main-table th.date-header{background:#b3d9ff}
+.main-table td{border:1px solid #8a4a4a; padding:3px 5px; white-space:nowrap; cursor:pointer}
+.main-table tr.selected td{background:#00ff7f!important; font-weight:700}
+.main-table tr:hover td{background:#b3ffda}
+td.price-cell{text-align:right; font-weight:700; background:#fff0ff}
+td.date-cell{color:#cc0000; font-weight:700; text-align:center; background:#fff0f0}
+td.date-cell2{color:#0000cc; font-weight:700; text-align:center; background:#f0f0ff}
+.bottom-bar{background:#e0f0d0; padding:5px 10px; display:flex; gap:6px; align-items:center; border-top:2px solid #999; font-size:11px; flex-wrap:wrap}
+.search-wrap{position:relative; display:inline-flex; align-items:center}
+.search-list{position:absolute; top:24px; left:0; width:160px; background:white; border:1px solid #666; max-height:150px; overflow:auto; z-index:2000; display:none; box-shadow:0 4px 10px rgba(0,0,0,0.3)}
+.search-list.active{display:block}
+.search-list div{padding:4px 6px; font-size:11px; cursor:pointer; border-bottom:1px solid #eee}
+.search-list div:hover{background:#b3d9ff}
+.price-info{margin-left:auto; background:#e0ffe0; border:1px solid #999; padding:3px 10px; font-size:10px; font-weight:700; border-radius:3px}
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.25); display:none; justify-content:center; align-items:center; z-index:1000; padding:12px}
+.modal-overlay.active{display:flex}
+.modal-popup{background:#7CFF7C; border:2px solid #2e8b57; width:800px; max-width:98vw; padding:14px; box-shadow:0 8px 28px rgba(0,0,0,0.35); border-radius:4px; max-height:95vh; overflow:auto}
+.modal-header{font-size:12px; font-weight:900; text-align:center; margin-bottom:10px; background:#2e8b57; color:white; padding:6px; border-radius:2px}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:8px 18px}
+.form-group{display:flex; align-items:center; gap:6px; margin-bottom:6px}
+.form-group label{font-size:11px; width:120px; text-align:right; font-weight:700; flex:none}
+.form-group input,.form-group textarea{height:22px; border:1px solid #666; padding:2px 6px; font-size:11px; background:#ffe0ff; border-radius:2px}
+.form-group input.code{width:130px; background:#fff0ff; font-weight:bold}
+.form-group input.area{width:150px; font-weight:bold}
+.form-group input.rest-name{width:100%; background:#fff; font-weight:bold; border:2px solid #666}
+.form-group.full{grid-column:span 2}
+.form-group input.menu-input{width:100%; background:#00ff7f; font-weight:900; border:2px solid #000}
+.form-group input.rate{width:100px; text-align:right; font-weight:700}
+.form-group input.capacity{width:100px; text-align:right; font-weight:700; background:#e0f0ff}
+.form-group textarea{height:44px; resize:vertical; width:100%}
+.btn-plus,.btn-minus{width:22px; height:22px; font-weight:900; font-size:12px; border:1px solid #555; cursor:pointer; border-radius:3px; display:inline-flex; align-items:center; justify-content:center}
+.btn-plus{background:#a8e6a8}
+.btn-minus{background:#ffb8b8}
+.searchable-wrap{position:relative; display:flex; align-items:center; gap:4px; flex:1}
+.searchable-list{position:absolute; top:24px; left:0; right:30px; background:white; border:1px solid #666; max-height:150px; overflow:auto; z-index:2000; display:none; box-shadow:0 4px 10px rgba(0,0,0,0.3)}
+.searchable-list.active{display:block}
+.searchable-list div{padding:5px 8px; font-size:11px; cursor:pointer; border-bottom:1px solid #eee}
+.searchable-list div:hover{background:#b3d9ff}
+.validity-box{background:linear-gradient(90deg,#ff7f00,#ff9f33); padding:8px 12px; border:2px solid #000; margin:10px 0; display:flex; align-items:center; gap:10px; border-radius:3px; color:white}
+.validity-box span.title{font-size:16px; font-weight:900}
+.validity-box span.label{font-size:11px; font-weight:700; color:black}
+.validity-box input{width:110px; height:22px; border:1px solid #666; background:white; font-size:11px; font-weight:700}
+.modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:14px; padding-top:10px; border-top:1px solid #2e8b57}
+.modal-actions button{padding:6px 18px; font-size:11px; font-weight:900; border:1px solid #555; cursor:pointer; border-radius:4px; min-width:70px}
+.modal-actions button.save{background:#a8e6a8}
+.modal-actions button.cancel{background:#b8b8ff}
+</style>
+</head>
+<body>
+<div class="top-bar">
+<button class="add" onclick="openModal()">Add</button>
+<button class="save" onclick="saveFromModal()">Save</button>
+<button class="edit" onclick="editSelected()">Edit</button>
+<button class="delete" onclick="deleteSelected()">Delete</button>
+<button class="print" onclick="printNice()">🖨️ Print BW</button>
+<button class="cancel" onclick="closeModal()">Cancel</button>
+<button class="exit" onclick="location.href='index.html'">Exit</button>
+<button class="refresh" onclick="location.reload()">Refresh</button>
+<label>Nama Restaurant:</label><input class="search" id="searchRest" placeholder="KINTAMANI, BLUE..." oninput="applyFilter()">
+<label>Area:</label><div class="search-wrap"><input class="search" id="searchArea" placeholder="BANGLI, KUTA..." oninput="filterTopList('area'); applyFilter()" onfocus="showTopList('area')"><div class="search-list" id="top-list-area"></div></div>
+<label>Menu:</label><div class="search-wrap"><input class="search" id="searchMenu" placeholder="BUFFET, GALA..." oninput="filterTopList('menu'); applyFilter()" onfocus="showTopList('menu')"><div class="search-list" id="top-list-menu"></div></div>
+<button class="sort-up" id="btnSortUp" onclick="sortByPrice('asc')">▲ Murah</button>
+<button class="sort-down" id="btnSortDown" onclick="sortByPrice('desc')">▼ Mahal</button>
+<button class="fix-date" onclick="fixAllDates()">🔧 Fix Tanggal Indo</button>
+</div>
+<div class="table-wrap">
+<table class="main-table"><thead><tr>
+<th>Kode REST</th><th>KODE AREA</th><th>NAMA RESTAURANT</th><th>VALID</th><th>UNTIL</th><th>NAMA MENU</th><th>KAPASITAS</th><th>NETT / PAX</th><th>REMARKS</th>
+</tr></thead><tbody id="tbody"></tbody></table>
+</div>
+<div class="bottom-bar">
+<button onclick="scrollTopTable()">Top</button>
+<button onclick="scrollNext()">Next</button>
+<button onclick="scrollPrev()">Prev</button>
+<button onclick="scrollBottom()">Bott</button>
+<button onclick="sortByPrice('asc')" style="background:#b3ffb3; font-weight:700; border:2px solid #2e8b57">▲ Murah→Mahal</button>
+<button onclick="sortByPrice('desc')" style="background:#ffb8b8; font-weight:700; border:2px solid #8b0000">▼ Mahal→Murah</button>
+<button onclick="clearSort()" style="background:#e0e0e0; font-weight:700">Normal</button>
+<button onclick="clearFilters()" style="background:#ffff99; font-weight:700; border:2px solid #000">Clear Filter</button>
+<button onclick="printNice()" style="background:#fff; font-weight:900; border:2px solid #000">🖨️ PRINT BW 2 BARIS - RESTAURANT</button>
+<div class="price-info" id="priceInfo">Total: 0 Restaurant</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+<div class="modal-popup">
+<div class="modal-header">Tambah / Edit Data Restaurant / Meals - PT SMAILING TOUR DMC - FORMAT INDONESIA DD-MM-YYYY</div>
+<div class="grid-2">
+<div class="form-group"><label>Kode REST :</label><input id="codeRest" class="code" placeholder="REST-00001"></div>
+<div class="form-group"><label>Kode Area :</label><div class="searchable-wrap"><input id="kodeArea" class="area" placeholder="BANGLI, KUTA, NUSA DUA..." autocomplete="off" oninput="filterList('area')" onfocus="showList('area')"><div class="searchable-list" id="list-area"></div><button class="btn-plus" onclick="addOption('area')" type="button">+</button><button class="btn-minus" onclick="delOption('area')" type="button">-</button></div></div>
+<div class="form-group full"><label>Nama Restaurant :</label><div class="searchable-wrap"><input id="namaRestaurant" class="rest-name" placeholder="KINTAMANI REST, BLUE MARINE..." autocomplete="off" oninput="filterList('rest')" onfocus="showList('rest')"><div class="searchable-list" id="list-rest"></div><button class="btn-plus" onclick="addOption('rest')" type="button">+</button><button class="btn-minus" onclick="delOption('rest')" type="button">-</button></div></div>
+<div class="form-group full"><label>Nama Menu :</label><div class="searchable-wrap"><input id="namaMenu" class="menu-input" placeholder="BUFFET LUNCH, GALA DINNER, BEBEK MUTER2..." autocomplete="off" oninput="filterList('menu')" onfocus="showList('menu')"><div class="searchable-list" id="list-menu"></div><button class="btn-plus" onclick="addOption('menu')" type="button">+</button><button class="btn-minus" onclick="delOption('menu')" type="button">-</button></div></div>
+<div class="form-group"><label>Kapasitas :</label><input id="kapasitas" class="capacity" value="0"></div>
+<div class="form-group"><label>Nett / Pax :</label><input id="nettPax" class="rate" value="0.00"></div>
+<div class="form-group full"><label>Remarks :</label><textarea id="remarks" placeholder="Catatan..."></textarea></div>
+</div>
+<div class="validity-box">
+<span class="title">VALIDITY :</span>
+<span class="label">VALID From :</span><input id="validFrom" type="date" value="2021-02-17">
+<span class="label">Until :</span><input id="validTo" type="date" value="2024-12-31">
+<span style="font-size:10px; color:black; font-weight:700; margin-left:8px" id="validDisplay"></span>
+</div>
+<div class="modal-actions">
+<button class="cancel" onclick="closeModal()">Cancel</button>
+<button class="save" onclick="saveFromModal()">Save</button>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, setDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "restaurant");
+
+let rests = []; let filteredRests = []; let selectedIndex = -1; let selectedFirebaseId = null; let currentSort = 'normal';
+let areaOptions = ["BANGLI","KUTA","NUSA DUA","UBUD","SANUR","JIMBARAN","SEMINYAK","CANGGU","KINTAMANI","BEDUGUL","LOVINA","CANDI DASA","SIDEMEN","TABANAN","GIANYAR"];
+let restNameOptions = ["KINTAMANI REST","LUNCH BUFFE","BLUE MARINE","BEBEK TEPI SAWAH","AYAM BETUTU","BALE UDANG","JIMBARAN SEAFOOD","SARASWATI REST","KINTAMANI BUFFET","BEBEK BENGIL"];
+let menuOptions = ["BUFFET LUNCH","MAKAN SEPUSNYA","GALA DINNER","BEBEK MUTER2","BUFFET DINNER","SET MENU","A LA CARTE","INDONESIAN BUFFET","INTERNATIONAL BUFFET","SEAFOOD BUFFET"];
+
+const optionMap = {
+  area: {options: ()=>areaOptions, set: v=>areaOptions=v, col:"rest_area_options", input:"kodeArea"},
+  rest: {options: ()=>restNameOptions, set: v=>restNameOptions=v, col:"rest_name_options", input:"namaRestaurant"},
+  menu: {options: ()=>menuOptions, set: v=>menuOptions=v, col:"rest_menu_options", input:"namaMenu"}
+};
+
+function formatTanggalIndonesia(dateStr){
+  if(!dateStr) return '';
+  let s = String(dateStr).trim(); if(s==='') return '';
+  let m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if(m){ return `${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}-${m[3]}`; }
+  m = s.match(/^(\d{1,2})\/(\d{4})$/);
+  if(m){ return `${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}-${m[3]}`; }
+  m = s.match(/^(\d{4})-(\d{1,2})$/);
+  if(m){ return `${m[3].padStart(2,'0')}-${m[2].padStart(2,'0')}-${m[1]}`; }
+  m = s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  if(m){ return `${m[3].padStart(2,'0')}-${m[2].padStart(2,'0')}-${m[1]}`; }
+  try{ let dt = new Date(s); if(!isNaN(dt)){ let d=String(dt.getDate()).padStart(2,'0'); let mo=String(dt.getMonth()+1).padStart(2,'0'); let y=dt.getFullYear(); return `${d}-${mo}-${y}`; } }catch(e){}
+  return s;
+}
+function toISOForInput(dateStr){
+  if(!dateStr) return '';
+  let s = String(dateStr).trim();
+  let m = s.match(/^(\d{1,2})-(\d{4})$/);
+  if(m){ return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; }
+  m = s.match(/^(\d{1,2})\/(\d{4})$/);
+  if(m){ return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; }
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m){ return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`; }
+  return s;
+}
+function updateValidDisplay(){
+  const from=document.getElementById('validFrom').value;
+  const to=document.getElementById('validTo').value;
+  if(from && to){ document.getElementById('validDisplay').innerText=`(${formatTanggalIndonesia(from)} s/d ${formatTanggalIndonesia(to)})`; }
+}
+['validFrom','validTo'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change', updateValidDisplay); });
+
+window.filterTopList=(type)=>{
+  const inputId = type==='area'? 'searchArea' : 'searchMenu';
+  const listId = type==='area'? 'top-list-area' : 'top-list-menu';
+  const input=document.getElementById(inputId);
+  const listDiv=document.getElementById(listId);
+  const f=input.value.toUpperCase();
+  let opts = type==='area'? areaOptions : menuOptions;
+  if(f) opts=opts.filter(o=> o.includes(f));
+  listDiv.innerHTML=''; opts.slice(0,30).forEach(opt=>{ const div=document.createElement('div'); div.textContent=opt; div.onclick=()=>{ input.value=opt; listDiv.classList.remove('active'); applyFilter(); }; listDiv.appendChild(div); });
+  if(opts.length>0 && f!=='') listDiv.classList.add('active'); else if(f==='') listDiv.classList.remove('active');
+};
+window.showTopList=(type)=>{
+  const listId = type==='area'? 'top-list-area' : 'top-list-menu';
+  const listDiv=document.getElementById(listId);
+  let opts = type==='area'? areaOptions : menuOptions;
+  listDiv.innerHTML=''; opts.slice(0,30).forEach(opt=>{ const div=document.createElement('div'); div.textContent=opt; div.onclick=()=>{ const inputId = type==='area'? 'searchArea' : 'searchMenu'; document.getElementById(inputId).value=opt; listDiv.classList.remove('active'); applyFilter(); }; listDiv.appendChild(div); });
+  listDiv.classList.add('active');
+};
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.search-wrap')){ document.querySelectorAll('.search-list').forEach(l=> l.classList.remove('active')); }
+  if(!e.target.closest('.searchable-wrap')){ document.querySelectorAll('.searchable-list').forEach(l=> l.classList.remove('active')); }
+});
+window.clearFilters=()=>{
+  document.getElementById('searchRest').value='';
+  document.getElementById('searchArea').value='';
+  document.getElementById('searchMenu').value='';
+  applyFilter();
+};
+
+function openModal(isEdit=false){
+  if(!isEdit){
+    selectedIndex=-1; selectedFirebaseId=null;
+    document.getElementById('codeRest').value='REST-'+String(rests.length+1).padStart(5,'0');
+    document.getElementById('kodeArea').value='';
+    document.getElementById('namaRestaurant').value='';
+    document.getElementById('namaMenu').value='';
+    document.getElementById('kapasitas').value='0';
+    document.getElementById('nettPax').value='0.00';
+    document.getElementById('remarks').value='';
+    document.getElementById('validFrom').value='2021-02-17';
+    document.getElementById('validTo').value='2024-12-31';
+  }
+  updateValidDisplay();
+  document.getElementById('modalOverlay').classList.add('active');
+}
+window.openModal=openModal;
+window.closeModal=()=>{ document.getElementById('modalOverlay').classList.remove('active'); };
+window.filterList=(type)=>{ const cfg=optionMap[type]; if(!cfg) return; const input=document.getElementById(cfg.input); const f=input.value.toUpperCase(); let opts=cfg.options(); if(f) opts=opts.filter(o=> o.includes(f)); const listDiv=document.getElementById('list-'+type); if(!listDiv) return; listDiv.innerHTML=''; opts.slice(0,40).forEach(opt=>{ const div=document.createElement('div'); div.textContent=opt; div.onclick=()=>{ input.value=opt; listDiv.classList.remove('active'); }; listDiv.appendChild(div); }); if(opts.length>0) listDiv.classList.add('active'); else listDiv.classList.remove('active'); };
+window.showList=(type)=>{ const cfg=optionMap[type]; if(!cfg) return; const listDiv=document.getElementById('list-'+type); const opts=cfg.options(); listDiv.innerHTML=''; opts.slice(0,40).forEach(opt=>{ const div=document.createElement('div'); div.textContent=opt; div.onclick=()=>{ document.getElementById(cfg.input).value=opt; listDiv.classList.remove('active'); }; listDiv.appendChild(div); }); listDiv.classList.add('active'); };
+window.addOption=async(type)=>{ const cfg=optionMap[type]; if(!cfg) return; const input=document.getElementById(cfg.input); let v=prompt(`Tambah ${type.toUpperCase()} baru:`, input.value); if(!v) return; const up=v.trim().toUpperCase(); if(!up) return; let opts=cfg.options(); if(opts.includes(up)){ input.value=up; return; } opts.push(up); opts.sort(); cfg.set(opts); input.value=up; try{ await setDoc(doc(db, cfg.col, up), {name:up, createdAt:new Date()}); }catch(e){} };
+window.delOption=async(type)=>{ const cfg=optionMap[type]; if(!cfg) return; const input=document.getElementById(cfg.input); const val=input.value.trim(); if(!val){ alert('Pilih dulu!'); return; } if(!confirm(`Hapus ${type} "${val}"?`)) return; let opts=cfg.options().filter(o=>o!==val.toUpperCase() && o!==val); cfg.set(opts); input.value=opts[0]||''; try{ await deleteDoc(doc(db, cfg.col, val)); }catch(e){} };
+function formatRupiah(num){ if(num===null||num===undefined||num==='') return '0.00'; const n=parseFloat(String(num).replace(/,/g,''))||0; return n.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+function parsePrice(p){ if(!p) return 0; return parseFloat(String(p).replace(/,/g,''))||0; }
+window.sortByPrice=(direction)=>{
+  currentSort=direction;
+  document.getElementById('btnSortUp').classList.remove('active');
+  document.getElementById('btnSortDown').classList.remove('active');
+  if(direction==='asc'){ document.getElementById('btnSortUp').classList.add('active'); filteredRests.sort((a,b)=> parsePrice(a.nettPax) - parsePrice(b.nettPax)); }
+  else if(direction==='desc'){ document.getElementById('btnSortDown').classList.add('active'); filteredRests.sort((a,b)=> parsePrice(b.nettPax) - parsePrice(a.nettPax)); }
+  updatePriceInfo(); render();
+};
+window.toggleSort=()=>{ if(currentSort==='normal' || currentSort==='desc'){ sortByPrice('asc'); } else{ sortByPrice('desc'); } };
+window.clearSort=()=>{ currentSort='normal'; document.getElementById('btnSortUp').classList.remove('active'); document.getElementById('btnSortDown').classList.remove('active'); filteredRests=[...rests].sort((a,b)=> a.namaRestaurant.localeCompare(b.namaRestaurant)); updatePriceInfo(); render(); };
+function updatePriceInfo(){ const total=filteredRests.length; let min=0, max=0; if(total>0){ const prices=filteredRests.map(h=> parsePrice(h.nettPax)); min=Math.min(...prices); max=Math.max(...prices); } let txt=''; if(currentSort==='asc') txt=`▲ Murah→Mahal | Min: ${formatRupiah(min)} | Max: ${formatRupiah(max)} | Tampil: ${total}`; else if(currentSort==='desc') txt=`▼ Mahal→Murah | Max: ${formatRupiah(max)} | Min: ${formatRupiah(min)} | Tampil: ${total}`; else txt=`Total Tampil: ${total} dari ${rests.length} Restaurant`; document.getElementById('priceInfo').innerText=txt; }
+
+window.saveFromModal=async()=>{
+  const code=document.getElementById('codeRest').value.trim(); if(!code){ alert('Kode REST kosong!'); return; }
+  const namaRest=document.getElementById('namaRestaurant').value.trim(); if(!namaRest){ alert('Nama Restaurant wajib!'); return; }
+  const payload={
+    codeRest: code.toUpperCase(),
+    kodeArea: document.getElementById('kodeArea').value.toUpperCase(),
+    namaRestaurant: namaRest.toUpperCase(),
+    namaMenu: document.getElementById('namaMenu').value.toUpperCase(),
+    kapasitas: document.getElementById('kapasitas').value.replace(/,/g,''),
+    nettPax: document.getElementById('nettPax').value.replace(/,/g,''),
+    remarks: document.getElementById('remarks').value,
+    valid: formatTanggalIndonesia(document.getElementById('validFrom').value),
+    until: formatTanggalIndonesia(document.getElementById('validTo').value),
+    updatedAt: new Date()
+  };
+  try{
+    if(selectedFirebaseId){ await updateDoc(doc(db,"restaurant",selectedFirebaseId), payload); }
+    else{ payload.createdAt=new Date(); await addDoc(colRef, payload); }
+    closeModal();
+  }catch(e){ alert('Error: '+e.message); }
+};
+window.editSelected=()=>{
+  if(selectedIndex===-1){ alert('Klik data dulu beb!'); return; }
+  const s=rests[selectedIndex]; selectedFirebaseId=s.firebaseId;
+  document.getElementById('codeRest').value=s.codeRest;
+  document.getElementById('kodeArea').value=s.kodeArea||'';
+  document.getElementById('namaRestaurant').value=s.namaRestaurant||'';
+  document.getElementById('namaMenu').value=s.namaMenu||'';
+  document.getElementById('kapasitas').value=formatRupiah(s.kapasitas);
+  document.getElementById('nettPax').value=formatRupiah(s.nettPax);
+  document.getElementById('remarks').value=s.remarks||'';
+  document.getElementById('validFrom').value=toISOForInput(s.valid)||'2021-02-17';
+  document.getElementById('validTo').value=toISOForInput(s.until)||'2024-12-31';
+  updateValidDisplay();
+  document.getElementById('modalOverlay').classList.add('active');
+};
+window.deleteSelected=async()=>{
+  if(selectedIndex===-1 ||!selectedFirebaseId){ alert('Klik data dulu!'); return; }
+  if(confirm('Hapus '+rests[selectedIndex].namaRestaurant+' - '+rests[selectedIndex].namaMenu+'?')){ await deleteDoc(doc(db,"restaurant",selectedFirebaseId)); selectedIndex=-1; selectedFirebaseId=null; }
+};
+window.applyFilter=()=>{
+  const sRest=document.getElementById('searchRest').value.toUpperCase();
+  const sArea=document.getElementById('searchArea').value.toUpperCase();
+  const sMenu=document.getElementById('searchMenu').value.toUpperCase();
+  filteredRests=rests.filter(h=>{
+    const matchRest =!sRest || (h.namaRestaurant||'').includes(sRest) || (h.codeRest||'').includes(sRest);
+    const matchArea =!sArea || (h.kodeArea||'').includes(sArea);
+    const matchMenu =!sMenu || (h.namaMenu||'').includes(sMenu);
+    return matchRest && matchArea && matchMenu;
+  });
+  if(currentSort==='asc') filteredRests.sort((a,b)=> parsePrice(a.nettPax)-parsePrice(b.nettPax));
+  else if(currentSort==='desc') filteredRests.sort((a,b)=> parsePrice(b.nettPax)-parsePrice(a.nettPax));
+  updatePriceInfo(); render();
+};
+function render(){
+  const tbody=document.getElementById('tbody'); tbody.innerHTML='';
+  const hasFilter = document.getElementById('searchRest').value || document.getElementById('searchArea').value || document.getElementById('searchMenu').value;
+  let finalList = hasFilter? filteredRests : (filteredRests.length>0? filteredRests : rests);
+  finalList.forEach((h)=>{
+    const originalIdx=rests.findIndex(x=> x.firebaseId===h.firebaseId);
+    const tr=document.createElement('tr'); tr.dataset.index=originalIdx; tr.className = originalIdx===selectedIndex? 'selected' : '';
+    const v1=formatTanggalIndonesia(h.valid);
+    const v2=formatTanggalIndonesia(h.until);
+    tr.innerHTML=`<td>${h.codeRest}</td><td style="color:blue; font-weight:700">${h.kodeArea}</td><td style="color:blue; font-weight:bold">${h.namaRestaurant}</td><td class="date-cell">${v1}</td><td class="date-cell2">${v2}</td><td style="background:#00ff7f; font-weight:900; border:2px solid #000">${h.namaMenu}</td><td style="text-align:right; background:#e0f0ff">${formatRupiah(h.kapasitas)}</td><td class="price-cell">${formatRupiah(h.nettPax)}</td><td>${h.remarks||''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById('tbody').addEventListener('click',(e)=>{ const tr=e.target.closest('tr'); if(!tr||tr.dataset.index===undefined) return; const idx=parseInt(tr.dataset.index); if(isNaN(idx)||idx>=rests.length) return; selectedIndex=idx; render(); });
+window.scrollTopTable=()=>{ document.querySelector('.table-wrap').scrollTop=0; };
+window.scrollBottom=()=>{ const w=document.querySelector('.table-wrap'); w.scrollTop=w.scrollHeight; };
+window.scrollNext=()=>{ const w=document.querySelector('.table-wrap'); w.scrollTop+=200; };
+window.scrollPrev=()=>{ const w=document.querySelector('.table-wrap'); w.scrollTop-=200; };
+
+window.printNice=()=>{
+  const list = (document.getElementById('searchRest').value || document.getElementById('searchArea').value || document.getElementById('searchMenu').value)? filteredRests : (filteredRests.length>0? filteredRests : rests);
+  const data = list.length>0? list : rests;
+  if(data.length===0){ alert('Tidak ada data!'); return; }
+  const now = new Date();
+  const tglCetak = formatTanggalIndonesia(now.toISOString().split('T')[0]) + ' ' + now.toLocaleTimeString('id-ID');
+  let html = `
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Print Meals BW - ${data.length} Data</title>
+<style>
+@page {size: landscape; margin:8mm}
+*{font-family: Tahoma, Arial, sans-serif; font-size:8.5px; color:#000!important; background:#fff!important}
+body{margin:0; padding:8px}
+.header{text-align:center; margin-bottom:8px; border-bottom:2px solid #000; padding-bottom:6px}
+.header h1{margin:0; font-size:14px; font-weight:900}
+.header h2{margin:2px 0; font-size:10px; font-weight:700}
+.header.info{font-size:7.5px; margin-top:3px}
+table{width:100%; border-collapse:collapse; border:1.5px solid #000}
+th{background:#fff!important; color:#000!important; border:1px solid #000!important; padding:4px 3px; font-size:7.5px; text-align:center; font-weight:900; text-transform:uppercase}
+td{border:1px solid #000!important; padding:3px 4px; vertical-align:top; background:#fff!important}
+tr.row-main td{font-weight:700; border-bottom:1px solid #000!important}
+tr.row-detail td{font-size:7.5px; border-top:none!important; padding:3px 5px; background:#fff!important}
+tr.row-detail td.label{font-weight:900; text-align:right; width:60px}
+.price{text-align:right; font-weight:900}
+.date1,.date2{text-align:center; font-weight:700}
+.rest-name{font-weight:900; text-transform:uppercase}
+.footer{margin-top:8px; display:flex; justify-content:space-between; font-size:7px; border-top:1.5px solid #000; padding-top:5px; font-weight:700}
+@media print{.no-print{display:none}}
+</style>
+</head><body>
+<div class="header">
+<h1>PT. SMAILING TOUR DMC - DATA RESTAURANT / MEALS</h1>
+<h2>LAPORAN RESTAURANT - FORMAT 1 RECORD 2 BARIS - BLACK & WHITE - IRIT TINTA</h2>
+<div class="info">Dicetak: ${tglCetak} | Total: ${data.length} Restaurant | Filter: ${document.getElementById('searchArea').value||'ALL AREA'} / ${document.getElementById('searchRest').value||'ALL REST'} / ${document.getElementById('searchMenu').value||'ALL MENU'} | Urut: ${currentSort==='asc'?'Murah->Mahal':currentSort==='desc'?'Mahal->Murah':'Normal'} | Format Tanggal: DD-MM-YYYY</div>
+</div>
+<table>
+<thead><tr>
+<th style="width:20px">No</th>
+<th>Kode REST</th><th>KODE AREA</th><th style="width:18%">NAMA RESTAURANT</th><th>VALID</th><th>UNTIL</th><th style="width:18%">NAMA MENU</th><th>KAPASITAS</th><th>NETT / PAX</th><th>REMARKS</th>
+</tr></thead><tbody>
+`;
+  data.forEach((h,i)=>{
+    const v1=formatTanggalIndonesia(h.valid);
+    const v2=formatTanggalIndonesia(h.until);
+    html += `
+<tr class="row-main">
+<td style="text-align:center">${i+1}</td>
+<td>${h.codeRest}</td>
+<td style="font-weight:900">${h.kodeArea}</td>
+<td class="rest-name">${h.namaRestaurant}</td>
+<td class="date1">${v1}</td>
+<td class="date2">${v2}</td>
+<td style="font-weight:900; border:1px solid #000">${h.namaMenu}</td>
+<td style="text-align:right">${formatRupiah(h.kapasitas)}</td>
+<td class="price">${formatRupiah(h.nettPax)}</td>
+<td>${h.remarks||''}</td>
+</tr>
+<tr class="row-detail">
+<td style="border-top:none"></td>
+<td class="label">Details:</td>
+<td colspan="3">Area: ${h.kodeArea} - Restaurant: ${h.namaRestaurant}</td>
+<td colspan="2">Validity: ${v1} s/d ${v2}</td>
+<td colspan="2">Menu: ${h.namaMenu} | Kap: ${formatRupiah(h.kapasitas)} pax | Nett: ${formatRupiah(h.nettPax)}/pax</td>
+<td>${h.remarks||'-'}</td>
+</tr>
+`;
+  });
+  html += `
+</tbody></table>
+<div class="footer">
+<div>PT. Smailing Tour DMC - Bali - Restaurant / Meals System</div>
+<div>Total ${data.length} Restaurant - Black & White - Irit Tinta</div>
+<div>Dicetak: ${tglCetak}</div>
+</div>
+<div class="no-print" style="text-align:center; margin-top:18px; background:#f0f0f0!important; padding:12px; border:1px solid #000">
+<div style="font-size:11px; font-weight:900; margin-bottom:8px">MODE BLACK & WHITE - IRIT TINTA - TANPA WARNA</div>
+<button onclick="window.print()" style="padding:10px 30px; font-weight:900; font-size:13px; background:#fff!important; color:#000!important; border:2px solid #000; cursor:pointer; border-radius:4px">🖨️ CETAK SEKARANG (BW)</button>
+<button onclick="window.close()" style="padding:8px 16px; font-weight:700; margin-left:10px; border:1px solid #000; cursor:pointer; background:#fff!important">Tutup</button>
+</div>
+</body></html>
+`;
+  const win = window.open('', '_blank', 'width=1200,height=800');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>{ win.focus(); }, 400);
+};
+
+window.fixAllDates=async()=>{
+  if(!confirm('Fix semua tanggal jadi format Indonesia DD-MM-YYYY?')) return;
+  const btn=document.querySelector('.fix-date'); btn.disabled=true; btn.innerText='⏳ Fixing...';
+  try{
+    const snap=await getDocs(colRef); let fixed=0; let batch=writeBatch(db); let batchCount=0;
+    for(const d of snap.docs){
+      const data=d.data();
+      const newV1=formatTanggalIndonesia(data.valid||'');
+      const newV2=formatTanggalIndonesia(data.until||'');
+      if(newV1!==data.valid || newV2!==data.until){ batch.update(doc(db, "restaurant", d.id), { valid: newV1, until: newV2 }); fixed++; batchCount++; }
+      if(batchCount>=400){ await batch.commit(); batch=writeBatch(db); batchCount=0; }
+    }
+    if(batchCount>0) await batch.commit();
+    alert(`✅ Selesai fix ${fixed} data!`);
+    btn.innerText='🔧 Fix Tanggal Indo'; btn.disabled=false;
+  }catch(e){ alert('Error: '+e.message); btn.disabled=false; btn.innerText='🔧 Fix Tanggal Indo'; }
+};
+onSnapshot(colRef, snap=>{
+  const oldCode=selectedIndex>=0? rests[selectedIndex]?.codeRest : null;
+  rests=[]; snap.forEach(d=>{ const data=d.data(); rests.push({ firebaseId:d.id, codeRest:data.codeRest||'', kodeArea:data.kodeArea||'', namaRestaurant:data.namaRestaurant||'', namaMenu:data.namaMenu||'', kapasitas:data.kapasitas||'0', nettPax:data.nettPax||'0', remarks:data.remarks||'', valid:data.valid||'17-02-2021', until:data.until||'31-12-2024' }); });
+  rests.sort((a,b)=> a.namaRestaurant.localeCompare(b.namaRestaurant));
+  filteredRests=[...rests];
+  if(currentSort==='asc') filteredRests.sort((a,b)=> parsePrice(a.nettPax)-parsePrice(b.nettPax));
+  else if(currentSort==='desc') filteredRests.sort((a,b)=> parsePrice(b.nettPax)-parsePrice(a.nettPax));
+  if(oldCode){ const idx=rests.findIndex(c=>c.codeRest===oldCode); if(idx>=0) selectedIndex=idx; }
+  updatePriceInfo(); render();
+  const areas=[...new Set(rests.map(h=> h.kodeArea).filter(a=>a))].sort();
+  const menus=[...new Set(rests.map(h=> h.namaMenu).filter(a=>a))].sort();
+  const restNames=[...new Set(rests.map(h=> h.namaRestaurant).filter(a=>a))].sort();
+  if(areas.length>0){ areaOptions=[...new Set([...areaOptions,...areas])].sort(); }
+  if(menus.length>0){ menuOptions=[...new Set([...menuOptions,...menus])].sort(); }
+  if(restNames.length>0){ restNameOptions=[...new Set([...restNameOptions,...restNames])].sort(); }
+});
+document.getElementById('modalOverlay').addEventListener('click',(e)=>{ if(e.target.id==='modalOverlay') closeModal(); });
+Object.values(optionMap).forEach(cfg=>{ const colRefOpt=collection(db, cfg.col); onSnapshot(colRefOpt, snap=>{ if(snap.size>0){ const arr=[]; snap.forEach(d=> arr.push(d.data().name)); if(arr.length>0) cfg.set(arr.sort()); }}); });
+</script>
+</body>
+</html>

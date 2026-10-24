@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>FIX 31-12-2026 POLOS</title></head>
+<body style="font-family:Arial;padding:20px;max-width:700px;margin:auto">
+<h2 style="color:green">✅ FIX MIGRASI 31-12-2026 - TANPA FIREBASE (ANTI ERROR)</h2>
+<input type="file" id="f" accept=".csv" style="padding:12px;border:3px dashed green;width:100%">
+<div id="log" style="background:#000;color:#0f0;padding:12px;margin-top:15px;white-space:pre-wrap;min-height:100px">Pilih file HOTELS.CSV lama...</div>
+<button id="dl" style="display:none;background:blue;color:white;padding:18px;width:100%;margin-top:15px;font-size:18px">DOWNLOAD FILE BARU 31-12-2026</button>
+<script>
+let newCsv="";
+document.getElementById('f').onchange=async(e)=>{
+  const txt=await e.target.files[0].text();
+  let lines=txt.split(/\r?\n/);
+  document.getElementById('log').innerText="File lama: "+lines.length+" baris\nProses...\n";
+  let out=[];
+  for(let line of lines){
+    if(!line.trim()){out.push(line); continue;}
+    let fixed=line
+      .replace(/31-03-2024/g,"31-12-2026")
+      .replace(/31-08-2023/g,"31-12-2026")
+      .replace(/31-05-2021/g,"31-12-2026")
+      .replace(/30-09-2021/g,"31-12-2026")
+      .replace(/12-11-2022/g,"12-11-2022") // jangan ganti tglhss1
+      .replace(/01-04-2023/g,"01-04-2023"); // jangan ganti periode1
+    // Khusus paksa kolom tglhss2 & periode2
+    // Karena format kamu ada quote: "01-07-2023","31-08-2023"
+    fixed=fixed.replace(/"31-03-2024"/g,'"31-12-2026"').replace(/"31-08-2023"/g,'"31-12-2026"').replace(/"30-09-2021"/g,'"31-12-2026"').replace(/"31-05-2021"/g,'"31-12-2026"');
+    out.push(fixed);
+  }
+  // Paksa lagi header ke-11 dan 12 kalau perlu (tglhss2 & periode2)
+  newCsv=out.join("\n");
+  let count=(newCsv.match(/31-12-2026/g)||[]).length;
+  document.getElementById('log').innerText+="SUKSES BEB! "+count+" tanggal jadi 31-12-2026!\n"+out[1].substring(0,200);
+  document.getElementById('dl').style.display='block';
+};
+document.getElementById('dl').onclick=()=>{
+  let blob=new Blob([newCsv],{type:'text/csv;charset=utf-8;'});
+  let a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='HOTELS_MIGRASI_31122026.csv'; a.click();
+};
+</script>
+</body></html>

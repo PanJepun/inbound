@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profit & Loss</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#777;padding:0;display:flex;flex-direction:column;align-items:center;font-family:Arial}
+.controls{width:100%;max-width:980px;background:#fff;padding:8px 10px;margin:6px 0;border:2px solid #000;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-weight:900;font-size:11px}
+.controls button{padding:7px 14px;border:2px solid #000;cursor:pointer;font-weight:900;background:#222;color:#fff}
+.controls input{width:70px;border:2px solid #000;font-weight:900;padding:4px 5px;font-size:11px;text-align:center}
+.wrapper{width:100%;max-width:980px;background:#fff;border:2px solid #000}
+.paper{padding:18px 24px 20px}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+.logo{font-weight:900;font-size:22px;color:#2a7ab5;line-height:11px}
+.logo span{font-size:8px;color:#000;font-weight:400;display:block;margin-top:3px}
+.plTitle{font-family:"Times New Roman",serif;font-size:36px;font-weight:900;color:#000;font-style:italic;text-align:right;line-height:36px}
+.head{margin-top:14px;font-size:12px;line-height:19px;text-align:center}
+.head b{font-weight:900}
+.infoRow{display:flex;justify-content:space-between;margin-top:14px;font-size:12px;line-height:19px;text-align:left}
+.infoRow .lbl{width:135px;display:inline-block;font-weight:900}
+.infoRow .val{display:inline-block;font-weight:700}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th{border:2px solid #000;padding:6px;font-size:11px;font-weight:900;text-align:center}
+td{border:1.2px solid #000;padding:5px 6px;font-size:11px}
+.rightNum{text-align:right;white-space:nowrap}
+.centerNum{text-align:center}
+.tot{margin-top:10px;font-size:12px;line-height:22px;font-weight:900}
+.tot .row{display:flex;justify-content:space-between}
+.tot .line{border-top:2px solid #000}
+@media print{.controls{display:none!important} body{background:#fff!important} .wrapper{border:none!important} @page{size:A4 landscape;margin:10mm}}
+</style>
+</head>
+<body>
+<div class="controls">
+<button onclick="window.print()">PRINT</button>
+<span>Guest ID: <span id="gIdCtrl" style="background:yellow;padding:2px 6px"></span></span>
+<span>Rate: <input id="rateIn" value="14300" onchange="render()"></span>
+</div>
+<div class="wrapper"><div class="paper">
+<div class="top"><div class="logo">Pan Jepun TOUR<span>Travel Management Expert</span></div><div class="plTitle">Profit &amp; Loss</div></div>
+<div class="head">
+<div>Agen Names : <b id="agency">-</b></div>
+<div>Booking Reference : <b id="custRef">-</b></div>
+<div>Date : <b id="invDate">-</b></div>
+<div>TC : <b id="tcShow">-</b></div>
+<div>Exchange Rate : <b id="rateShow">-</b></div>
+</div>
+<div class="infoRow">
+<div style="width:55%"><span class="lbl">Booking Names :</span><span class="val" id="cName" style="white-space:pre-line">-</span></div>
+<div style="width:45%"><div><span class="lbl">Itinerary Names :</span><span class="val" id="packetShow">-</span></div><div><span class="lbl">Total Pax :</span><span class="val" id="totalPaxShow">-</span></div><div><span class="lbl">Nationality :</span><span class="val" id="natShow">-</span></div></div>
+</div>
+<table><tr><th rowspan="2" style="width:85px">Date</th><th rowspan="2" style="text-align:left">Description</th><th rowspan="2" style="width:110px">Supplier</th><th rowspan="2" style="width:40px">Pax</th><th colspan="2">SELLING</th><th colspan="2">TOTAL COST</th><th rowspan="2" style="width:110px">PROFITT</th></tr><tr><th style="width:105px">IDR</th><th style="width:80px">USD</th><th style="width:105px">IDR</th><th style="width:80px">USD</th></tr><tbody id="tbodyPL"></tbody></table>
+<div class="tot">
+<div class="row"><div>Total Sales : Rp. <span id="totSalesRp">0</span> &nbsp; USD : <span id="totSalesUsd2">0.00</span></div><div>Tot Sales : Rp. <span id="totSalesRp2">0</span> Tot Sales : Rp. <span id="totSalesRp3">0</span></div></div>
+<div class="row"><div>Tot Cost : Rp. <span id="totCostRp">0</span></div><div>Nett : Rp. <span id="nettRp2">0</span></div></div>
+<div class="row line"><div>Nett Profit : Rp. <span id="nettRp">0</span> &nbsp; <span id="nettPct">0.00</span> %</div><div>Nett : USD &nbsp; <span id="nettUsd">0.00</span></div></div>
+</div>
+</div></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe" };
+const db = getFirestore(initializeApp(firebaseConfig));
+let activePNR = new URLSearchParams(window.location.search).get('guestId')||'SMLDMC-20OKT26-00001'; activePNR=activePNR.toUpperCase().trim();
+let hotelMarginPct=10, tourMarginPct=10, totalPax=2;
+let cacheHotels=[], cacheIte=[];
+function parseDate(s){ if(!s) return new Date(9999,0,1); s=String(s).trim().replace(/\s+/g,''); const p=s.split(/[-/]/); if(p.length===3){ if(p[0].length===4) return new Date(+p[0],+p[1]-1,+p[2]); return new Date(+p[2],+p[1]-1,+p[0]); } const d=new Date(s); return isNaN(d)?new Date(9999,0,1):d; }
+function fmt(n){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtIDR(n){ return Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function parseNum(v){ if(v==null) return 0; return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }
+function formatDateFromAny(val){ if(!val) return ''; try{ let d; if(val && typeof val.toDate==='function'){ d=val.toDate(); } else if(val && typeof val.seconds==='number'){ d=new Date(val.seconds*1000); } else if(val instanceof Date){ d=val; } else if(typeof val==='string'){ let s=val.trim().replaceAll('/','-').replace(/\s+/g,''); if(s.match(/^\d{2}-\d{2}-\d{4}$/)) return s; if(s.match(/^\d{4}-\d{2}-\d{2}/)){ const p=s.split('-'); return `${p[2].substring(0,2)}-${p[1]}-${p[0]}`; } d=new Date(s); } if(!d || isNaN(d.getTime())) return String(val).replaceAll('/','-'); const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0'); const yyyy=d.getFullYear(); return `${dd}-${mm}-${yyyy}`; }catch(e){ return String(val).replaceAll('/','-'); } }
+function getGuestId(obj){ for(let k in obj){ const lk=k.toLowerCase(); if(lk.includes('guest') && lk.includes('id') && obj[k]) return String(obj[k]).toUpperCase().trim(); } return (obj.guestId||obj.GuestID||'').toString().toUpperCase().trim(); }
+function getField(obj, includes){ const keys=Object.keys(obj); for(let k of keys){ const lk=k.toLowerCase().replace(/\s+/g,''); let ok=true; for(let inc of includes){ if(!lk.includes(inc)) { ok=false; break; } } if(ok) return obj[k]; } return ''; }
+function calcNites(ci,co){ const d1=parseDate(ci); const d2=parseDate(co); if(isNaN(d1)||isNaN(d2)) return 1; return Math.round((d2-d1)/86400000)||1; }
+function getRateFromDoc(d){ let r=0; const tryKeys=['rate','Rate','RATE','kurs','Kurs','KURS','exchangeRate','ExchangeRate','usdRate','UsdRate']; for(let k of tryKeys){ if(d[k]!=null && parseNum(d[k])>0){ r=parseNum(d[k]); break; } } if(!r){ for(let k in d){ const lk=k.toLowerCase(); if((lk.includes('rate')||lk.includes('kurs')||lk.includes('exchange')) && !lk.includes('margin') && !lk.includes('profit')){ const v=parseNum(d[k]); if(v>1000){ r=v; break; } } } } return r; }
+window.render=function(){
+  const rate = parseNum(document.getElementById('rateIn').value)||14300;
+  document.getElementById('rateShow').innerText = fmtIDR(rate) + '.00';
+  const tb=document.getElementById('tbodyPL'); tb.innerHTML='';
+  let rows=[];
+  cacheHotels.sort((a,b)=> parseDate(a.checkIn)-parseDate(b.checkIn));
+  cacheHotels.forEach(h=>{
+    const rateN=parseNum(h.rate); const abf=parseNum(h.abf); const hb=parseNum(h.hb); const fb=parseNum(h.fb); const ssupl=parseNum(h.sglsup||h.supl); const xbed=parseNum(h.xbed); const troom=parseInt(h.troom||1)||1; const nites=calcNites(h.checkIn,h.checkOut);
+    const cost=((rateN+abf)*nites+hb+fb+ssupl+xbed)*troom;
+    const sales=cost*(1+hotelMarginPct/100);
+    const name=(h.hotelName||'').toString().toUpperCase(); const room=(h.roomType||'DOUBLE/TWIN').toString().toUpperCase();
+    rows.push({date:h.checkIn, desc:name+' / '+room+' - '+troom+' RM X '+nites+' N', supplier:name, pax:totalPax, sales:sales, cost:cost});
+  });
+  cacheIte.sort((a,b)=> parseDate(a.date)-parseDate(b.date));
+  cacheIte.forEach(r=>{
+    const cost=r.nett*r.pax; const sales=cost*(1+(r.marginPct||tourMarginPct)/100);
+    rows.push({date:r.date, desc:r.service, supplier:'SMAILING TOUR', pax:r.pax, sales:sales, cost:cost});
+  });
+  rows.sort((a,b)=> parseDate(a.date)-parseDate(b.date));
+  let totSales=0, totCost=0;
+  rows.forEach(r=>{
+    const profit=r.sales-r.cost; totSales+=r.sales; totCost+=r.cost;
+    tb.innerHTML+=`<tr><td class="centerNum">${formatDateFromAny(r.date)}</td><td>${r.desc}</td><td class="centerNum">${r.supplier}</td><td class="centerNum">${r.pax}</td><td class="rightNum">${fmtIDR(r.sales)}</td><td class="rightNum">${fmt(r.sales/rate)}</td><td class="rightNum">${fmtIDR(r.cost)}</td><td class="rightNum">${fmt(r.cost/rate)}</td><td class="rightNum">${fmtIDR(profit)}</td></tr>`;
+  });
+  const nett=totSales-totCost;
+  const pct= totSales>0 ? (nett/totSales*100) : 0;
+  document.getElementById('totSalesRp').innerText=fmtIDR(totSales);
+  document.getElementById('totSalesRp2').innerText=fmtIDR(totSales);
+  document.getElementById('totSalesRp3').innerText=fmtIDR(totSales);
+  document.getElementById('totSalesUsd2').innerText=fmt(totSales/rate);
+  document.getElementById('totCostRp').innerText=fmtIDR(totCost);
+  document.getElementById('nettRp').innerText=fmtIDR(nett);
+  document.getElementById('nettRp2').innerText=fmtIDR(nett);
+  document.getElementById('nettPct').innerText=fmt(pct);
+  document.getElementById('nettUsd').innerText=fmt(nett/rate);
+}
+async function load(){
+ document.getElementById('invDate').innerText=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).replaceAll('/','-');
+ const parts = activePNR.split('-'); document.getElementById('custRef').innerText = parts.length>1 ? parts[parts.length-1] : activePNR;
+ const collections=["marketing","master","bookings"];
+ for(let colName of collections){ try{ const snap=await getDocs(collection(db,colName)); snap.forEach(s=>{ const d=s.data(); const g=getGuestId(d); if(!g || (g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g))) return;
+  if(d.hotelMargin) hotelMarginPct=parseFloat(d.hotelMargin)||hotelMarginPct; if(d.tourMargin) tourMarginPct=parseFloat(d.tourMargin)||tourMarginPct; if(d.profitMargin){ hotelMarginPct=parseFloat(d.profitMargin)||hotelMarginPct; tourMarginPct=parseFloat(d.profitMargin)||tourMarginPct; }
+  const rMaster = getRateFromDoc(d);
+  if(rMaster>0){ document.getElementById('rateIn').value = rMaster; }
+  totalPax=parseInt(parseNum(d.totalPax||d.pax||2))||2;
+  document.getElementById('totalPaxShow').innerText=totalPax;
+  document.getElementById('cName').innerText=String(d.guestName||d.clientName||d.bookingName||'').toUpperCase();
+  document.getElementById('agency').innerText=String(d.agent||d.agency||'').toUpperCase();
+  document.getElementById('natShow').innerText=String(d.nationality||d.nation||d.country||'').toUpperCase();
+  document.getElementById('tcShow').innerText=String(d.tc||d.TC||d.pic||d.tourLeader||'').toUpperCase();
+  if(d.custReference||d.custRef||d.pic||d.reference) document.getElementById('custRef').innerText=String(d.custReference||d.custRef||d.pic||d.reference).toUpperCase();
+  const pkt = d.packet||d.packetName||d.package||d.packageName||d.tourName||d.program||d.itinerary||'';
+  if(pkt) document.getElementById('packetShow').innerText=String(pkt).toUpperCase();
+ }); }catch(e){} }
+ const snapH = await getDocs(collection(db,"hotel_transactions"));
+ snapH.forEach(s=>{ const d=s.data(); const g=getGuestId(d)||''; if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return; cacheHotels.push(d); });
+ const cols=["transp","transport","transport_transactions","tour_transactions","tours","meals","guide","guideFee","guide_fee"];
+ for(let colName of cols){ try{ const snap=await getDocs(collection(db,colName)); let found=0; snap.forEach(s=>{ const d=s.data(); const g=getGuestId(d)||''; let match=g && (g===activePNR||g.includes(activePNR)||activePNR.includes(g)); if(!match) return; const dateVal=getField(d,['date','tour'])||getField(d,['date'])||''; const nameServ=getField(d,['name','service'])||getField(d,['name','meal'])||getField(d,['name','guide'])||getField(d,['name','tour'])||''; const nameTrans=getField(d,['name','transport'])||''; const price=parseNum(getField(d,['price','tour'])||getField(d,['price'])||0); const margin=parseNum(getField(d,['margin'])||0); const totalSales=parseNum(getField(d,['total','sales'])||0); const nettSales=parseNum(getField(d,['nett','sales'])||0); const pax=parseInt(parseNum(getField(d,['pax'])||2))||2; if(totalSales===0 && nettSales===0 && price===750000) return; let serviceName=String(nameServ||'').toUpperCase().trim()||String(nameTrans||'').toUpperCase().trim()||'SERVICE'; const nettPerPax=price>0?price:(nettSales>0?nettSales/pax:0); if(nettPerPax===0 && serviceName==='SERVICE') return; cacheIte.push({date:dateVal,pax:pax,service:serviceName,nett:nettPerPax,marginPct:margin||tourMarginPct,source:colName}); found++; }); if(found>0) break; }catch(e){} }
+ try{ const snapOpt=await getDocs(collection(db,"optional")); snapOpt.forEach(s=>{ const d=s.data(); const g=String(d.GuestID||'').toUpperCase().trim(); if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return; if(!d.NameOfTour) return; const pax=parseInt(parseNum(d.TPax||2))||2; cacheIte.push({date:d.Date||'',pax:pax,service:String(d.NameOfTour||'').toUpperCase(),nett:parseNum(d.NetPrice||0),marginPct:parseNum(d.Margin||10),source:'OPTIONAL'}); }); }catch(e){}
+ try{ const snapOth=await getDocs(collection(db,"others")); snapOth.forEach(s=>{ const d=s.data(); const g=String(d.GuestID||d.guestId||'').toUpperCase().trim(); if(g!==activePNR && !g.includes(activePNR) && !activePNR.includes(g)) return; const nm=d.NameOfService||d.NameOfTour||''; if(!nm) return; const pax=(parseInt(parseNum(d.Adult||0))||0)+(parseInt(parseNum(d.Child||0))||0)||parseInt(parseNum(d.Pax||2))||2; cacheIte.push({date:d.Date||'',pax:pax,service:String(nm).toUpperCase(),nett:parseNum(d.Price||0),marginPct:parseNum(d.Margin||10),source:'OTHERS'}); }); }catch(e){}
+ const seenH = new Set();
+ cacheHotels = cacheHotels.filter(h=>{ const key = `${formatDateFromAny(h.checkIn)}|${formatDateFromAny(h.checkOut)}|${String(h.hotelName||'').toUpperCase()}|${String(h.roomType||'').toUpperCase()}|${h.troom||1}`; if(seenH.has(key)) return false; seenH.add(key); return true; });
+ const seenI = new Set();
+ cacheIte = cacheIte.filter(r=>{ const key = `${formatDateFromAny(r.date)}|${String(r.service||'').toUpperCase()}|${r.nett}|${r.pax}|${r.source}`; if(seenI.has(key)) return false; seenI.add(key); return true; });
+ render();
+}
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DONATION COST - INPUT DI ATAS - PT SMAILING TOUR DMC</title>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0; user-select:none}
+.top-title{background:linear-gradient(180deg, #e0eeff, #c0d8ff); border-bottom:2px solid #5a7fb5; padding:6px 10px; font-weight:700; font-size:13px; color:#0a1931; display:flex; justify-content:space-between}
+.form-top{background:#e8e8f0; padding:10px 12px; border-bottom:2px solid #999}
+.form-row{display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap}
+.form-left{flex:1; min-width:320px}
+.form-right{flex:1; min-width:420px; display:flex; gap:10px}
+.row{display:flex; align-items:center; margin-bottom:6px; gap:4px}
+.row label{font-size:11px; font-weight:700; width:125px; flex:none; text-align:right; margin-right:6px}
+.row input,.row textarea,.row select{font-size:11px; padding:3px 6px; border:1px solid #666; background:white}
+.row input{height:22px}
+.row input:disabled,.row textarea:disabled,.row select:disabled{background:#e5e5e5; color:#555; cursor:not-allowed}
+.row input.don-code{width:130px; font-weight:bold}
+.row input.kab{width:150px}
+.row input.object{width:240px; font-weight:bold}
+.row textarea.remarks{width:280px; height:78px; resize:none}
+.donation-box{border:1px solid #666; background:#f5f5ff; padding:8px; border-radius:2px; flex:1}
+.donation-title{font-size:11px; font-weight:900; background:#e0e0e0; padding:2px 10px; border:1px solid #999; display:inline-block; margin-bottom:6px}
+.don-row{display:flex; align-items:center; gap:6px; margin-bottom:5px}
+.don-row label{font-size:11px; width:80px; text-align:right}
+.don-row input{width:80px; height:22px; text-align:right; border:1px solid #666; background:#e0f0ff; font-weight:bold}
+.don-row input:disabled{background:#e5e5e5}
+.searchable-wrap{position:relative; display:flex; align-items:center}
+.searchable-wrap input{width:150px}
+.searchable-list{position:absolute; top:23px; left:0; width:200px; background:white; border:1px solid #666; max-height:140px; overflow-y:auto; z-index:100; display:none; box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.searchable-list.active{display:block}
+.searchable-list div{padding:4px 6px; font-size:11px; cursor:pointer; border-bottom:1px solid #eee}
+.searchable-list div:hover{background:#b3d9ff}
+.btn-plus,.btn-minus{width:22px; height:22px; font-weight:900; font-size:12px; border:1px solid #555; cursor:pointer; border-radius:2px; line-height:1}
+.btn-plus{background:linear-gradient(180deg, #a8e6a8, #5fbf5f)}
+.btn-minus{background:linear-gradient(180deg, #ffb8b8, #ff6a6a)}
+.btn-plus:disabled,.btn-minus:disabled{opacity:0.4}
+.toolbar-top{display:flex; gap:4px; align-items:center; margin-top:10px; margin-left:131px; flex-wrap:wrap}
+.toolbar-top button{padding:4px 0; width:58px; font-size:11px; font-weight:700; border:1px solid #777; cursor:pointer; border-radius:2px; background:linear-gradient(180deg, #fff, #d0d0d0)}
+.toolbar-top button.add{background:#a8e6a8; border:2px solid #2e8b57}
+.toolbar-top button.save:disabled{opacity:0.5}
+.toolbar-top button.edit{background:#e8e8e8}
+.toolbar-top button.delete{background:#e8e8e8}
+.toolbar-top button.cancel{background:#fff7a8}
+.toolbar-top button.print{background:#a8e6a8}
+.toolbar-top button.exit{background:#b8b8ff}
+.toolbar-top button.update-mode{background:linear-gradient(180deg, #fff7cc, #ff9900)!important}
+.search-bar{background:#d0e0ff; padding:5px 10px; display:flex; gap:12px; align-items:center; border-bottom:1px solid #888; font-size:11px; font-weight:700}
+.search-bar input{height:22px; padding:3px 8px; border:1px solid #666; font-size:11px; width:160px; background:white}
+.table-wrap{background:white; overflow:auto; height:calc(100vh - 240px); border-top:2px solid #00cc99}
+table{width:100%; border-collapse:collapse; font-size:11px}
+th{background:#e8e8e8; border:1px solid #8a4a4a; padding:4px 4px; font-size:10px; position:sticky; top:0; text-align:center; white-space:nowrap; font-weight:700}
+td{border:1px solid #8a4a4a; padding:3px 5px; white-space:nowrap; cursor:pointer; background:#e8fffe}
+tr:nth-child(even) td{background:#d0f0ef}
+tr.selected td{background:#00ff7f!important; font-weight:700}
+tr:hover td{background:#b3ffda!important}
+td.remarks-col{max-width:320px; white-space:normal; word-break:break-word}
+</style>
+</head>
+<body>
+<div class="top-title"><span>DONATION - PT SMAILING TOUR DMC - INPUT DI ATAS - INBOUND DB: inbound2026-12ffe</span><span id="clock">00:00:00</span><span id="fbStatus" style="font-size:11px; color:green; font-weight:bold">● Firebase: inbound2026-12ffe</span></div>
+
+<div class="form-top">
+<div class="form-row">
+<div class="form-left">
+<div class="row"><label>Donation Code :</label><input id="donCode" class="don-code" disabled></div>
+<div class="row">
+<label>Area (Kabupaten) :</label>
+<div class="searchable-wrap">
+<input id="kabupaten" class="kab" disabled placeholder="KETIK TABANAN..." autocomplete="off" oninput="filterKab()" onfocus="showKab()">
+<div class="searchable-list" id="list-kab"></div>
+</div>
+<button class="btn-plus" id="btnAddKab" onclick="addKab()" disabled>+</button>
+<button class="btn-minus" id="btnDelKab" onclick="delKab()" disabled>-</button>
+</div>
+<div class="row">
+<label>Name Of Object :</label>
+<div class="searchable-wrap">
+<input id="nameObject" class="object" disabled placeholder="JATI LUWIH, TANAH LOT..." autocomplete="off" oninput="filterObject()" onfocus="showObject()">
+<div class="searchable-list" id="list-object"></div>
+</div>
+<button class="btn-plus" id="btnAddObj" onclick="addObject()" disabled>+</button>
+<button class="btn-minus" id="btnDelObj" onclick="delObject()" disabled>-</button>
+</div>
+
+<div class="toolbar-top">
+<button id="btnAdd" class="add" onclick="doAdd()">Add</button>
+<button id="btnSave" class="save" onclick="doSave()" disabled>Save</button>
+<button id="btnEdit" class="edit" onclick="doEdit()">Edit</button>
+<button id="btnDelete" class="delete" onclick="doDelete()">Delete</button>
+<button id="btnCancel" class="cancel" onclick="doCancel()">Cancel</button>
+<button class="print" onclick="doPrint()">Print</button>
+<button class="exit" onclick="location.href='index.html'">Exit</button>
+</div>
+
+</div>
+
+<div class="form-right">
+<div class="donation-box">
+<div class="donation-title">Donation :</div>
+<div style="display:flex; gap:12px">
+<div>
+<div class="don-row"><label>WNA Adult :</label><input id="wnaAdult" type="text" disabled></div>
+<div class="don-row"><label>WNA Child :</label><input id="wnaChild" type="text" disabled></div>
+<div class="don-row"><label>COA :</label><input id="coa" type="text" disabled style="background:white; text-align:left; width:100px"></div>
+</div>
+<div>
+<div class="don-row"><label>WNI Adults :</label><input id="wniAdult" type="text" disabled></div>
+<div class="don-row"><label>WNI Child :</label><input id="wniChild" type="text" disabled></div>
+</div>
+<div style="flex:1; margin-left:8px">
+<div class="row" style="align-items:flex-start"><label style="width:55px">Remarks :</label><textarea id="remarks" class="remarks" disabled></textarea></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="search-bar">
+<span>🔍 Filter:</span>
+<span>Kabupaten:</span><input id="searchKab" placeholder="TABANAN..." oninput="applyFilter()">
+<span>Object:</span><input id="searchObject" placeholder="JATI LUWIH..." oninput="applyFilter()" style="width:180px">
+<span>Remarks:</span><input id="searchRemarks" placeholder="GUIDE DILARANG..." oninput="applyFilter()" style="width:180px">
+<button onclick="clearFilter()" style="padding:2px 8px; font-size:10px; border:1px solid #666; cursor:pointer">Clear</button>
+<span style="margin-left:auto; font-size:10px; font-weight:400" id="filterInfo">Menampilkan semua</span>
+</div>
+
+<div class="table-wrap">
+<table id="donationTable">
+<thead>
+<tr>
+<th>Don. Code</th><th>Kabupaten</th><th>Object</th><th>WNA Adl</th><th>WNA Chd</th><th>WNI Adl</th><th>WNI Chd</th><th>REMARKS</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0",
+  measurementId: "G-Q61303QL6F"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "donation");
+const colKab = collection(db, "donation_kabupaten_options");
+const colObj = collection(db, "donation_object_options");
+let donations = [];
+let filtered = [];
+let kabOptions = ["TABANAN","BADUNG","GIANYAR","BANGLI","KLUNGKUNG","KARANGASEM","BULELENG","JEMBRANA","DENPASAR","UBUD"];
+let objectOptions = ["JATI LUWIH","TANAH LOT","BEDUGUL TOUR","MONKEY FOREST UBUD","KINTAMANI TOUR","TIRTA EMPUL","TAMAN AYUN","BATUAN TEMPLE","KECHAK DANCE","BARONG DANCE"];
+let selectedIndex = -1;
+let selectedFirebaseId = null;
+function setFormEnabled(enabled){
+  ['donCode','kabupaten','nameObject','wnaAdult','wnaChild','wniAdult','wniChild','coa','remarks'].forEach(id=>{ document.getElementById(id).disabled=!enabled; });
+  ['btnAddKab','btnDelKab','btnAddObj','btnDelObj'].forEach(id=>{ document.getElementById(id).disabled=!enabled; });
+  document.getElementById('btnSave').disabled=!enabled;
+  document.getElementById('btnCancel').disabled=!enabled;
+}
+function formatRupiah(num){
+  if(num===null||num===undefined||num==='') return '0.00';
+  const n=parseFloat(String(num).replace(/,/g,''))||0;
+  return n.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function buildList(type, filterText){
+  const map={'kab':kabOptions,'object':objectOptions};
+  let opts=map[type]||[];
+  if(filterText){
+    const f=filterText.toUpperCase();
+    opts=opts.filter(o=> o.includes(f));
+  }
+  const idMap={'kab':'list-kab','object':'list-object'};
+  const listDiv=document.getElementById(idMap[type]);
+  listDiv.innerHTML='';
+  opts.slice(0,40).forEach(opt=>{
+    const div=document.createElement('div');
+    div.textContent=opt;
+    div.onclick=()=>{
+      const inputId=type==='kab'?'kabupaten':'nameObject';
+      document.getElementById(inputId).value=opt;
+      listDiv.classList.remove('active');
+    };
+    listDiv.appendChild(div);
+  });
+  if(opts.length>0) listDiv.classList.add('active');
+  else listDiv.classList.remove('active');
+}
+window.filterKab=()=>{ buildList('kab', document.getElementById('kabupaten').value); };
+window.showKab=()=>{ buildList('kab',''); };
+window.filterObject=()=>{ buildList('object', document.getElementById('nameObject').value); };
+window.showObject=()=>{ buildList('object',''); };
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.searchable-wrap')){
+    document.querySelectorAll('.searchable-list').forEach(l=> l.classList.remove('active'));
+  }
+});
+window.addKab=async()=>{
+  const v=prompt('Tambah Kabupaten baru:');
+  if(!v) return;
+  const up=v.trim().toUpperCase();
+  if(!up) return;
+  if(kabOptions.includes(up)){ document.getElementById('kabupaten').value=up; return; }
+  kabOptions.push(up); kabOptions.sort();
+  document.getElementById('kabupaten').value=up;
+  try{ await setDoc(doc(db,"donation_kabupaten_options", up), {name:up, createdAt:new Date()}); }catch(e){}
+};
+window.delKab=async()=>{
+  const val=document.getElementById('kabupaten').value; if(!val) return;
+  if(!confirm(`Hapus Kabupaten "${val}"?`)) return;
+  kabOptions=kabOptions.filter(v=>v!==val);
+  document.getElementById('kabupaten').value=kabOptions[0]||'';
+  try{ await deleteDoc(doc(db,"donation_kabupaten_options", val)); }catch(e){}
+};
+window.addObject=async()=>{
+  const v=prompt('Tambah Object baru:');
+  if(!v) return;
+  const up=v.trim().toUpperCase();
+  if(!up) return;
+  if(objectOptions.includes(up)){ document.getElementById('nameObject').value=up; return; }
+  objectOptions.push(up); objectOptions.sort();
+  document.getElementById('nameObject').value=up;
+  try{ await setDoc(doc(db,"donation_object_options", up), {name:up, createdAt:new Date()}); }catch(e){}
+};
+window.delObject=async()=>{
+  const val=document.getElementById('nameObject').value; if(!val) return;
+  if(!confirm(`Hapus Object "${val}"?`)) return;
+  objectOptions=objectOptions.filter(v=>v!==val);
+  document.getElementById('nameObject').value=objectOptions[0]||'';
+  try{ await deleteDoc(doc(db,"donation_object_options", val)); }catch(e){}
+};
+window.applyFilter=()=>{
+  const k=document.getElementById('searchKab').value.toUpperCase();
+  const o=document.getElementById('searchObject').value.toUpperCase();
+  const r=document.getElementById('searchRemarks').value.toUpperCase();
+  filtered=donations.filter(d=>{
+    const mk=!k||d.kabupaten.includes(k);
+    const mo=!o||d.object.includes(o);
+    const mr=!r||(d.remarks||'').toUpperCase().includes(r);
+    return mk&&mo&&mr;
+  });
+  document.getElementById('filterInfo').innerText=`Menampilkan ${filtered.length} dari ${donations.length}`;
+  render();
+};
+window.clearFilter=()=>{
+  document.getElementById('searchKab').value='';
+  document.getElementById('searchObject').value='';
+  document.getElementById('searchRemarks').value='';
+  filtered=donations;
+  render();
+};
+function render(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  const list = filtered.length>0 || document.getElementById('searchKab').value || document.getElementById('searchObject').value? filtered : donations;
+  list.forEach((d)=>{
+    const originalIdx=donations.findIndex(x=> x.firebaseId===d.firebaseId);
+    const tr=document.createElement('tr');
+    tr.dataset.index=originalIdx;
+    tr.className = originalIdx===selectedIndex? 'selected' : '';
+    tr.innerHTML=`<td>${d.donCode}</td><td>${d.kabupaten}</td><td>${d.object}</td><td style="text-align:right; background:#e0ffe0">${formatRupiah(d.wnaAdult)}</td><td style="text-align:right; background:#e0ffe0">${formatRupiah(d.wnaChild)}</td><td style="text-align:right; background:#e0ffe0">${formatRupiah(d.wniAdult)}</td><td style="text-align:right; background:#e0ffe0">${formatRupiah(d.wniChild)}</td><td class="remarks-col">${d.remarks||''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById('tbody').addEventListener('click',(e)=>{
+  const tr=e.target.closest('tr');
+  if(!tr||tr.dataset.index===undefined) return;
+  const idx=parseInt(tr.dataset.index);
+  if(isNaN(idx)||idx>=donations.length) return;
+  selectedIndex=idx;
+  const s=donations[idx];
+  selectedFirebaseId=s.firebaseId;
+  if(s.kabupaten &&!kabOptions.includes(s.kabupaten)){ kabOptions.push(s.kabupaten); kabOptions.sort(); }
+  if(s.object &&!objectOptions.includes(s.object)){ objectOptions.push(s.object); objectOptions.sort(); }
+  document.getElementById('donCode').value=s.donCode;
+  document.getElementById('kabupaten').value=s.kabupaten;
+  document.getElementById('nameObject').value=s.object;
+  document.getElementById('wnaAdult').value=formatRupiah(s.wnaAdult);
+  document.getElementById('wnaChild').value=formatRupiah(s.wnaChild);
+  document.getElementById('wniAdult').value=formatRupiah(s.wniAdult);
+  document.getElementById('wniChild').value=formatRupiah(s.wniChild);
+  document.getElementById('coa').value=s.coa||'';
+  document.getElementById('remarks').value=s.remarks||'';
+  setFormEnabled(false);
+  const b=document.getElementById('btnAdd'); b.innerText='Update'; b.classList.add('update-mode');
+  render();
+});
+window.doAdd=()=>{
+  const b=document.getElementById('btnAdd');
+  if(b.innerText==='Update'){ doSave(); return; }
+  selectedIndex=-1; selectedFirebaseId=null;
+  const next=donations.length+1;
+  document.getElementById('donCode').value='DON-'+String(next).padStart(3,'0');
+  ['kabupaten','nameObject','wnaAdult','wnaChild','wniAdult','wniChild','coa','remarks'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('wnaAdult').value='0.00'; document.getElementById('wnaChild').value='0.00';
+  document.getElementById('wniAdult').value='0.00'; document.getElementById('wniChild').value='0.00';
+  document.getElementById('kabupaten').value=kabOptions[0]||'TABANAN';
+  setFormEnabled(true);
+};
+window.doEdit=()=>{
+  if(selectedIndex===-1 &&!document.getElementById('donCode').value){ alert('Klik data di tabel bawah dulu beb!'); return; }
+  setFormEnabled(true);
+};
+window.doSave=async()=>{
+  const donCode=document.getElementById('donCode').value.trim();
+  if(!donCode){ alert('Donation Code kosong beb!'); return; }
+  const kabupaten=document.getElementById('kabupaten').value.trim();
+  if(!kabupaten){ alert('Kabupaten wajib isi beb!'); return; }
+  const payload={
+    donCode: donCode.toUpperCase(),
+    kabupaten: kabupaten.toUpperCase(),
+    object: document.getElementById('nameObject').value.toUpperCase(),
+    wnaAdult: document.getElementById('wnaAdult').value.replace(/,/g,''),
+    wnaChild: document.getElementById('wnaChild').value.replace(/,/g,''),
+    wniAdult: document.getElementById('wniAdult').value.replace(/,/g,''),
+    wniChild: document.getElementById('wniChild').value.replace(/,/g,''),
+    coa: document.getElementById('coa').value,
+    remarks: document.getElementById('remarks').value,
+    updatedAt: new Date()
+  };
+  try{
+    if(selectedFirebaseId){
+      await updateDoc(doc(db,"donation",selectedFirebaseId), payload);
+    }else{
+      payload.createdAt=new Date();
+      await addDoc(colRef, payload);
+    }
+    setFormEnabled(false);
+    document.getElementById('btnAdd').innerText='Add'; document.getElementById('btnAdd').classList.remove('update-mode');
+  }catch(e){ alert('Error: '+e.message); }
+};
+window.doDelete=async()=>{
+  if(selectedIndex===-1 ||!selectedFirebaseId){ alert('Klik data di tabel bawah dulu beb!'); return; }
+  if(confirm('Hapus '+document.getElementById('donCode').value+'?')){
+    await deleteDoc(doc(db,"donation",selectedFirebaseId));
+    doCancel();
+  }
+};
+window.doCancel=()=>{
+  selectedIndex=-1; selectedFirebaseId=null;
+  ['donCode','kabupaten','nameObject','wnaAdult','wniAdult','wnaChild','wniChild','coa','remarks'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('btnAdd').innerText='Add'; document.getElementById('btnAdd').classList.remove('update-mode');
+  setFormEnabled(false); render();
+};
+window.doPrint=()=>{ window.print(); };
+setInterval(()=>{ document.getElementById('clock').innerText=new Date().toTimeString().split(' ')[0]; },1000);
+onSnapshot(colKab, snap=>{
+  if(snap.size>0){
+    const arr=[]; snap.forEach(d=> arr.push(d.data().name));
+    if(arr.length>0) kabOptions=arr.sort();
+  }
+});
+onSnapshot(colObj, snap=>{
+  if(snap.size>0){
+    const arr=[]; snap.forEach(d=> arr.push(d.data().name));
+    if(arr.length>0) objectOptions=arr.sort();
+  }
+});
+onSnapshot(colRef, snap=>{
+  const oldCode=selectedIndex>=0? donations[selectedIndex]?.donCode : null;
+  donations=[];
+  snap.forEach(d=>{
+    const data=d.data();
+    donations.push({
+      firebaseId:d.id,
+      donCode:data.donCode||'',
+      kabupaten:data.kabupaten||'',
+      object:data.object||'',
+      wnaAdult:data.wnaAdult||'0',
+      wnaChild:data.wnaChild||'0',
+      wniAdult:data.wniAdult||'0',
+      wniChild:data.wniChild||'0',
+      coa:data.coa||'',
+      remarks:data.remarks||''
+    });
+  });
+  donations.sort((a,b)=> a.donCode.localeCompare(b.donCode));
+  filtered=donations;
+  if(donations.length===0){
+    donations=[
+      {firebaseId:null, donCode:"DON-001", kabupaten:"TABANAN", object:"JATI LUWIH", wnaAdult:"75000", wnaChild:"2500", wniAdult:"10000", wniChild:"5000", coa:"", remarks:"GUIDE DILARANG MEMBAWA MINUMAN DARI LUAR"},
+      {firebaseId:null, donCode:"DON-002", kabupaten:"TABANAN", object:"TANAH LOT", wnaAdult:"50000", wnaChild:"25000", wniAdult:"100000", wniChild:"50000", coa:"", remarks:""},
+      {firebaseId:null, donCode:"DON-003", kabupaten:"TABANAN", object:"BEDUGUL TOUR", wnaAdult:"50000", wnaChild:"25000", wniAdult:"100000", wniChild:"50000", coa:"", remarks:"Sekilas Tentang Monkey Forest Ubud"}
+    ];
+    filtered=donations;
+  }
+  if(oldCode){
+    const idx=donations.findIndex(c=>c.donCode===oldCode);
+    if(idx>=0) selectedIndex=idx;
+  }
+  render();
+  document.getElementById('fbStatus').innerText=`● Firebase: ${donations.length} data`;
+});
+setFormEnabled(false);
+</script>
+</body>
+</html>
