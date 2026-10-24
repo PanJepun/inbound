@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIGRASI HOTELS.CSV VFP KE FIREBASE - FINAL</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0}
+.header{background:#2e8b57; color:white; padding:10px 14px; font-weight:900; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px}
+.container{max-width:1150px; margin:10px auto; background:white; border:2px solid #2e8b57; padding:12px; border-radius:6px}
+.step{border:1.5px solid #999; padding:10px; margin-bottom:10px; border-radius:4px; background:#f9fff9}
+.step h3{margin:0 0 6px; background:#e0ffe0; padding:5px 8px; border:1px solid #2e8b57; font-size:13px}
+code{background:#fff0b3; padding:2px 4px; font-weight:700; font-size:11px}
+input[type=file]{border:2px solid #2e8b57; padding:8px; background:#e0ffe0; width:100%; margin:6px 0; cursor:pointer}
+button{padding:6px 12px; font-size:11px; font-weight:900; border:1px solid #555; border-radius:4px; cursor:pointer; margin:2px}
+button.go{background:linear-gradient(180deg,#a8e6a8,#2e8b57); color:white; padding:10px 22px; font-size:13px; border:2px solid #000}
+button.del{background:#ffb8b8}
+table{width:100%; border-collapse:collapse; font-size:11px}
+th{background:#2e8b57; color:white; border:1px solid #000; padding:4px 6px; position:sticky; top:0}
+td{border:1px solid #999; padding:3px 6px; white-space:nowrap}
+.preview{max-height:350px; overflow:auto; border:2px solid #2e8b57; margin-top:8px}
+.log{background:#000; color:#0f0; font-family:Consolas, monospace; font-size:11px; padding:8px; height:200px; overflow:auto; white-space:pre-wrap; margin-top:8px}
+.progress{height:22px; background:#e0e0e0; border:1px solid #999; border-radius:10px; overflow:hidden; margin:8px 0}
+.bar{height:100%; background:linear-gradient(90deg,#2e8b57,#00ff7f); width:0%; color:white; font-weight:900; text-align:center; line-height:22px; font-size:11px; transition:width 0.3s}
+</style>
+</head>
+<body>
+<div class="header"><span>🚀 HOTELS.CSV → FIREBASE MIGRATOR - inbound2026-12ffe</span><span id="fbStat">● Connecting...</span></div>
+<div class="container">
+<div class="step">
+<h3>STEP 1: File HOTELS.CSV kamu (dari VFP)</h3>
+<p>File kamu: <code>HOTELS.CSV</code> hasil export VFP: <code>USE hotels.dbf</code> → <code>COPY TO hotels.csv TYPE CSV</code></p>
+<input type="file" id="fileInput" accept=".csv,.txt,.xlsx,.xls">
+</div>
+<div class="step">
+<h3>STEP 2: Preview Data HOTELS.CSV</h3>
+<div id="info" style="font-size:11px; font-weight:700; background:#ffff99; padding:5px; border:1px solid #999; display:none"></div>
+<div class="preview" id="preview"><table id="tbl"><thead id="th"></thead><tbody id="tb"><tr><td style="padding:20px; text-align:center; color:#999">Upload HOTELS.CSV dulu beb!</td></tr></tbody></table></div>
+<div id="count" style="font-size:11px; font-weight:700; margin-top:6px">0 baris</div>
+</div>
+<div class="step">
+<h3>STEP 3: JSON Output (Format Firebase)</h3>
+<textarea id="jsonOut" style="width:100%; height:200px; border:2px solid #2e8b57; font-family:Consolas, monospace; font-size:10px; padding:6px" placeholder="JSON akan muncul di sini..."></textarea>
+<div style="margin-top:6px; display:flex; gap:6px">
+<button onclick="copyJSON()">Copy JSON</button>
+<button onclick="downloadJSON()">Download hotels.json</button>
+</div>
+</div>
+<div class="step">
+<h3>STEP 4: Migrasi ke Firebase collection `hotel`</h3>
+<div style="display:grid; grid-template-columns: 160px 200px; gap:6px; font-size:11px; margin:6px 0">
+<label>Market default:</label><input id="defMarket" value="ALL MARKET">
+<label>City default:</label><input id="defCity" value="BALI">
+<label>Valid From:</label><input id="defFrom" type="date" value="2023-04-01">
+<label>Valid To:</label><input id="defTo" type="date" value="2024-03-31">
+<label>Skip price 0?</label><select id="skipZero"><option value="no">Tidak - migrasi semua</option><option value="yes">Ya - skip harga 0</option></select>
+</div>
+<button class="go" id="btnGo" onclick="migrate()" disabled>🚀 MIGRASI HOTELS.CSV KE FIREBASE SEKARANG</button>
+<button class="del" onclick="deleteAll()">⚠️ HAPUS SEMUA HOTEL DI FIREBASE</button>
+<div class="progress"><div class="bar" id="bar">0%</div></div>
+<div class="log" id="log">Log:\n- Upload HOTELS.CSV dulu beb...\n</div>
+<div id="result" style="display:none; background:#d0ffd0; border:2px solid #2e8b57; padding:10px; font-weight:700; margin-top:8px"></div>
+</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, doc, writeBatch, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "hotel");
+let mapped = [];
+function log(msg){ const el=document.getElementById('log'); el.textContent+=msg+"\n"; el.scrollTop=el.scrollHeight; }
+document.getElementById('fbStat').innerText='● Firebase: inbound2026-12ffe OK';
+function normalizeDate(s){ if(!s) return ''; s=String(s).trim(); let m=s.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/); if(m){ return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; } m=s.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/); if(m){ return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`; } return s; }
+function toNum(v){ if(v==null||v=='') return '0'; let s=String(v).replace(/[^0-9.\-]/g,''); let n=parseFloat(s); return isNaN(n)?'0':String(n); }
+function showPreview(headers, rows){
+  const th=document.getElementById('th'); const tb=document.getElementById('tb');
+  th.innerHTML='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>'; tb.innerHTML='';
+  rows.slice(0,100).forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=r.map(c=>`<td>${String(c).substring(0,80)}</td>`).join(''); tb.appendChild(tr); });
+  document.getElementById('count').innerText=`${rows.length} baris | ${headers.length} kolom`;
+  document.getElementById('info').style.display='block';
+  document.getElementById('info').innerText=`✅ ${rows.length} data - Kolom: ${headers.join(', ').substring(0,200)}`;
+  document.getElementById('btnGo').disabled=false;
+  const lower=headers.map(h=> String(h).toLowerCase().trim());
+  const findIdx=(arr)=>{ for(let k of arr){ let i=lower.findIndex(h=> h.includes(k)); if(i>=0) return i; } return -1; };
+  const idxCode=findIdx(['kodehtl','code','kdhotel','codeofhotel']); const idxArea=findIdx(['areahtl','areahotel','area']); const idxNama=findIdx(['namahtl','namahotel','hotelname','name','hotel_name']); const idxTipe=findIdx(['tiperoom','typeroom','type','tipe']); const idxHarga=findIdx(['hrgroom','roomrate','price','harga','rate','hrg']); const idxXbed=findIdx(['xbed','extrabed']); const idxCat=findIdx(['kategori','category','cat']); const idxAbf=findIdx(['abf']); const idxHb=findIdx(['hb']); const idxFb=findIdx(['fb']); const idxPer1=findIdx(['periode1','valid1','validfrom','tgl1','fromdate']); const idxPer2=findIdx(['periode2','valid2','validto','tgl2','todate']); const idxMarket=findIdx(['pasaran','market']); const idxCity=findIdx(['kota','city']); const idxHss1=findIdx(['tglhss1','hssfrom','hss1']); const idxHss2=findIdx(['tglhss2','hssto','hss2']); const idxHssRate=findIdx(['hssrate','ratehss']); const idxCoa=findIdx(['coa','account']);
+  mapped=rows.map((r,i)=>{ const get=(idx, def='')=> idx>=0? (r[idx]||def) : def; return { codeHotel: String(get(idxCode, `HTL-${String(i+1).padStart(4,'0')}`)).toUpperCase().trim() || `HTL-${String(i+1).padStart(4,'0')}`, areaHotel: String(get(idxArea,'')).toUpperCase().trim(), nameHotel: String(get(idxNama,'')).toUpperCase().trim(), typeRoom: String(get(idxTipe,'SINGLE')).toUpperCase().trim() || 'SINGLE', category: String(get(idxCat,'')).toUpperCase().trim(), roomRate: toNum(get(idxHarga,'0')), xBedRate: toNum(get(idxXbed,'0')), singleSup: '0', abf: toNum(get(idxAbf,'0')), hb: toNum(get(idxHb,'0')), fb: toNum(get(idxFb,'0')), validFrom: normalizeDate(get(idxPer1,'2023-04-01')), validTo: normalizeDate(get(idxPer2,'2024-03-31')), hsFrom: normalizeDate(get(idxHss1,'')), hsTo: normalizeDate(get(idxHss2,'')), rateHSS: toNum(get(idxHssRate,'0')), coa: String(get(idxCoa,'')).trim(), city: String(get(idxCity,'')).toUpperCase().trim(), market: String(get(idxMarket,'ALL MARKET')).toUpperCase().trim() || 'ALL MARKET', rawIndex: i }; }).filter(m=> m.nameHotel!=='');
+  const jsonStr=JSON.stringify(mapped.slice(0,20), null, 2); document.getElementById('jsonOut').value=jsonStr + `\n... dan ${mapped.length-20} data lagi...\nTotal ${mapped.length} hotel siap migrasi`;
+  log(`✅ Auto-map: Code=${idxCode}, Area=${idxArea}, Nama=${idxNama}, Harga=${idxHarga}, Market=${idxMarket} -> ${mapped.length} valid`);
+}
+document.getElementById('fileInput').addEventListener('change', async (e)=>{
+  const file=e.target.files[0]; if(!file) return; log(`📂 Baca file: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
+  try{ const buf=await file.arrayBuffer(); const wb=XLSX.read(buf, {type:'array'}); const sheetName=wb.SheetNames[0]; const sheet=wb.Sheets[sheetName]; const json=XLSX.utils.sheet_to_json(sheet, {header:1, defval:'', raw:false}); if(json.length<2){ log('❌ File kosong beb!'); return; } const headers=json[0].map(h=> String(h).trim()); const rows=json.slice(1).filter(r=> r.some(c=> String(c).trim()!=='')); showPreview(headers, rows); log(`✅ Berhasil baca ${rows.length} baris dari ${file.name} - Sheet: ${sheetName}`); }catch(err){ log(`❌ Error: ${err.message}`); }
+});
+window.copyJSON=()=>{ const txt=document.getElementById('jsonOut'); txt.select(); document.execCommand('copy'); log('📋 JSON copied!'); };
+window.downloadJSON=()=>{ const full=JSON.stringify(mapped, null, 2); const blob=new Blob([full], {type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='HOTELS.json'; a.click(); log('⬇️ Download HOTELS.json'); };
+window.migrate=async()=>{
+  if(mapped.length===0){ alert('Upload HOTELS.CSV dulu!'); return; }
+  const defMarket=document.getElementById('defMarket').value||'ALL MARKET'; const defCity=document.getElementById('defCity').value||'BALI'; const defFrom=document.getElementById('defFrom').value||'2023-04-01'; const defTo=document.getElementById('defTo').value||'2024-03-31'; const skipZero=document.getElementById('skipZero').value==='yes'; const btn=document.getElementById('btnGo'); btn.disabled=true; btn.innerText='⏳ MIGRASI...'; const bar=document.getElementById('bar'); let success=0, skipped=0; log(`🚀 Mulai migrasi ${mapped.length} hotel...`);
+  try{ const batchSize=400; for(let i=0;i<mapped.length;i+=batchSize){ const chunk=mapped.slice(i,i+batchSize); const batch=writeBatch(db); let cnt=0; for(const m of chunk){ const price=parseFloat(m.roomRate)||0; if(skipZero && price===0){ skipped++; continue; } const payload={ codeHotel: m.codeHotel, areaHotel: m.areaHotel || defCity.toUpperCase(), nameHotel: m.nameHotel, typeRoom: m.typeRoom || 'SINGLE', category: m.category, roomRate: m.roomRate, xBedRate: m.xBedRate, singleSup: m.singleSup, abf: m.abf, hb: m.hb, fb: m.fb, validFrom: m.validFrom || defFrom, validTo: m.validTo || defTo, hsFrom: m.hsFrom || defFrom, hsTo: m.hsTo || defTo, rateHSS: m.rateHSS, coa: m.coa, city: m.city || defCity.toUpperCase(), market: m.market || defMarket, remarks: '', createdAt: new Date(), updatedAt: new Date(), migratedFrom: 'HOTELS.CSV_VFP', migratedAt: new Date().toISOString() }; const ref=doc(colRef); batch.set(ref, payload); cnt++; } if(cnt>0){ await batch.commit(); success+=cnt; } const pct=Math.round(((i+chunk.length)/mapped.length)*100); bar.style.width=pct+'%'; bar.innerText=pct+'% - '+success+' hotel'; log(`✅ Batch ${Math.floor(i/batchSize)+1}: ${cnt} hotel - ${pct}%`); await new Promise(r=>setTimeout(r,150)); } log(`\n🎉 SELESAI! Berhasil: ${success}, Skip: ${skipped}`); document.getElementById('result').style.display='block'; document.getElementById('result').innerHTML=`✅ MIGRASI SELESAI BEB!<br>Berhasil migrasi <b>${success} hotel</b> dari HOTELS.CSV ke Firebase!<br>Skip (harga 0): ${skipped}<br><br>➡️ Sekarang buka <b>hotel.html</b> - semua data VFP kamu sudah ada di Firebase!`; btn.innerText='✅ SELESAI'; }catch(err){ log(`❌ Error: ${err.message}`); btn.disabled=false; btn.innerText='🚀 MIGRASI HOTELS.CSV KE FIREBASE SEKARANG'; }
+};
+window.deleteAll=async()=>{ if(!confirm('⚠️ HAPUS SEMUA HOTEL DI FIREBASE?')) return; const c=prompt('Ketik HAPUS:'); if(c!=='HAPUS') return; log('🗑️ Menghapus...'); try{ const snap=await getDocs(colRef); let n=0; for(const d of snap.docs){ await deleteDoc(doc(db,'hotel',d.id)); n++; if(n%50===0) log(`🗑️ ${n}/${snap.size} terhapus`); } log(`✅ Selesai hapus ${n} hotel`); }catch(e){ log(`❌ Error hapus: ${e.message}`); } };
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIGRASI SUPPLIER - VFP to FIREBASE</title>
+<style>
+*{font-family:Tahoma, Arial, sans-serif; box-sizing:border-box}
+body{margin:0; background:#dbe4f0; padding:12px}
+.header{background:#2e8b57; color:white; padding:10px; font-weight:900; text-align:center; border:2px solid #000}
+.box{background:white; border:2px solid #000; padding:12px; margin-top:10px}
+.box h3{margin:0 0 8px 0; font-size:12px; background:#e0e0e0; padding:4px 8px; border:1px solid #999}
+input[type=file]{border:2px solid #000; padding:6px; width:100%; background:#fff0b3}
+table{width:100%; border-collapse:collapse; font-size:11px; margin-top:10px}
+th{background:#f0f0f0; border:1px solid #999; padding:4px; font-size:10px; position:sticky; top:0}
+td{border:1px solid #999; padding:3px 5px; white-space:nowrap}
+tr.selected td{background:#00ff7f}
+.progress{background:#e0e0e0; border:1px solid #999; height:22px; margin:8px 0; position:relative}
+.progress-bar{background:linear-gradient(90deg,#2e8b57,#7CFF7C); height:100%; width:0%; transition:width 0.2s; text-align:center; font-size:11px; font-weight:900; line-height:22px}
+button{padding:6px 14px; font-size:11px; font-weight:900; border:2px solid #000; cursor:pointer; border-radius:3px; margin-right:6px}
+button.migrate{background:linear-gradient(180deg,#a8e6a8,#2e8b57); color:white}
+button.clear{background:#ffb8b8}
+button.preview{background:#a8cfff}
+.log{background:black; color:#00ff00; font-family:Consolas, monospace; font-size:10px; padding:8px; height:200px; overflow:auto; border:2px solid #000; margin-top:8px; white-space:pre-wrap}
+.info{background:#ffff99; border:2px solid #000; padding:6px; font-size:11px; font-weight:700; margin:6px 0}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+<div class="header">PT. SMAILING TOUR DMC - MIGRASI SUPPLIER VFP → FIREBASE - BLACK & WHITE READY</div>
+
+<div class="box">
+<h3>1. Pilih File SUPPLIER.CSV / SUPPLIER.TXT (Export dari VFP)</h3>
+<input type="file" id="fileInput" accept=".csv,.txt,.dbf">
+<div class="info">
+Format CSV harus ada kolom: Name of Supplier / NAMASUPP / NAMA_SUPPLIER, Address / ALAMAT, Rec Account / NOACC / RECACC<br>
+Contoh dari screenshot kamu: SWISS BELRESORT WATU JIMBARAN | Jalan Danau Tamblingan No.99... | (kosong) | A&T HOLIDAY | JL. PB SUDIRMAN PRAYA LOMBOK | 121093213<br>
+Support: koma, semicolon, tab. Auto-detect!
+</div>
+<div style="margin-top:6px">
+<button class="preview" onclick="previewFile()">👁️ Preview 20 Data</button>
+<button class="clear" onclick="clearPreview()">Clear</button>
+<span id="fileInfo" style="font-size:11px; font-weight:700; margin-left:10px"></span>
+</div>
+</div>
+
+<div class="box">
+<h3>2. Preview Data (20 baris pertama)</h3>
+<div style="max-height:260px; overflow:auto; border:1px solid #999">
+<table id="previewTable"><thead><tr><th>No</th><th>Name of Supplier</th><th>Address</th><th>No Account / Rec Account</th></tr></thead><tbody id="previewBody"></tbody></table>
+</div>
+<div id="totalInfo" style="font-size:11px; font-weight:900; margin-top:6px"></div>
+</div>
+
+<div class="box">
+<h3>3. Migrasi ke Firebase (Collection: supplier)</h3>
+<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+<button class="migrate" onclick="migrateToFirebase()">🚀 MIGRASI SEKARANG KE FIREBASE</button>
+<button onclick="checkExisting()">🔍 Cek Data Existing</button>
+<button onclick="deleteAll()" style="background:black; color:white">⚠️ HAPUS SEMUA SUPPLIER DI FIREBASE</button>
+</div>
+<div class="progress"><div class="progress-bar" id="progressBar">0%</div></div>
+<div id="statusText" style="font-size:11px; font-weight:700"></div>
+<div class="log" id="log">Log migrasi akan muncul di sini...
+Siap migrasi beb!
+</div>
+</div>
+
+<div class="box">
+<h3>4. Contoh Format CSV yang Benar</h3>
+<pre style="font-size:10px; background:#f0f0f0; padding:8px; border:1px solid #999; overflow:auto">
+Name of Supplier,Address,Rec Account
+"SWISS BELRESORT WATU JIMBARAN","Jalan Danau Tamblingan No.99, Sanur, Denpasar Se", ""
+"SWISS-BEL INN SEMINYAK BALI","Jl. Sunset Road No. 88S, Seminyak", ""
+"A&T HOLIDAY","JL. PB SUDIRMAN PRAYA LOMBOK","121093213"
+"THE 101 LEGIAN","jalan Raya Legian no 117A",""
+"THE LEGIAN SUNSET RESIDENCE","Jalan Shri Lakshmi #17, Legian",""
+</pre>
+Jika dari DBF, export dulu ke CSV dari VFP: COPY TO supplier.csv TYPE CSV
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, writeBatch, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg",
+  authDomain: "inbound2026-12ffe.firebaseapp.com",
+  projectId: "inbound2026-12ffe",
+  storageBucket: "inbound2026-12ffe.firebasestorage.app",
+  messagingSenderId: "368642042481",
+  appId: "1:368642042481:web:0da95081f2039b357089d0"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "supplier");
+
+let parsedData = [];
+let fileName = '';
+
+document.getElementById('fileInput').addEventListener('change', (e)=>{
+  const f=e.target.files[0];
+  if(!f) return;
+  fileName=f.name;
+  document.getElementById('fileInfo').innerText=`File: ${f.name} (${(f.size/1024).toFixed(1)} KB)`;
+  log(`File dipilih: ${f.name} - ${f.size} bytes`);
+  previewFile();
+});
+
+window.log=(msg)=>{
+  const l=document.getElementById('log');
+  l.textContent+=`\n[${new Date().toLocaleTimeString()}] ${msg}`;
+  l.scrollTop=l.scrollHeight;
+};
+
+window.previewFile=()=>{
+  const input=document.getElementById('fileInput');
+  if(!input.files[0]){ alert('Pilih file CSV dulu beb!'); return; }
+  Papa.parse(input.files[0], {
+    header:true,
+    skipEmptyLines:true,
+    encoding:"UTF-8",
+    complete: function(results){
+      const rows=results.data;
+      if(rows.length===0){ alert('CSV kosong atau header salah beb!'); return; }
+      // normalize header
+      const normalized = rows.map(r=>{
+        const obj={};
+        Object.keys(r).forEach(k=>{
+          const up=k.toUpperCase().trim();
+          const val=r[k];
+          if(['NAME OF SUPPLIER','NAMASUPP','NAMA_SUPPLIER','SUPPLIER','NAMA','NAME'].includes(up)) obj.nameSupplier=val;
+          else if(['ADDRESS','ALAMAT','ADDR','ALAMT'].includes(up)) obj.address=val;
+          else if(['NO ACCOUNT','NOACCOUNT','REC ACCOUNT','RECACCOUNT','ACCOUNT','NO ACC','NOACC','REK'].includes(up)) obj.recAccount=val;
+          else if(up.includes('SUPPLIER') && up.includes('NAME')) obj.nameSupplier=val;
+          else if(up.includes('ADDRESS') || up.includes('ALAMAT')) obj.address=val;
+          else if(up.includes('ACCOUNT') || up.includes('ACC')) obj.recAccount=val;
+        });
+        // fallback if header not matched, try by position
+        if(!obj.nameSupplier && Object.values(r)[0]) obj.nameSupplier=Object.values(r)[0];
+        if(!obj.address && Object.values(r)[1]) obj.address=Object.values(r)[1];
+        if(!obj.recAccount && Object.values(r)[2]) obj.recAccount=Object.values(r)[2];
+        return obj;
+      }).filter(x=> x.nameSupplier && String(x.nameSupplier).trim()!=='');
+
+      parsedData=normalized;
+      document.getElementById('totalInfo').innerText=`Total data terdeteksi: ${parsedData.length} supplier | Header asli: ${results.meta.fields.join(', ')}`;
+      renderPreview(parsedData.slice(0,20));
+      log(`Preview OK: ${parsedData.length} data, header: ${results.meta.fields.join(', ')}`);
+      if(parsedData.length>0) log(`Contoh: ${parsedData[0].nameSupplier} | ${parsedData[0].address} | ${parsedData[0].recAccount}`);
+    },
+    error: function(err){ alert('Error parse CSV: '+err.message); log('Error: '+err.message); }
+  });
+};
+
+function renderPreview(data){
+  const tbody=document.getElementById('previewBody');
+  tbody.innerHTML='';
+  data.forEach((d,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td style="font-weight:900">${d.nameSupplier}</td><td>${d.address||''}</td><td style="background:#fff0b3; font-weight:700">${d.recAccount||''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+window.clearPreview=()=>{ document.getElementById('previewBody').innerHTML=''; document.getElementById('totalInfo').innerText=''; parsedData=[]; document.getElementById('progressBar').style.width='0%'; document.getElementById('progressBar').innerText='0%'; };
+
+window.migrateToFirebase=async()=>{
+  if(parsedData.length===0){ alert('Preview dulu beb! Pilih file CSV!'); return; }
+  if(!confirm(`Migrasi ${parsedData.length} supplier ke Firebase?\n\nContoh:\n${parsedData[0].nameSupplier}\n\nLanjut beb?`)) return;
+  const btn=document.querySelector('button.migrate'); btn.disabled=true; btn.innerText='⏳ Migrasi...';
+  const bar=document.getElementById('progressBar');
+  const status=document.getElementById('statusText');
+  let success=0, fail=0;
+  log(`Mulai migrasi ${parsedData.length} data ke collection 'supplier'...`);
+  try{
+    // batch 400
+    let batch=writeBatch(db);
+    let batchCount=0;
+    let totalBatch=0;
+    for(let i=0;i<parsedData.length;i++){
+      const d=parsedData[i];
+      const payload={
+        nameSupplier: String(d.nameSupplier||'').toUpperCase().trim(),
+        address: String(d.address||'').trim(),
+        recAccount: String(d.recAccount||'').trim(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        source: fileName||'CSV'
+      };
+      if(!payload.nameSupplier) { fail++; continue; }
+      const newRef=doc(colRef);
+      batch.set(newRef, payload);
+      batchCount++; totalBatch++;
+      if(batchCount>=400){
+        await batch.commit();
+        batch=writeBatch(db);
+        batchCount=0;
+        const pct=Math.round((totalBatch/parsedData.length)*100);
+        bar.style.width=pct+'%'; bar.innerText=pct+'%';
+        status.innerText=`Progress: ${totalBatch}/${parsedData.length} (${pct}%)`;
+        log(`Batch committed: ${totalBatch} data...`);
+      }
+      success++;
+    }
+    if(batchCount>0){ await batch.commit(); log(`Final batch committed: ${totalBatch} data`); }
+    bar.style.width='100%'; bar.innerText='100% - SELESAI';
+    status.innerText=`✅ Selesai! Sukses: ${success}, Gagal: ${fail}, Total: ${parsedData.length}`;
+    log(`✅ MIGRASI SELESAI! Sukses: ${success}, Gagal: ${fail}`);
+    alert(`✅ Selesai migrasi ${success} supplier beb!\n\nSekarang buka supplier.html untuk lihat data!`);
+  }catch(e){
+    log('❌ ERROR: '+e.message);
+    alert('Error migrasi: '+e.message);
+  }
+  btn.disabled=false; btn.innerText='🚀 MIGRASI SEKARANG KE FIREBASE';
+};
+
+window.checkExisting=async()=>{
+  log('Cek data existing di Firebase collection supplier...');
+  try{
+    const snap=await getDocs(colRef);
+    log(`Data existing di Firebase: ${snap.size} supplier`);
+    document.getElementById('statusText').innerText=`Existing di Firebase: ${snap.size} supplier`;
+    if(snap.size>0){
+      let sample=[];
+      snap.forEach(d=>{ if(sample.length<5) sample.push(d.data().nameSupplier); });
+      log(`Sample existing: ${sample.join(', ')}`);
+    }
+  }catch(e){ log('Error cek: '+e.message); }
+};
+
+window.deleteAll=async()=>{
+  if(!confirm('⚠️ HAPUS SEMUA DATA SUPPLIER DI FIREBASE?\n\nIni akan hapus semua, tidak bisa undo!\n\nYakin beb?')) return;
+  if(!confirm('Yakin beneran hapus semua? Ketik OK untuk lanjut - ini terakhir!')) return;
+  log('Mulai hapus semua data supplier...');
+  try{
+    const snap=await getDocs(colRef);
+    let batch=writeBatch(db);
+    let count=0;
+    let total=0;
+    for(const d of snap.docs){
+      batch.delete(doc(db, "supplier", d.id));
+      count++; total++;
+      if(count>=400){ await batch.commit(); batch=writeBatch(db); count=0; log(`Deleted ${total}/${snap.size}...`); }
+    }
+    if(count>0) await batch.commit();
+    log(`✅ Selesai hapus ${total} data supplier`);
+    alert(`Selesai hapus ${total} supplier`);
+  }catch(e){ log('Error hapus: '+e.message); }
+};
+</script>
+</body>
+</html>

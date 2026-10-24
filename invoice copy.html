@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>INVOICE - SMAILING TOUR - V1 SS FINAL</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#fff;font-family:Arial, Tahoma;font-size:12px}
+.invoiceBox{width:800px;margin:20px auto;border:1px solid #000;padding:20px;background:#fff}
+.headerTop{display:flex;justify-content:space-between;align-items:flex-start}
+.logo{font-size:22px;font-weight:900;color:#0000cc;line-height:18px}
+.logo span.tour{color:#66aadd;font-weight:400}
+.logo small{font-size:9px;color:#000;display:block;font-weight:700}
+.titleInvoice{font-size:18px;font-weight:900;color:#0000cc;text-align:center;margin-top:10px;letter-spacing:1px}
+.infoRow{display:flex;justify-content:space-between;margin-top:15px;font-weight:700;font-size:11px}
+.infoRow b{font-weight:900}
+.leftInfo div, .rightInfo div{margin:3px 0}
+table.inv{width:100%;border-collapse:collapse;margin-top:15px;border:2px solid #000}
+table.inv th{border:1px solid #000;padding:6px;font-weight:900;font-size:11px;background:#fff;text-align:center}
+table.inv td{border:1px solid #000;padding:4px 6px;font-size:11px}
+table.inv td.num{text-align:right;font-weight:700}
+.footerTotal{width:300px;margin-left:auto;margin-top:5px;font-size:11px;font-weight:700}
+.footerTotal div{display:flex;justify-content:space-between;padding:2px 0}
+.footerTotal div.grand{font-weight:900;font-size:13px;border-top:2px solid #000;margin-top:5px;padding-top:5px}
+.footerTotal div.totalBalanced{font-weight:900;font-size:13px;border-top:2px double #000;border-bottom:2px double #000;padding:4px 0;margin-top:4px}
+.btnPrint{position:fixed;top:10px;right:10px;padding:10px 20px;background:#00ff66;border:2px solid #000;font-weight:900;cursor:pointer;border-radius:5px}
+@media print{ .btnPrint{display:none} .invoiceBox{border:none;margin:0;width:100%} }
+</style>
+</head>
+<body>
+<button class="btnPrint" onclick="window.print()">PRINT INVOICE</button>
+
+<div class="invoiceBox" id="invBox">
+<div class="headerTop">
+<div class="logo">SMAILING <span class="tour">TOUR</span> <small>Travel Management Expert ✈️</small></div>
+<div class="titleInvoice">INVOICE</div>
+<div style="width:150px"></div>
+</div>
+
+<div class="infoRow">
+<div class="leftInfo">
+<div>Agen Names : <b id="agentName">AURORA</b></div>
+<div style="display:flex;gap:5px"><div>Client(s) :</div><div><b id="clientName">Adolfo Florentino Cantu Chapa<br>Laura Priscila Gonzales Almaguer</b></div></div>
+</div>
+<div class="rightInfo" style="text-align:right">
+<div>Date : <b id="invDate">08-07-2023</b></div>
+<div>Cust Reference : <b id="custRef">HILARIUS</b></div>
+<div>Printed By : <b>SMAILING DMC BALI</b></div>
+</div>
+</div>
+
+<table class="inv">
+<thead>
+<tr>
+<th style="width:90px">Description LAND SERVICES</th>
+<th></th>
+<th style="width:80px">Amount USD</th>
+<th style="width:50px">T.Pax</th>
+<th style="width:90px">TOTAL USD</th>
+</tr>
+</thead>
+<tbody id="tbodyInv">
+<tr><td>08-12-JUL-2023</td><td>MANDAPA UBUD/DOUBLE/TWIN/RESERVE SUITE</td><td class="num">1,790.00</td><td class="num">2</td><td class="num">3,580.00</td></tr>
+<tr><td>08-07-2023</td><td>Transfer In Apt-Ubud</td><td class="num">35.00</td><td class="num">2</td><td class="num">70.00</td></tr>
+<tr><td>12-07-2023</td><td>Transfer Out Ubud Apt</td><td class="num">35.00</td><td class="num">2</td><td class="num">70.00</td></tr>
+<tr><td>09-07-2023</td><td>FD Ubud, Temple , Terrazas</td><td class="num">86.00</td><td class="num">2</td><td class="num">172.00</td></tr>
+<tr><td>10-07-2023</td><td>FD Lempuyang, Tirta Ganga, Besakih</td><td class="num">93.00</td><td class="num">2</td><td class="num">186.00</td></tr>
+</tbody>
+</table>
+
+<div class="footerTotal">
+<div><span>GRAND TOTAL USD :</span><span id="grandTotal">4,078.00</span></div>
+<div><span>Early Bird : 0.00 %</span><span>0.00</span></div>
+<div><span>Disc Note(s) :</span><span></span></div>
+<div><span>DEPOSIT RECEIVED USD :</span><span></span></div>
+<div class="totalBalanced"><span>Total Balanced Due :</span><span id="balancedDue">4,078.00</span></div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe", storageBucket: "inbound2026-12ffe.firebasestorage.app", messagingSenderId: "368642042481", appId: "1:368642042481:web:0da95081f2039b357089d0" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+function getParam(name){ return new URLSearchParams(window.location.search).get(name); }
+
+async function loadInvoice(){
+  const guestId=getParam('guestId');
+  if(!guestId) return;
+  
+  // Load master
+  const q=query(collection(db, "marketing"), where("guestId","==",guestId));
+  const snap=await getDocs(q);
+  if(!snap.empty){
+    const d=snap.docs[0].data();
+    document.getElementById('agentName').innerText=d.agent||'AURORA';
+    document.getElementById('clientName').innerText=d.guestName||'';
+    document.getElementById('custRef').innerText=d.travelConsultant||'HILARIUS';
+    document.getElementById('invDate').innerText=d.resDate||'08-07-2023';
+    if(d.tourPriceUSD){
+      const gt=d.tourPriceUSD.replace(/,/g,'');
+      document.getElementById('grandTotal').innerText=Number(gt).toLocaleString('en-US',{minimumFractionDigits:2});
+      document.getElementById('balancedDue').innerText=Number(gt).toLocaleString('en-US',{minimumFractionDigits:2});
+    }
+  }
+  
+  // Coba load hotels / tours untuk LAND SERVICES (jika ada)
+  try{
+    const hotelsSnap=await getDocs(collection(db, "hotels"));
+    let rows=[];
+    hotelsSnap.forEach(docSnap=>{
+      const hd=docSnap.data();
+      if(hd.guestId===guestId){
+        rows.push(`<tr><td>${hd.checkIn||''}</td><td>${hd.hotel||''}/${hd.roomType||''}/${hd.remarks||''}</td><td class="num">${hd.price||'0'}</td><td class="num">${document.getElementById('clientName').innerText.includes('2')?'2':'2'}</td><td class="num">${hd.total||'0'}</td></tr>`);
+      }
+    });
+    if(rows.length>0) document.getElementById('tbodyInv').innerHTML=rows.join('');
+  }catch(e){ console.log('no hotels collection yet', e); }
+}
+
+loadInvoice();
+</script>
+</body>
+</html>

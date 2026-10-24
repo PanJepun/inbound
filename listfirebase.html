@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>FIREBASE TABLE VIEWER - FINAL SS</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#c6e8c6;font-family:Tahoma,Arial;font-size:11px;overflow:hidden}
+.head{background:#d4d0c8;border-bottom:2px solid #000;padding:6px 8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.head b{font-size:13px}.head select,.head input{height:24px;border:1.5px solid #000;font-weight:700;padding:0 6px;font-size:11px}
+.head input{width:230px}
+.btn{height:24px;padding:0 12px;font-weight:900;border:1.5px solid #000;cursor:pointer;border-radius:3px;font-size:11px}
+.btn-refresh{background:#ff9999}
+.btn-az{background:#c6ffcc;border:2px solid #000}
+.btn-az.active{background:#00ff66}
+.btn-za{background:#ffff99;border:2px solid #000}
+.btn-za.active{background:#ffcc00}
+.wrap{overflow:auto;height:calc(100vh - 38px);background:#fff}
+table{width:100%;border-collapse:collapse;background:#fff}
+th{background:#d8e8d0;border:1px solid #000;padding:6px 5px;text-align:left;font-size:11px;font-weight:900;position:sticky;top:0;white-space:nowrap}
+td{border:1px solid #666;padding:5px;font-weight:700;white-space:nowrap;font-size:11px}
+tr:nth-child(even) td{background:#e8f3ed}
+</style>
+</head>
+<body>
+<div class="head">
+<b>🔥 FIREBASE TABLE VIEWER</b> Collection:
+<select id="colSel"><option value="supplier">supplier</option><option value="marketing">marketing</option><option value="hotel_transactions">hotel_transactions</option><option value="transport">transport</option><option value="optional">optional</option><option value="others">others</option><option value="restaurant">restaurant</option></select>
+<input id="search" placeholder="Cari nama... ex: SINDHU" oninput="render()">
+<button class="btn btn-refresh" onclick="load()">REFRESH</button>
+<button class="btn btn-az" id="btnAZ" onclick="sortName('az')">⬆️ NAMA A-Z</button>
+<button class="btn btn-za" id="btnZA" onclick="sortName('za')">⬇️ NAMA Z-A</button>
+<span id="count" style="font-weight:900;color:#0000cc"></span>
+<span id="sortInfo" style="font-weight:900;color:#ff0000"></span>
+</div>
+<div class="wrap"><table><thead id="thead"></thead><tbody id="tbody"><tr><td>Loading...</td></tr></tbody></table></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const db = getFirestore(initializeApp({ apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe" }));
+let allData=[]; let sortMode='az';
+function getName(r){ return String(r.nameSupplier||r.guestName||r.hotelName||r.NameOfTour||r.NameOfService||r.name||'').toUpperCase(); }
+window.sortName=(mode)=>{ sortMode=mode; document.getElementById('btnAZ').classList.toggle('active', mode==='az'); document.getElementById('btnZA').classList.toggle('active', mode==='za'); document.getElementById('sortInfo').innerText = mode==='az' ? ' | Urut: A -> Z' : ' | Urut: Z -> A'; render(); };
+window.load=async()=>{ const col=document.getElementById('colSel').value; document.getElementById('tbody').innerHTML='<tr><td>Loading '+col+'...</td></tr>'; const snap=await getDocs(collection(db,col)); allData=[]; snap.forEach(s=>{ let d=s.data(); d._docId=s.id; allData.push(d); }); render(); };
+function fmtVal(v){ if(!v) return ''; if(v && v.toDate) return v.toDate().toLocaleString('en-GB'); if(v && v.seconds) return new Date(v.seconds*1000).toLocaleString('en-GB'); if(typeof v==='object') return JSON.stringify(v); return String(v); }
+window.render=()=>{
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  let rows=allData.filter(r=> JSON.stringify(r).toLowerCase().includes(q));
+  if(sortMode==='az') rows.sort((a,b)=> getName(a).localeCompare(getName(b)));
+  if(sortMode==='za') rows.sort((a,b)=> getName(b).localeCompare(getName(a)));
+  document.getElementById('count').innerText='Total: '+rows.length+' rows';
+  if(!rows.length){ document.getElementById('tbody').innerHTML='<tr><td>Kosong</td></tr>'; return; }
+  let preferred = ['createdAt','updatedAt','nameSupplier','recAccount','source','address'];
+  let keys = [];
+  preferred.forEach(k=>{ if(rows.some(r=> k in r)) keys.push(k); });
+  rows.forEach(r=> Object.keys(r).forEach(k=>{ if(k==='_id'||k==='_docId'||k==='id') return; if(!keys.includes(k)) keys.push(k); }));
+  document.getElementById('thead').innerHTML='<tr>'+keys.map(k=>`<th>${k} <span>⬇️</span></th>`).join('')+'</tr>';
+  document.getElementById('tbody').innerHTML=rows.map(r=> '<tr>'+keys.map(k=>`<td>${fmtVal(r[k])}</td>`).join('')+'</tr>').join('');
+};
+document.getElementById('colSel').onchange=load;
+sortName('az');
+load();
+</script>
+</body>
+</html>

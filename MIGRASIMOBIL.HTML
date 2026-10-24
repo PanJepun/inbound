@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MIGRASI MOBIL.CSV FVP -> FIREBASE - SMAILING</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#e8f5e9;font-family:Tahoma,Arial;font-size:12px;padding:15px}
+.win{max-width:1200px;margin:0 auto;background:#fff;border:3px solid #000;border-radius:8px;padding:15px;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+h1{background:#0000cc;color:#fff;padding:10px 15px;margin:-15px -15px 15px -15px;font-size:16px;display:flex;justify-content:space-between;align-items:center}
+h1 span{font-size:11px;background:#ffff00;color:#000;padding:3px 8px;border-radius:3px}
+.uploadBox{border:3px dashed #0000cc;background:#ffffcc;padding:20px;text-align:center;border-radius:8px;margin-bottom:15px}
+.uploadBox input{margin-top:10px}
+.uploadBox.dragover{background:#ccffcc;border-color:#00aa00}
+.btn{padding:8px 18px;font-weight:900;border:2px solid #000;cursor:pointer;border-radius:5px;margin:3px}
+.btn-green{background:#00ff66;color:#000}
+.btn-blue{background:#66ccff;color:#000}
+.btn-yellow{background:#ffff00;color:#000}
+.btn-red{background:#ff9999;color:#000}
+.preview{max-height:400px;overflow:auto;border:2px solid #000;background:#fff;margin-top:10px}
+table.prev{width:100%;border-collapse:collapse;font-size:11px}
+table.prev th{background:#d4d0c8;border:1px solid #000;padding:5px;position:sticky;top:0;font-weight:900}
+table.prev td{border:1px solid #999;padding:4px;white-space:nowrap}
+.log{height:150px;overflow:auto;border:2px solid #000;background:#000;color:#00ff00;padding:8px;font-family:Consolas,monospace;font-size:11px;margin-top:10px;white-space:pre-wrap}
+.stats{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.statBox{flex:1;min-width:150px;border:2px solid #000;padding:10px;background:#fff;text-align:center;border-radius:5px}
+.statBox b{font-size:20px;display:block;color:#0000cc}
+</style>
+</head>
+<body>
+<div class="win">
+<h1>🚛 MIGRASI MOBIL.CSV (FVP FoxPro) → FIREBASE <span id="jam">--:--:--</span></h1>
+
+<div class="uploadBox" id="dropZone">
+<div style="font-size:14px;font-weight:900">📂 DRAG & DROP FILE MOBIL.CSV DISINI</div>
+<div style="font-size:11px;margin-top:5px">Atau klik pilih file - Format: Car Code, Name of Transport, Car Type, Service, Driver, Car Cost (9,000,000.00)</div>
+<input type="file" id="fileInput" accept=".csv,.txt,.dbf" onchange="handleFile(this.files[0])">
+<div style="margin-top:10px;font-size:10px;background:#fff;padding:5px;border:1px solid #000;text-align:left">
+<b>Format MOBIL.CSV yang diharapkan dari FVP:</b><br>
+<code>Car Code,Name of Transport,Car Type,Service,Driver,Car Cost,HP<br>
+A1,SMAILING,HIACE,TRANSFER AIRPORT / HOTEL,SUMARYA,"500,000.00",0812...<br>
+A2,OKE JAR,ALPHARD,TRANSFER HOTEL/AIRPORT,,"600,000.00",</code>
+</div>
+</div>
+
+<div class="stats">
+<div class="statBox"><b id="statTotal">0</b>Total Baris CSV</div>
+<div class="statBox"><b id="statValid">0</b>Valid Siap Migrasi</div>
+<div class="statBox"><b id="statSuccess">0</b>Sukses ke Firebase</div>
+<div class="statBox"><b id="statFail">0</b>Gagal</div>
+</div>
+
+<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn-blue" onclick="previewData()">👁️ Preview Data</button>
+<button class="btn btn-green" id="btnMigrasi" onclick="migrasiToFirebase()" disabled>🚀 MIGRASI KE FIREBASE (transport_master)</button>
+<button class="btn btn-yellow" onclick="exportSample()">📄 Download Format Sample MOBIL.CSV</button>
+<button class="btn btn-red" onclick="clearAll()">🗑️ Clear</button>
+</div>
+
+<div class="preview" id="previewArea" style="display:none">
+<table class="prev" id="prevTable"><thead><tr><th>Car Code</th><th>Name Transport</th><th>Car Type</th><th>Service</th><th>Driver</th><th>Car Cost</th><th>HP</th><th>Status</th></tr></thead><tbody id="prevBody"></tbody></table>
+</div>
+
+<div class="log" id="logBox">Log migrasi akan muncul disini beb...\nSiap menunggu file MOBIL.CSV...\n</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, doc, setDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyDaF0kZroF4gCx8rFLTm88gF7-GS86fyg", authDomain: "inbound2026-12ffe.firebaseapp.com", projectId: "inbound2026-12ffe", storageBucket: "inbound2026-12ffe.firebasestorage.app", messagingSenderId: "368642042481", appId: "1:368642042481:web:0da95081f2039b357089d0" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let parsedData = [];
+function log(msg){ const box=document.getElementById('logBox'); box.innerText += `[${new Date().toLocaleTimeString()}] ${msg}\n`; box.scrollTop=box.scrollHeight; }
+function parseNum(v){ if(!v) return 0; return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }
+function formatNominal(v){ return parseNum(v).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+// CSV PARSER YANG BISA HANDLE "9,000,000.00" BEB - PENTING!
+function parseCSVLine(line){
+  const cols=[];
+  let cur=''; let inQuote=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){ inQuote=!inQuote; }
+    else if(ch===',' && !inQuote){ cols.push(cur.trim()); cur=''; }
+    else { cur+=ch; }
+  }
+  cols.push(cur.trim());
+  return cols.map(c=> c.replace(/^"|"$/g,'').replace(/""/g,'"').trim());
+}
+
+window.handleFile=(file)=>{
+  if(!file){ return; }
+  log(`File diterima: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    const text=e.target.result;
+    parseCSV(text);
+  };
+  reader.readAsText(file, 'UTF-8');
+};
+
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length===0){ log('File kosong beb!'); return; }
+  const header=parseCSVLine(lines[0]).map(h=>h.toLowerCase());
+  log(`Header: ${header.join(' | ')}`);
+  let idxCarCode=header.findIndex(h=>h.includes('car code')||h.includes('carcode')||h==='code');
+  let idxName=header.findIndex(h=>h.includes('name')&&h.includes('transport'));
+  let idxCarType=header.findIndex(h=>h.includes('car type')||h.includes('cartype')||h.includes('type'));
+  let idxService=header.findIndex(h=>h.includes('service'));
+  let idxDriver=header.findIndex(h=>h.includes('driver')||h.includes('supir'));
+  let idxCost=header.findIndex(h=>h.includes('car cost')||h.includes('cost')||h.includes('harga')||h.includes('price'));
+  let idxHP=header.findIndex(h=>h.includes('hp')||h.includes('phone')||h.includes('telp'));
+  // fallback kalau header tidak standar
+  if(idxCarCode===-1) idxCarCode=0;
+  if(idxName===-1) idxName=1;
+  if(idxCarType===-1) idxCarType=2;
+  if(idxService===-1) idxService=3;
+  if(idxDriver===-1) idxDriver=4;
+  if(idxCost===-1) idxCost=5;
+  if(idxHP===-1) idxHP=6;
+
+  parsedData=[];
+  for(let i=1;i<lines.length;i++){
+    const cols=parseCSVLine(lines[i]);
+    if(cols.length<3) continue;
+    if(cols.every(c=>!c)) continue;
+    const item={
+      carCode: (cols[idxCarCode]||'').toUpperCase().trim(),
+      name: (cols[idxName]||'').toUpperCase().trim(),
+      carType: (cols[idxCarType]||'').toUpperCase().trim(),
+      service: (cols[idxService]||'').toUpperCase().trim(),
+      driver: (cols[idxDriver]||'').toUpperCase().trim(),
+      costRaw: (cols[idxCost]||'0').trim(),
+      cost: formatNominal(cols[idxCost]||'0'),
+      costNum: parseNum(cols[idxCost]||'0'),
+      hp: (cols[idxHP]||'').trim(),
+      rawLine: lines[i]
+    };
+    if(item.carCode || item.name){ parsedData.push(item); }
+  }
+  document.getElementById('statTotal').innerText=lines.length-1;
+  document.getElementById('statValid').innerText=parsedData.length;
+  document.getElementById('btnMigrasi').disabled=parsedData.length===0;
+  log(`Parsing selesai beb! ${parsedData.length} data valid dari ${lines.length-1} baris.`);
+  previewData();
+}
+
+window.previewData=()=>{
+  if(parsedData.length===0){ alert('Belum ada data beb! Upload MOBIL.CSV dulu!'); return; }
+  const tbody=document.getElementById('prevBody'); tbody.innerHTML='';
+  parsedData.slice(0,100).forEach((d,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:900;text-align:center">${d.carCode}</td><td>${d.name}</td><td>${d.carType}</td><td style="background:#fff9c4">${d.service}</td><td>${d.driver}</td><td style="text-align:right;background:#fff9c4;font-weight:900">${d.cost}</td><td>${d.hp}</td><td>Ready</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('previewArea').style.display='block';
+  log(`Preview ${Math.min(100, parsedData.length)} data pertama ditampilkan.`);
+};
+
+window.migrasiToFirebase=async()=>{
+  if(parsedData.length===0){ alert('Tidak ada data beb!'); return; }
+  if(!confirm(`MIGRASI ${parsedData.length} data MOBIL ke Firebase collection 'transport_master' ?\nFormat cost akan jadi 9,000,000.00`)) return;
+  const btn=document.getElementById('btnMigrasi'); btn.disabled=true; btn.innerText='MIGRASI BERJALAN...';
+  let success=0, fail=0;
+  log(`🚀 Mulai migrasi ${parsedData.length} data ke Firebase...`);
+  for(let i=0;i<parsedData.length;i++){
+    const d=parsedData[i];
+    try{
+      // cek duplikat carCode
+      const q=query(collection(db, "transport_master"), where("carCode","==",d.carCode));
+      const existing=await getDocs(q);
+      let shouldAdd=true;
+      existing.forEach(docSnap=>{
+        const ex=docSnap.data();
+        if(ex.name===d.name && ex.service===d.service){ shouldAdd=false; }
+      });
+      if(!shouldAdd){ log(`⏭️ Skip duplikat: ${d.carCode} ${d.name}`); continue; }
+      
+      await addDoc(collection(db, "transport_master"), {
+        carCode: d.carCode,
+        name: d.name,
+        carType: d.carType,
+        service: d.service,
+        driver: d.driver,
+        cost: d.cost,
+        costNum: d.costNum,
+        hp: d.hp,
+        source: 'MOBIL.CSV FVP FoxPro',
+        migratedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
+      });
+      success++; document.getElementById('statSuccess').innerText=success;
+      log(`✅ ${i+1}/${parsedData.length} OK: ${d.carCode} - ${d.name} - ${d.cost} - ${d.service.substring(0,30)}`);
+    }catch(e){
+      fail++; document.getElementById('statFail').innerText=fail;
+      log(`❌ Gagal ${d.carCode}: ${e.message}`);
+    }
+    // delay kecil biar tidak kena quota
+    await new Promise(r=>setTimeout(r, 100));
+  }
+  btn.innerText=`✅ SELESAI ${success} SUKSES`;
+  log(`\n🎉 MIGRASI SELESAI BEB!\nTotal: ${parsedData.length}\nSukses: ${success}\nGagal: ${fail}\nCollection: transport_master\nFormat nominal: 9,000,000.00 sudah rapi!\nSekarang buka transp.html popup akan muncul data baru!`);
+  alert(`MIGRASI SELESAI BEB!\nSukses: ${success}\nGagal: ${fail}\n\nSekarang buka transp.html → popup Customer Transport akan ada data baru dari MOBIL.CSV!`);
+};
+
+window.exportSample=()=>{
+  let sample=`Car Code,Name of Transport,Car Type,Service,Driver,Car Cost,HP
+A1,SMAILING,HIACE,TRANSFER AIRPORT / HOTEL,SUMARYA,"500,000.00",08123456789
+A2,OKE JAR,ALPHARD,TRANSFER HOTEL/AIRPORT,,"600,000.00",
+B1,SMAILING,ALPHRD,TRFS HOTEL/HOTEL,,"750,000.00",
+J1,SMAL JOGJA,INOVA,AIRPORT / HOTEL NUSA DUA,,"500,000.00",
+J2,SML JOGJA,INOVA,HOTEL / AIRPORT NUSA DUA,,"800,000.00",
+X1,SMAILING,ALPHARD,TRF IN / HOTEL NUSA DUA,,"800,000.00",
+A111,SMAILING TOUR,INVOCE REBORN,TRF OUT HOTEL/AIRPORT,,"0.00",`;
+  const blob=new Blob([sample], {type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='MOBIL_SAMPLE_FORMAT_FVP.csv'; a.click();
+  URL.revokeObjectURL(url);
+  log('Sample MOBIL.CSV didownload beb!');
+};
+
+window.clearAll=()=>{
+  parsedData=[]; document.getElementById('statTotal').innerText='0'; document.getElementById('statValid').innerText='0'; document.getElementById('statSuccess').innerText='0'; document.getElementById('statFail').innerText='0';
+  document.getElementById('previewArea').style.display='none'; document.getElementById('prevBody').innerHTML=''; document.getElementById('fileInput').value=''; document.getElementById('logBox').innerText='Log cleared - siap upload baru beb...\n';
+  document.getElementById('btnMigrasi').disabled=true; document.getElementById('btnMigrasi').innerText='🚀 MIGRASI KE FIREBASE (transport_master)';
+};
+
+// drag & drop
+const dropZone=document.getElementById('dropZone');
+dropZone.addEventListener('dragover', (e)=>{ e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', ()=>{ dropZone.classList.remove('dragover'); });
+dropZone.addEventListener('drop', (e)=>{ e.preventDefault(); dropZone.classList.remove('dragover'); const file=e.dataTransfer.files[0]; if(file) handleFile(file); });
+
+function tick(){ const now=new Date(); document.getElementById('jam').innerText=now.toLocaleTimeString(); }
+setInterval(tick,1000); tick();
+log('Tool migrasi siap beb! Upload MOBIL.CSV dari FVP FoxPro!');
+</script>
+</body>
+</html>
